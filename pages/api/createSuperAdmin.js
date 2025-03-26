@@ -1,4 +1,4 @@
-import dbConnect from "@/lib/mongoose";
+import { connectToDB } from "@/lib/mongoose";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -9,8 +9,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    await dbConnect(); // Connect to MongoDB
-
+    await connectToDB();
     const email = "SuperAdmin@example.com";
     const plainPassword = "SuperAdmin123"; // This is the actual password you'll use
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
