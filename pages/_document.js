@@ -3,7 +3,10 @@ import { Html, Head, Main, NextScript } from 'next/document'
 export default function Document() {
   return (
     <Html lang="en">
-      <Head />
+      <Head>
+        {/* Link to the favicon */}
+        <link rel="icon" href="/SCC icon.webp" />
+      </Head>
       <body>
         <Main />
         <NextScript />
