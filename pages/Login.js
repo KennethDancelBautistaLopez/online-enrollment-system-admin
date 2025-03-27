@@ -17,19 +17,24 @@ export default function Login({ children }) {
     setLoading(true);
     setError("");
     
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (result?.error) {
-      setError("Invalid email or password.");
-    } else {
-      router.push("/"); // Redirect after successful login
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false, // Prevent auto-redirect
+        callbackUrl: "/", // Redirect manually after success
+      });
+  
+      if (result.error) {
+        throw new Error("Invalid email or password.");
+      }
+  
+      router.push(result.url || "/"); // Redirect on success
+    } catch (err) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   if (!session) {
