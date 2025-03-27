@@ -87,7 +87,34 @@ export default function StudentForm({
       email,
       password,
     });
-  }, []);
+  }, [
+    _studentId,
+    fname,
+    mname,
+    lname,
+    address,
+    mobile,
+    landline,
+    facebook,
+    birthdate,
+    birthplace,
+    nationality,
+    religion,
+    sex,
+    father,
+    mother,
+    guardian,
+    guardianOccupation,
+    registrationDate,
+    lrn,
+    education,
+    strand,
+    course,
+    yearLevel,
+    schoolYear,
+    email,
+    password,
+  ]);
 
   async function saveStudent(ev) {
     ev.preventDefault();
