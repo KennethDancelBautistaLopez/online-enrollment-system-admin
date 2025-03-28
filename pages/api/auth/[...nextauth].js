@@ -4,6 +4,10 @@ import bcrypt from "bcryptjs";
 import { connectToDB } from "@/lib/mongoose";
 import User from "@/models/User";
 
+export const config = {
+  runtime: "edge",
+};
+
 export default NextAuth({
   session: {
     strategy: "jwt",
