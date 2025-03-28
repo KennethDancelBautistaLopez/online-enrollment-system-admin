@@ -41,7 +41,7 @@ export default NextAuth({
           return { id: user._id, email: user.email, role: user.role };
         } catch (error) {
           console.error("❌ Authentication error:", error);
-          throw new Error("Authentication failed. Please try again.");
+          throw new Error(JSON.stringify({ message: error.message }));
         }
       },
     }),
@@ -67,3 +67,8 @@ export default NextAuth({
     signIn: "/login",
   },
 });
+
+
+export const config = {
+  runtime: "nodejs",
+};
