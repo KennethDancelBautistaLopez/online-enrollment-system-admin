@@ -90,7 +90,6 @@ export default NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        console.log("🔹 Assigning user to JWT token:", user);
         token.id = user.id;
         token.email = user.email;
         token.role = user.role;
@@ -98,7 +97,6 @@ export default NextAuth({
       return token;
     },
     async session({ session, token }) {
-      console.log("🔹 Assigning token to session:", token);
       session.user.id = token.id;
       session.user.email = token.email;
       session.user.role = token.role;

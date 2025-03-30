@@ -15,7 +15,7 @@ export default function Nav({show}) {
   const logout = async () => {
     await signOut();
     Cookies.remove('access_token');
-    router.push('/login');
+    router.push('/');
   };
   
   return (

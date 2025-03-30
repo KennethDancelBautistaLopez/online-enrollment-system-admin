@@ -1,143 +1,249 @@
-import {connectToDB}  from "@/lib/mongoose";
-import Student from "@/models/Student";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+  import {connectToDB}  from "@/lib/mongoose";
+  import Student from "@/models/Student";
+  import jwt from "jsonwebtoken";
+  import mongoose from "mongoose";
 
 
-async function handler(req, res) {
-  console.log("API /students called with method:", req.method);
-  await connectToDB();
-  const {method} = req;
+  async function handler(req, res) {
+    console.log("API /students called with method:", req.method);
+    await connectToDB();
+    const {method} = req;
 
-  if (method === "GET") {
-    try {
-      if (req.query?.id) {
-        const student = await Student.findOne({ _studentId: req.query.id });
-        if (!student) return res.status(404).json({ error: "Student not found" });
-        return res.status(200).json(student);
-      } else {
-        // Return all students when no ID is provided
-        const students = await Student.find({});
-        return res.status(200).json(students);
+    if (method === "GET") {
+      try {
+        const { id } = req.query;
+        console.log("Received ID:", id); // Debugging log
+  
+        if (id) {
+          // ✅ Validate ObjectId properly
+          if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: "Invalid student ID format" });
+          }
+  
+          // ✅ Find by either MongoDB `_id` or `_studentId`
+          const student = await Student.findOne({
+            $or: [{ _id: id }, { _studentId: id }],
+          });
+  
+          if (!student) {
+            console.log("Student not found:", id);
+            return res.status(404).json({ error: "Student not found" });
+          }
+  
+          return res.status(200).json(student);
+        } else {
+          const students = await Student.find();
+          return res.status(200).json(students);
+        }
+      } catch (error) {
+        console.error("Error in GET /students:", error);
+        return res.status(500).json({ error: "Internal Server Error", details: error.message });
       }
-    } catch (error) {
-      return res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-  }
 
 
-  if (method === "POST") {
-    try {
-        const { 
-            email, fname, mname, lname, address, mobile, landline, facebook, birthdate, 
-            nationality, birthplace, religion, sex, father, mother, guardian, 
-            guardianOccupation, registrationDate, lrn, education, strand, course, 
-            yearLevel, schoolYear, password 
-        } = req.body;
+    if (method === "POST") {
+      try {
 
-        // Validate required fields
-        if (!email || !fname || !mname || !lname || !education || !password || !yearLevel || !schoolYear || !birthdate || !address || !mobile || !sex || !registrationDate || !lrn || !nationality || !birthplace || !religion || !father || !mother || !guardian || !guardianOccupation || !course || !strand ) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
+          const { 
+              fname, mname, lname, address, mobile, landline, facebook, birthdate, 
+              birthplace, nationality, religion, sex, father, mother, guardian, 
+              guardianOccupation, registrationDate, lrn, education, strand, course, 
+              yearLevel, schoolYear, email
+          } = req.body;
 
-        // hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+          console.log("Education value before sending:", education);
 
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: "Invalid email format" });
-        }
+          // Validate required fields
+          if ( !fname || !lname ||!address || !mobile || !facebook || !birthdate || !birthplace || !nationality || !religion || !sex || !father || !mother || !guardian || !guardianOccupation || !registrationDate || !education || !yearLevel || !schoolYear || !email) {
+              return res.status(400).json({ error: "Missing required fields" });
+          }
 
-        if(password.length < 8) {
-            return res.status(400).json({ error: "Password must be at least 8 characters long" });
-        }
+          // fname and lname format
+          const nameRegex = /^[A-Za-z\s]{1,50}$/;
+          if (!nameRegex.test(fname) || !nameRegex.test(lname)) {
+              return res.status(400).json({ error: "Invalid name format. Must be up to 50 characters." });
+          }
 
-        // Check if email already exists
-        const existingStudent = await Student.findOne({ email });
-        if (existingStudent) {
-            return res.status(400).json({ error: "Email already exists" });
-        }
+          // Validate mobile number format
+          const mobileRegex = /^\d{4}-\d{3}-\d{4}$/;
+          if (!mobileRegex.test(mobile)) {
+              return res.status(400).json({ error: "Invalid mobile number format. Use XXXX-XXX-XXXX." });
+          }
 
-        // Generate student ID
-        const currentYear = new Date().getFullYear();
-        const lastStudent = await Student.findOne({ _studentId: new RegExp(`^${currentYear}-`) })
-            .sort({ _studentId: -1 });
+          // // strand format
+          // const strandRegex = /^[A-Z]{3,6}$/;
+          // if (!strandRegex.test(strand)) {
+          //     return res.status(400).json({ error: "Invalid strand format" });
+          // }
 
-        let nextNumber = "0001";
-        if (lastStudent) {
-            const lastNumber = parseInt(lastStudent._studentId.split("-")[1], 10);
-            nextNumber = String(lastNumber + 1).padStart(4, "0");
-        } 
+          // // Course format
+          // const courseRegex = /^[A-Z\s]{1,10}$/;
+          // if (course && !courseRegex.test(course)) {
+          //   return res.status(400).json({ error: "Invalid course format. Must be all caps and up to 10 letters." });
+          // }
+
+          // if education is college, course is required
+          if (education === "college" && !course) {
+              return res.status(400).json({ error: "Course is required for college education" });
+          }
+          // if education is senior high, strand is required
+          if (education === "senior high" && !strand) {
+              return res.status(400).json({ error: "Strand is required for senior high education" });
+          }
+          // if education is elementary and junior high, the strand and course are not required
+          if (education === "elementary" || education === "junior high") {
+              if (strand) {
+                  return res.status(400).json({ error: "Strand is not required for elementary and junior high education" });
+              }
+              if (course) {
+                  return res.status(400).json({ error: "Course is not required for elementary and junior high education" });
+              }
+          }
 
 
-        const newStudentNumber = `${currentYear}-${nextNumber}`;
+          // lrn format
+          const lrnRegex = /^[0-9]{12}$/;
+          if (!lrnRegex.test(lrn)) {
+              return res.status(400).json({ error: "Invalid LRN format" });
+          }
 
-        // Create new student
-        const newStudent = await Student.create({
-            _studentId: newStudentNumber,
-            studentNumber: newStudentNumber,
-            fname,
-            mname,
-            lname,
-            address,
-            mobile,
-            landline,
-            facebook,
-            birthdate,
-            nationality,
-            birthplace,
-            religion,
-            sex,
-            father,
-            mother,
-            guardian,
-            guardianOccupation,
-            registrationDate,
-            lrn,
-            education,
-            strand,
-            course,
-            yearLevel,
-            schoolYear,
-            email,
-            password: hashedPassword
+          // year level format 
+          const yearLevelRegex = /^(1[0-2]|[1-9])$/;
+          if (!yearLevelRegex.test(yearLevel)) {
+              return res.status(400).json({ error: "Invalid year level format. Enter a number between 1 and 12." });
+          }
+
+          // school year format
+          const schoolYearRegex = /^(20\d{2})-(20\d{2})$/;
+          if (!schoolYearRegex.test(schoolYear)) {
+              return res.status(400).json({ error: "Invalid school year format" });
+          }
+          
+
+
+          // Validate email format
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+              return res.status(400).json({ error: "Invalid email format" });
+          }
+
+          // facebook url format
+          const facebookRegex = /^(https?:\/\/)?(www\.)?facebook\.com\/(share\/[^\s]+|[a-zA-Z0-9.]+)$/;
+          if (!facebookRegex.test(facebook)) {
+              return res.status(400).json({ error: "Invalid facebook url format" });
+          }
+
+          // Check if email already exists
+          const existingStudent = await Student.findOne({ email });
+          if (existingStudent) {
+              return res.status(400).json({ error: "Email already exists" });
+          }
+
+          // Generate student ID
+          const currentYear = new Date().getFullYear();
+          const lastStudent = await Student.findOne({ _studentId: new RegExp(`^${currentYear}-`) })
+              .sort({ _studentId: -1 });
+
+          let nextNumber = "0001";
+          if (lastStudent) {
+              const lastNumber = parseInt(lastStudent._studentId.split("-")[1], 10);
+              nextNumber = String(lastNumber + 1).padStart(4, "0");
+          } 
+
+
+          const newStudentNumber = `${currentYear}-${nextNumber}`;
+
+          // Create new student
+          const newStudent = await Student.create({
+              _studentId: newStudentNumber,
+              studentNumber: newStudentNumber,
+              fname,
+              mname,
+              lname,
+              address,
+              mobile,
+              landline,
+              facebook,
+              birthdate,
+              birthplace,
+              nationality,
+              religion,
+              sex,
+              father,
+              mother,
+              guardian,
+              guardianOccupation,
+              registrationDate,
+              lrn,
+              education,
+              strand,
+              course,
+              yearLevel,
+              schoolYear,
+              email
+          });
+
+
+
+              // Generate JWT Token
+          const token = jwt.sign(
+            { id: newStudent._id, email: newStudent.email, role: "student" }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: "7d" } // Token expires in 7 days
+          );
+
+          
+
+          return res.status(201).json({ 
+            message: "Student added successfully", 
+            student: newStudent, 
+            token 
         });
 
-
-
-            // Generate JWT Token
-        const token = jwt.sign(
-          { id: newStudent._id, email: newStudent.email, role: "student" }, 
-          process.env.JWT_SECRET, 
-          { expiresIn: "7d" } // Token expires in 7 days
-        );
-
-        
-
-        return res.status(201).json({ 
-          message: "Student added successfully", 
-          student: newStudent, 
-          token 
-      });
-
-    } catch (error) {
-        return res.status(500).json({ error: "Failed to add student", details: error.message });
-    }
-}
-
-  if (method === "PUT") {
-    const { _studentId, fname, mname, lname, address, mobile, landline, facebook, birthdate, 
-      nationality, birthplace, religion, sex, father, mother, guardian, 
-      guardianOccupation, registrationDate, lrn, education, strand, course, 
-      yearLevel, schoolYear, email, password } = req.body;
-      await Student.updateOne({ _studentId }, { fname, mname, lname, address, mobile, landline, facebook, birthdate, 
-        nationality, birthplace, religion, sex, father, mother, guardian, 
-        guardianOccupation, registrationDate, lrn, education, strand, course, 
-        yearLevel, schoolYear, email, password });
-    res.json(true);
+      } catch (error) {
+          return res.status(500).json({ error: "Failed to add student", details: error.message });
+      }
   }
 
+
+  if (method === "PUT") {
+    try {
+      const { id } = req.query;
+      if (!id) return res.status(400).json({ error: "Student ID is required" });
+  
+      console.log("Updating student with ID:", id);
+  
+      // ✅ Check if the provided ID is a valid ObjectId before using it
+      let query = { _studentId: id };
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        query = { _id: new mongoose.Types.ObjectId(id) };
+      }
+  
+      // ✅ Find student before updating
+      const existingStudent = await Student.findOne(query);
+  
+      console.log("Existing student found:", existingStudent);
+  
+      if (!existingStudent) {
+        console.log("Student not found for update:", id);
+        return res.status(404).json({ error: "Student not found" });
+      }
+  
+      // ✅ Update student
+      const updatedStudent = await Student.findOneAndUpdate(query, req.body, {
+        new: true,
+        runValidators: true,
+      });
+  
+      console.log("Updated student:", updatedStudent);
+      return res.status(200).json(updatedStudent);
+    } catch (error) {
+      console.error("Error updating student:", error);
+      return res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+  }
+  
   if (method === "DELETE") {
     if (req.query?.id) {
       const deletedStudent = await Student.findOneAndDelete({
@@ -148,7 +254,8 @@ async function handler(req, res) {
     }
   }
 
-  return res.status(405).json({ error: "Method Not Allowed" });
-}
 
-export default (handler);
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  export default (handler);
