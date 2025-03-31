@@ -19,6 +19,69 @@ export default async function handler(req, res) {
   }
 }
 
+// async function handlePostRequest(req, res) {
+//   try {
+//     const { amount, description, method, name, email, phone } = req.body;
+
+//     if (!amount || !description) {
+//       return res.status(400).json({ error: "Amount and description are required" });
+//     }
+
+//     const API_KEY = process.env.PAY_MONGO;
+//     if (!API_KEY) {
+//       console.error("❌ Missing PayMongo API Key");
+//       return res.status(500).json({ error: "Server error: PayMongo API Key missing" });
+//     }
+
+//     const encodedKey = Buffer.from(`${API_KEY}:`).toString("base64");
+
+//     const response = await axios.post(
+//       "https://api.paymongo.com/v1/links",
+//       {
+//         data: {
+//           attributes: {
+//             amount: amount * 100, // PayMongo expects amount in cents
+//             description,
+//             redirect: {
+//               success: "http://localhost:3000/payments",
+//               failure: "http://localhost:3000/payments",
+//             },
+//           },
+//         },
+//       },
+//       {
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Basic ${encodedKey}`,
+//         },
+//       }
+//     );
+
+//     if (!response.data || !response.data.data) {
+//       return res.status(500).json({ error: "Invalid response from PayMongo" });
+//     }
+
+//     const payment = await Payment.create({
+//       paymentId: response.data.data.id,
+//       amount,
+//       status: "pending",
+//       referenceNumber: response.data.data.attributes.reference_number,
+//       description,
+//       method,
+//       billingDetails: { name, email, phone },
+//     });
+
+//     res.status(201).json({ 
+//       success: true, 
+//       data: payment, 
+//       checkoutUrl: response.data.data.attributes.checkout_url 
+//     });
+
+//   } catch (error) {
+//     console.error("❌ PayMongo API Error:", error.response?.data || error.message);
+//     res.status(500).json({ error: error.response?.data || "Payment creation failed" });
+//   }
+// }
 async function handlePostRequest(req, res) {
   try {
     const { amount, description, method, name, email, phone } = req.body;
@@ -61,6 +124,7 @@ async function handlePostRequest(req, res) {
       return res.status(500).json({ error: "Invalid response from PayMongo" });
     }
 
+    // Save the pending payment to the database
     const payment = await Payment.create({
       paymentId: response.data.data.id,
       amount,
@@ -83,6 +147,7 @@ async function handlePostRequest(req, res) {
   }
 }
 
+
 async function handleGetRequest(res) {
   try {
     const payments = await Payment.find({});
@@ -93,17 +158,46 @@ async function handleGetRequest(res) {
   }
 }
 
+// async function handlePutRequest(req, res) {
+//   try {
+//     const { id, status } = req.body;
+
+//     if (!id || !status) {
+//       return res.status(400).json({ error: "Missing ID or status" });
+//     }
+
+//     const updatedPayment = await Payment.findByIdAndUpdate(
+//       id,
+//       { status },
+//       { new: true }
+//     );
+
+//     if (!updatedPayment) {
+//       return res.status(404).json({ error: "Payment not found" });
+//     }
+
+//     res.status(200).json({ success: true, data: updatedPayment });
+//   } catch (error) {
+//     console.error("Error updating payment:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// }
+
 async function handlePutRequest(req, res) {
   try {
-    const { id, status } = req.body;
+    const { id, status, datePaid, settlementStatus } = req.body;
 
     if (!id || !status) {
       return res.status(400).json({ error: "Missing ID or status" });
     }
 
-    const updatedPayment = await Payment.findByIdAndUpdate(
-      id,
-      { status },
+    const updateFields = { status };
+    if (datePaid) updateFields.datePaid = new Date(datePaid);
+    if (settlementStatus) updateFields.settlementStatus = settlementStatus;
+
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { paymentId: id }, // Find by PayMongo Payment ID
+      updateFields,
       { new: true }
     );
 
