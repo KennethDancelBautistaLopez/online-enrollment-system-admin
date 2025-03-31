@@ -14,7 +14,7 @@ export default function EventsPage() {
 
   return (
     <Login>
-      <h1>Events</h1>
+      <h1 className="text-2xl font-bold mb-4">List of Events</h1>
       <Link className="btn-primary" href={"/events/new"}>
         Add New Event
       </Link>

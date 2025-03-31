@@ -161,9 +161,11 @@ export default function StudentForm({
       }
   }
 
-  if (goToStudents && _studentId) {
-    router.push("/students?id=${studentId}");
-  }
+  useEffect(() => {
+    if (goToStudents) {
+      router.push("/students");
+    }
+  }, [goToStudents, router]);
 
   return (
     <form onSubmit={saveStudent}>

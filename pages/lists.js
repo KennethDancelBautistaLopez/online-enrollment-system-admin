@@ -24,7 +24,7 @@ export default function Students() {
 
   return (
     <Login>
-      <h1>Students List</h1>
+      <h1 className="text-2xl font-bold mb-4">List of Students</h1>
       <table className="basic mt-4 w-full border-collapse border border-gray-300">
         <thead>
           <tr className="bg-gray-100">
