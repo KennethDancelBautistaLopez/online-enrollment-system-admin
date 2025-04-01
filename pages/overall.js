@@ -5,31 +5,33 @@ import axios from "axios";
 
 export default function Payments() {
   const [totalIncome, setTotalIncome] = useState(0);
-  const [chartData, setChartData] = useState([]);
-  const [paymentDetails, setPaymentDetails] = useState({
-    amount: "",
-    description: "",
-    method: "GCash", // Default payment method
-    name: "",
-    email: "",
-    phone: "",
-  });
-  const [paymentUrl, setPaymentUrl] = useState("");
+  const [chartData, setChartData] = useState([]); 
+
 
   useEffect(() => {
     axios
       .get("/api/payments")
       .then((response) => {
-        const payments = response.data.data;
+        const payments = response.data; // Ensure correct response structure
+  
+        if (!Array.isArray(payments) || payments.length === 0) {
+          console.warn("⚠️ No payments found or invalid format.");
+          return;
+        }
+  
         setTotalIncome(
-          payments.reduce((total, payment) => total + payment.amount, 0)
+          payments.reduce((total, payment) => total + (payment.amount || 0), 0) // Avoid undefined `amount`
         );
+  
         setChartData(
-          payments.map((payment) => ({ date: payment.createdAt, amount: payment.amount }))
+          payments.map((payment) => ({
+            date: payment.createdAt || "Unknown",
+            amount: payment.amount || 0,
+          }))
         );
       })
       .catch((error) => {
-        console.error("Failed to fetch payments:", error);
+        console.error("❌ Failed to fetch payments:", error);
       });
   }, []);
 

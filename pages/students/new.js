@@ -4,7 +4,7 @@ import Login from "@/pages/Login";
 export default function NewStudent() {
   return (
     <Login>
-      <h1>New Student</h1>
+      <h1 className="text-2xl font-bold mb-4">New Student</h1>
       <StudentForm />
     </Login>
   );  

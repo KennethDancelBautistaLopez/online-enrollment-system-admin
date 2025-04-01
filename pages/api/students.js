@@ -41,7 +41,6 @@
       }
     }
 
-
     if (method === "POST") {
       try {
 

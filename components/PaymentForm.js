@@ -1,51 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-export default function PaymentForm() {
+export default function PaymentForm({ paymentData }) {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [paymentId, setPaymentId] = useState("");
   const router = useRouter();
+
+  // Pre-fill form with data if editing an existing payment
+  useEffect(() => {
+    if (paymentData) {
+      setAmount(paymentData.amount);
+      setDescription(paymentData.description);
+      setName(paymentData.billingDetails.name);
+      setEmail(paymentData.billingDetails.email);
+      setPhone(paymentData.billingDetails.phone);
+      setPaymentId(paymentData._id); // Store paymentId if editing
+    }
+  }, [paymentData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!amount || !description|| !name || !email || !phone) {
+    if (!amount || !description || !name || !email || !phone) {
       alert("Please fill in all fields.");
       return;
     }
     if (amount > 9999999.99) {
-        alert("Maximum allowed amount is ₱9,999,999.99");
-        return;
-      }
+      alert("Maximum allowed amount is ₱9,999,999.99");
+      return;
+    }
 
-    await handlePayment(amount, description, name, email, phone); // Convert PHP to centavos
+    await handlePayment(amount, description, name, email, phone);
   };
 
   const handlePayment = async (amount, description, name, email, phone) => {
     try {
-      const res = await fetch("/api/payments", {
-        method: "POST",
+      const res = await fetch(`/api/payments${paymentId ? `/${paymentId}` : ""}`, {
+        method: paymentId ? "PUT" : "POST", // PUT if editing, POST if creating
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ amount, description, name, email, phone }),
       });
-  
+
       const data = await res.json();
-      console.log("API Response:", data); // Debugging the response
-  
-      const checkoutUrl = data?.checkoutUrl || data?.data?.attributes?.checkout_url; // Fix applied
-  
-      if (checkoutUrl) {
-        // Open the PayMongo checkout URL in a new tab
-        window.open(checkoutUrl, "_blank");
-  
-        // Redirect back to the payments page after payment
+      console.log("API Response:", data);
+
+      if (data?.checkoutUrl) {
+        window.open(data.checkoutUrl, "_blank");
         setTimeout(() => {
           router.push("/payments");
-        }, 5000); // Adjust timeout as needed
+        }, 5000);
       } else {
         console.error("Failed to get checkout URL", data);
         alert("Something went wrong. Please try again.");
@@ -56,9 +64,11 @@ export default function PaymentForm() {
     }
   };
 
-  return ( 
+  return (
     <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Tuition Payment</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        {paymentId ? "Edit Payment" : "Tuition Payment"}
+      </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-gray-700 font-medium">Amount (PHP)</label>
@@ -119,7 +129,7 @@ export default function PaymentForm() {
           type="submit"
           className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition duration-300"
         >
-          Pay Now
+          {paymentId ? "Update Payment" : "Pay Now"}
         </button>
       </form>
     </div>

@@ -18,7 +18,7 @@ export default function EditEventPage() {
 
   return (
     <Login>
-      <h1>Edit Event</h1>
+      <h1 className="text-2xl font-bold mb-4">Edit Event</h1>
       {eventInfo && <EventForm {...eventInfo} />}
     </Login>
   );
