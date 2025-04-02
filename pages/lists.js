@@ -1,7 +1,7 @@
 import Login from "@/pages/Login";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { generatePDFfile } from "@/components/generatePDFfile"; 
+import { generatePDFfile } from "@/components/generatePDFfile";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
@@ -12,15 +12,49 @@ export default function Students() {
       setStudents(response.data);
     });
   }, []);
+
   function handleGeneratePDF() {
     students.forEach((student) => {
       const pdfLink = generatePDFfile(student);
       setPdfLinks((prevPdfLinks) => ({
         ...prevPdfLinks,
-        [student.id]: pdfLink,
+        [student._studentId]: pdfLink, // Changed id to _studentId
       }));
     });
   }
+
+  const updateStudentStatus = async (studentId, status) => {
+    try {
+      const response = await fetch(`/api/students?id=${studentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update student status');
+      }
+  
+      // Update the student status in the local state
+      setStudents((prevStudents) =>
+        prevStudents.map((student) =>
+          student._studentId === studentId
+            ? { ...student, status }  // Update the status for the selected student
+            : student
+        )
+      );
+  
+      console.log('Updated student:', data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  
 
   return (
     <Login>
@@ -32,40 +66,57 @@ export default function Students() {
             <th className="border border-gray-300 p-2">Student Number</th>
             <th className="border border-gray-300 p-2">Name</th>
             <th className="border border-gray-300 p-2">Email</th>
-            <th className="border border-gray-300 p-2">Education</th>
-
-            {students.some((s) => s.education === "college") && (
-              <th className="border border-gray-300 p-2">Course</th>
-            )}
-            {students.some((s) => s.education === "senior-high") && (
-              <th className="border border-gray-300 p-2">Strand</th>
-            )}
-
-            <th className="border border-gray-300 p-2">Year Level</th>
+            <th className="border border-gray-300 p-2">Files</th>
+            <th className="border border-gray-300 p-2">Upload Files</th>
+            <th className="border border-gray-300 p-2">status</th>
             <th className="border border-gray-300 p-2">Download</th>
           </tr>
         </thead>
         <tbody>
           {students.map((student, index) => (
-            <tr key={student._id} className="hover:bg-gray-50">
+            <tr key={student._studentId} className="hover:bg-gray-50">
               <td className="border border-gray-300 p-2 text-center">{index + 1}</td>
               <td className="border border-gray-300 p-2">{student._studentId}</td>
               <td className="border border-gray-300 p-2">{student.fname} {student.mname} {student.lname}</td>
               <td className="border border-gray-300 p-2">{student.email}</td>
-              <td className="border border-gray-300 p-2">{student.education}</td>
 
-              {student.education === "college" && (
-                <td className="border border-gray-300 p-2">{student.course}</td>
-              )}
-              {student.education === "senior-high" && (
-                <td className="border border-gray-300 p-2">{student.strand}</td>
-              )}
-
-              <td className="border border-gray-300 p-2">{student.yearLevel}</td>
               <td className="border border-gray-300 p-2 text-center">
-                {pdfLinks[student._id] ? (
+                <a
+                  href={`/files/${student._studentId}`}
+                  className="btn-primary text-sm px-3 py-1"
+                >
+                  View
+                </a>
+              </td>
+
+              <td className="border border-gray-300 p-2 text-center">
+                <a
+                  href={`/upload/${student._studentId}`}
+                  className="btn-primary text-sm px-3 py-1"
+                >
+                  Upload
+                </a>
+              </td>
+
+              {/* Wrap <select> in <td> */}
+              <td className="border border-gray-300 p-2">
+                <select
+                  value={student.status}
+                  onChange={(e) => updateStudentStatus(student._studentId, e.target.value)}
+                  className="bg-white border border-gray-300 p-2"
+                >
+                  <option value="">Select Status</option>
+                  <option value="enrolled">Enrolled</option>
+                  <option value="graduated">Graduated</option>
+                  <option value="dropped">Dropped</option>
+                  <option value="missing files">Missing Files</option>
+                </select>
+              </td>
+
+              <td className="border border-gray-300 p-2 text-center">
+                {pdfLinks[student._studentId] ? (
                   <a
-                    href={pdfLinks[student._id]}
+                    href={pdfLinks[student._studentId]}
                     download={`${student.fname}_${student.lname}_info.pdf`}
                     className="btn-primary text-sm px-3 py-1"
                   >

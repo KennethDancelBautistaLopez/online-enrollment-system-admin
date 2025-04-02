@@ -46,7 +46,7 @@ export default function StudentForm({
   const [guardian, setGuardian] = useState(existingGuardian);
   const [guardianOccupation, setGuardianOccupation] = useState(existingGuardianOccupation);
   const [registrationDate, setRegistrationDate] = useState(
-    existingRegistrationDate || new Date().toISOString().split("T")[0]
+    existingRegistrationDate ? existingRegistrationDate.split("T")[0] : new Date().toISOString().split("T")[0]
   );
   const [lrn, setLrn] = useState(existingLrn);
   const [education, setEducation] = useState(existingEducation);

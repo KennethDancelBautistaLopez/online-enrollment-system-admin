@@ -29,14 +29,23 @@ export default async function handler(req, res) {
     }
   }
 
-  if (req.method === "PUT") {
+  if (req.method === "GET") {
+    const { id } = req.query; // Get the id from query params
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid event ID" });
+    }
+  
     try {
-      const { _id, ...updatedData } = req.body;
-      const updatedEvent = await Event.findByIdAndUpdate(_id, updatedData, { new: true });
-      if (!updatedEvent) return res.status(404).json({ error: "Event not found" });
-      return res.status(200).json(updatedEvent);
+      const event = await Event.findById(id); // Use findById to fetch a single event
+  
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+  
+      return res.status(200).json(event); // Return a single event object, not an array
     } catch (error) {
-      return res.status(500).json({ error: "Failed to update event", details: error.message });
+      return res.status(500).json({ error: "Failed to fetch event", details: error.message });
     }
   }
 

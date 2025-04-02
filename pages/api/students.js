@@ -48,7 +48,7 @@
               fname, mname, lname, address, mobile, landline, facebook, birthdate, 
               birthplace, nationality, religion, sex, father, mother, guardian, 
               guardianOccupation, registrationDate, lrn, education, strand, course, 
-              yearLevel, schoolYear, email
+              yearLevel, schoolYear, email, status
           } = req.body;
 
           console.log("Education value before sending:", education);
@@ -127,12 +127,10 @@
               return res.status(400).json({ error: "Invalid email format" });
           }
 
-          // facebook url format
-          const facebookRegex = /^(https?:\/\/)?(www\.)?facebook\.com\/(share\/[^\s]+|[a-zA-Z0-9.]+)$/;
+          const facebookRegex = /^(https?:\/\/)?(www\.)?facebook\.com\/([a-zA-Z0-9.]+|share\/[^\s]+)?$/;
           if (!facebookRegex.test(facebook)) {
-              return res.status(400).json({ error: "Invalid facebook url format" });
+            return res.status(400).json({ error: "Invalid Facebook URL format" });
           }
-
           // Check if email already exists
           const existingStudent = await Student.findOne({ email });
           if (existingStudent) {
@@ -180,7 +178,8 @@
               course,
               yearLevel,
               schoolYear,
-              email
+              email,
+              status: "missing files",
           });
 
 
@@ -208,35 +207,35 @@
 
   if (method === "PUT") {
     try {
-      const { id } = req.query;
+      const { status } = req.body;
+      const { id } = req.query;  // Student ID from the URL (query param)
+  
       if (!id) return res.status(400).json({ error: "Student ID is required" });
+      if (!status) return res.status(400).json({ error: "Status is required" });
   
-      console.log("Updating student with ID:", id);
-  
-      // ✅ Check if the provided ID is a valid ObjectId before using it
-      let query = { _studentId: id };
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        query = { _id: new mongoose.Types.ObjectId(id) };
+      // Ensure status is one of the predefined options
+      const validStatuses = ["enrolled", "graduated", "dropped", "missing files"];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
       }
   
-      // ✅ Find student before updating
-      const existingStudent = await Student.findOne(query);
+      // Ensure student._studentId is valid (check if it's a string)
+      if (!id || typeof id !== 'string' || !id.trim()) {
+        return res.status(400).json({ error: "Invalid student ID" });
+      }
   
-      console.log("Existing student found:", existingStudent);
+      // Find the student and update their status
+      const updatedStudent = await Student.findOneAndUpdate(
+        { _studentId: id },  // Search by student._studentId
+        { status },           // Update the status field
+        { new: true, runValidators: true }  // Ensure the update is validated
+      );
   
-      if (!existingStudent) {
-        console.log("Student not found for update:", id);
+      if (!updatedStudent) {
         return res.status(404).json({ error: "Student not found" });
       }
   
-      // ✅ Update student
-      const updatedStudent = await Student.findOneAndUpdate(query, req.body, {
-        new: true,
-        runValidators: true,
-      });
-  
-      console.log("Updated student:", updatedStudent);
-      return res.status(200).json(updatedStudent);
+      return res.status(200).json(updatedStudent);  // Return the updated student
     } catch (error) {
       console.error("Error updating student:", error);
       return res.status(500).json({ error: "Internal server error", details: error.message });

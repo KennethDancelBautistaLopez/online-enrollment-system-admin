@@ -27,6 +27,7 @@ const StudentSchema = new mongoose.Schema(
     yearLevel: { type: String, required: true },
     schoolYear: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    status: { type: String, enum: ["enrolled", "graduated", "dropped", "missing files"], default: "missing files"  },
   },
   { timestamps: true }
 );

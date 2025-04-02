@@ -47,8 +47,8 @@ export default function EditStudentPage() {
       <h1 className="text-2xl font-bold mb-4">Edit Student</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
       {studentInfo ? (
-        <StudentForm {...studentInfo} /> // ✅ Pass fetched data to the form
-      ) : (
+        <StudentForm {...studentInfo} />
+      ) : ( 
         !error && <p>Loading student data...</p>
       )}
     </Login>
