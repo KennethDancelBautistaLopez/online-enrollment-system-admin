@@ -2,15 +2,50 @@ import Link from "next/link";
 import Login from "@/pages/Login";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
+  const { data: session } = useSession();
+  const [initialized, setInitialized] = useState(false); // Prevent duplicate toasts
 
   useEffect(() => {
-    axios.get("/api/students").then((response) => {
-      setStudents(response.data);
-    })
-  }, []);
+    if (!session) {
+      return;
+    }
+
+    // Fetch students data only once after session is available
+    const fetchStudents = async () => {
+      try {
+        const response = await axios.get("/api/students");
+        setStudents(response.data);
+
+        // Show success toast only once after students are loaded
+        if (!initialized && response.data.length > 0) {
+          toast.success("Students loaded successfully! ✅");
+          setInitialized(true); // Prevent the toast from showing again
+        }
+      } catch (error) {
+        console.error("Error fetching students:", error);
+        toast.error("Failed to load students.");
+      }
+    };
+
+    fetchStudents(); // Call fetch function to load students data
+
+  }, [session, initialized]); // Only trigger when session changes or initialized state
+
+  useEffect(() => {
+    if (!session) {
+      toast.error("You are not logged in.");
+    }
+  }, [session]); // Trigger error toast only when session is null
+
+  if (!session) {
+    return <Login />;
+  }
+
   return (
     <Login>
       <Link className="btn-primary" href="/students/new">
@@ -56,7 +91,7 @@ export default function Students() {
               )}
               <td className="border border-gray-300 p-2">{student.registrationDate}</td>
               <td className="border border-gray-300 p-2">{student.email}</td>
-              <td className="border border-gray-300 p-2 flex gap-2">
+              <td className="border border-gray-300 p-2 flex text-center ">
                 <Link className="btn-default" href={`/students/edit/${student._id}`}>
                   Edit
                 </Link>

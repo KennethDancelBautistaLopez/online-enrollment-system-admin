@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 export default function StudentForm({
   _studentId,
@@ -152,12 +153,15 @@ export default function StudentForm({
           data,
           headers: { "Content-Type": "application/json" },
         });
+
+        toast.success('Student saved successfully');
         
         if (response.status >= 200 && response.status < 300) {
           setGoToStudents(true);
+
         }
       } catch (error) {
-        console.error('Error saving student:', error.response ? error.response.data : error.message);
+        toast.error('Error saving student:', error.response ? error.response.data : error.message);
       }
   }
 
@@ -315,10 +319,13 @@ export default function StudentForm({
       <input type="text" placeholder="Enter School Year (e.g., 2023-2024)" value={schoolYear} onChange={(ev) => setSchoolYear(ev.target.value)} required />
 
       <label>Email</label>
-      <input type="email" placeholder="Enter email" value={email} onChange={(ev) => {
-    const inputValue = ev.target.value.replace(/@gmail\.com$/, ""); // Remove existing @gmail.com if retyped
-    setEmail(inputValue + "@gmail.com");
-  }} required />
+        <input
+          type="email"
+          placeholder="Enter Email Address"
+          value={email}
+          onChange={(ev) => setEmail(ev.target.value)}
+          required
+        />
 
       <button type="submit" className="btn-primary">Save</button>
     </form>

@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import StudentForm from "@/components/StudentForm";
+import {toast} from "react-hot-toast";
 
 export default function EditStudentPage() {
   const [studentInfo, setStudentInfo] = useState(null);
@@ -22,7 +23,7 @@ export default function EditStudentPage() {
   }, [router.isReady, router.query]);
 
   useEffect(() => {
-    if (!studentId) return; // ✅ Prevents running when studentId is undefined
+    if (!studentId) return; 
   
     console.log("🔄 Fetching student data for ID:", studentId);
   
@@ -31,14 +32,16 @@ export default function EditStudentPage() {
         console.log("✅ Fetched student data:", response.data);
   
         if (response.data && Object.keys(response.data).length > 0) {
-          setStudentInfo(response.data); // ✅ Ensure `studentInfo` is updated
+          setStudentInfo(response.data);
+          toast.success("Student details loaded successfully! ✅");
+
         } else {
-          setError("Student not found");
+          toast.error("No student found for the provided ID. ❌");
         }
       })
       .catch((error) => {
         console.error("❌ Error fetching student:", error.response?.data?.error || error.message);
-        setError("Failed to load student data");
+        toast.error("Failed to load student data! 🚨");
       });
   }, [studentId]); 
 

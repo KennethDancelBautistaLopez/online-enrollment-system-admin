@@ -2,6 +2,7 @@ import Login from "@/pages/Login";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast"; // Import toast
 
 export default function DeletePaymentPage() {
   const router = useRouter();
@@ -11,21 +12,29 @@ export default function DeletePaymentPage() {
   useEffect(() => {
     if (!id) return;
 
-    axios.get(`/api/payments?id=${id}`)
-      .then(response => setPaymentInfo(response.data))
-      .catch(error => console.error("Error fetching payment:", error));
+    axios
+      .get(`/api/payments?id=${id}`)
+      .then((response) => {
+        setPaymentInfo(response.data);
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching payment:", error);
+        toast.error("Failed to load payment details. 🚨");
+      });
   }, [id]);
 
   function goBack() {
-    router.push('/payments'); // Redirect back to payments list
+    router.push("/payments"); // Redirect back to payments list
   }
 
   async function deletePayment() {
     try {
       await axios.delete(`/api/payments?id=${id}`); // Ensure correct API call
+      toast.success("Payment deleted successfully! ✅");
       goBack();
     } catch (error) {
-      console.error("Error deleting payment:", error);
+      console.error("❌ Error deleting payment:", error);
+      toast.error("Failed to delete payment. Please try again. ❌");
     }
   }
 

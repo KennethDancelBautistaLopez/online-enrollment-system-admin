@@ -1,15 +1,35 @@
 import { connectToDB } from "@/lib/mongoose";
 import Event from "@/models/Event";
+import mongoose from "mongoose"; // Ensure mongoose is imported for ID validation
 
 export default async function handler(req, res) {
   await connectToDB();
 
   if (req.method === "GET") {
-    try {
-      const events = await Event.find();
-      return res.status(200).json(events);
-    } catch (error) {
-      return res.status(500).json({ error: "Failed to fetch events", details: error.message });
+    const { id } = req.query; // Get the event ID from the query params
+    if (id) {
+      // If an ID is passed, return a single event
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid event ID" });
+      }
+
+      try {
+        const event = await Event.findById(id); // Fetch the event by ID
+        if (!event) {
+          return res.status(404).json({ error: "Event not found" });
+        }
+        return res.status(200).json(event); // Return the event data
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to fetch event", details: error.message });
+      }
+    } else {
+      // If no ID is passed, return all events
+      try {
+        const events = await Event.find();
+        return res.status(200).json(events);
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to fetch events", details: error.message });
+      }
     }
   }
 
@@ -29,30 +49,18 @@ export default async function handler(req, res) {
     }
   }
 
-  if (req.method === "GET") {
-    const { id } = req.query; // Get the id from query params
-    
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (req.method === "DELETE") {
+    const { id } = req.query; // Get the ID from the query parameters
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid event ID" });
     }
-  
+
     try {
-      const event = await Event.findById(id); // Use findById to fetch a single event
-  
+      const event = await Event.findByIdAndDelete(id); // Use ID from query to delete event
       if (!event) {
         return res.status(404).json({ error: "Event not found" });
       }
-  
-      return res.status(200).json(event); // Return a single event object, not an array
-    } catch (error) {
-      return res.status(500).json({ error: "Failed to fetch event", details: error.message });
-    }
-  }
-
-  if (req.method === "DELETE") {
-    try {
-      const { _id } = req.body;
-      await Event.findByIdAndDelete(_id);
       return res.status(200).json({ message: "Event deleted successfully" });
     } catch (error) {
       return res.status(500).json({ error: "Failed to delete event", details: error.message });

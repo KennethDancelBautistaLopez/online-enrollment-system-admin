@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { toast } from "react-hot-toast";
 
 export default function EventForm({ _id, title, description, date, location, eventType, organizer }) {
   const [titleState, setTitle] = useState(title || "");
@@ -22,12 +23,15 @@ export default function EventForm({ _id, title, description, date, location, eve
     try {
       if (_id) {
         await axios.put("/api/events", { ...data, _id });
+        toast.success("Event updated successfully!");
       } else {
         await axios.post("/api/events", data);
+        toast.success("Event created successfully!");
       }
       router.push("/events");
     } catch (error) {
       console.error("Error saving event:", error);
+      toast.error("Failed to save event. Please try again.");
     }
   }
 

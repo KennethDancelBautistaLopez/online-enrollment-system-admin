@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { toast } from "react-hot-toast";
 
 export default function PaymentForm({ paymentData }) {
   const [amount, setAmount] = useState("");
@@ -25,11 +26,11 @@ export default function PaymentForm({ paymentData }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount || !description || !name || !email || !phone) {
-      alert("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
     if (amount > 9999999.99) {
-      alert("Maximum allowed amount is ₱9,999,999.99");
+      toast.error("Maximum allowed amount is ₱9,999,999.99");
       return;
     }
 
@@ -50,17 +51,18 @@ export default function PaymentForm({ paymentData }) {
       console.log("API Response:", data);
 
       if (data?.checkoutUrl) {
+        toast.success("Payment successful! Redirecting...");
         window.open(data.checkoutUrl, "_blank");
         setTimeout(() => {
           router.push("/payments");
         }, 5000);
       } else {
         console.error("Failed to get checkout URL", data);
-        alert("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Payment failed. Please try again.");
+      toast.error("Payment failed. Please try again.");
     }
   };
 

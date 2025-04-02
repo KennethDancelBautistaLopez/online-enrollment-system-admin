@@ -2,15 +2,38 @@ import Login from "@/pages/Login";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
-
+ 
+  const { data: session } = useSession();
   useEffect(() => {
-    axios.get("/api/events").then((response) => {
-      setEvents(response.data);
-    });
-  }, []);
+    if (!session) {
+      return;
+    }
+    axios
+      .get("/api/events")
+      .then((response) => {
+        setEvents(response.data);
+        toast.success("Events loaded successfully! ✅");
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching events:", error);
+        toast.error("Failed to load events. Please try again. 🚨");
+      });
+  }, [session]);
+
+    useEffect(() => {
+      if (!session) {
+        toast.error("You are not logged in.");
+      }
+    }, [session]);
+  
+    if (!session) {
+      return <Login />;
+    }
 
   return (
     <Login>

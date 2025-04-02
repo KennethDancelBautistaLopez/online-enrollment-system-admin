@@ -2,26 +2,45 @@ import Login from "@/pages/Login";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { generatePDFfile } from "@/components/generatePDFfile";
+import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [pdfLinks, setPdfLinks] = useState({});
 
+  const { data: session } = useSession();
+
+
   useEffect(() => {
+    if (!session) {
+      return;
+    }
     axios.get("/api/students").then((response) => {
       setStudents(response.data);
+      toast.success("Students loaded successfully! ✅");
     });
-  }, []);
+  }, [session]);
 
-  function handleGeneratePDF() {
-    students.forEach((student) => {
-      const pdfLink = generatePDFfile(student);
-      setPdfLinks((prevPdfLinks) => ({
-        ...prevPdfLinks,
-        [student._studentId]: pdfLink, // Changed id to _studentId
-      }));
+  // Handle PDF generation for a specific student
+  function handleGeneratePDF(student) {
+    const pdfLink = generatePDFfile(student);
+    setPdfLinks((prevPdfLinks) => ({
+      ...prevPdfLinks,
+      [student._studentId]: pdfLink, // Add the new PDF link for this student
+    }));
+
+    toast.success(`PDF generated for ${student.fname} ${student.lname}!`, {
+      duration: 3000, // Duration in milliseconds
     });
   }
+
+  // view files for a specific student
+
+
+  // upload files
+
+
 
   const updateStudentStatus = async (studentId, status) => {
     try {
@@ -32,13 +51,13 @@ export default function Students() {
         },
         body: JSON.stringify({ status }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update student status');
       }
-  
+
       // Update the student status in the local state
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
@@ -47,14 +66,21 @@ export default function Students() {
             : student
         )
       );
-  
+
       console.log('Updated student:', data);
     } catch (error) {
       console.error(error);
     }
   };
-  
-  
+    useEffect(() => {
+      if (!session) {
+        toast.error("You are not logged in.");
+      }
+    }, [session]);
+
+    if (!session) {
+      return <Login />;
+    }
 
   return (
     <Login>
@@ -68,7 +94,7 @@ export default function Students() {
             <th className="border border-gray-300 p-2">Email</th>
             <th className="border border-gray-300 p-2">Files</th>
             <th className="border border-gray-300 p-2">Upload Files</th>
-            <th className="border border-gray-300 p-2">status</th>
+            <th className="border border-gray-300 p-2">Status</th>
             <th className="border border-gray-300 p-2">Download</th>
           </tr>
         </thead>
@@ -98,7 +124,6 @@ export default function Students() {
                 </a>
               </td>
 
-              {/* Wrap <select> in <td> */}
               <td className="border border-gray-300 p-2">
                 <select
                   value={student.status}
@@ -124,7 +149,7 @@ export default function Students() {
                   </a>
                 ) : (
                   <button
-                    onClick={() => handleGeneratePDF(student)}
+                    onClick={() => handleGeneratePDF(student)} // Pass the student to the function
                     className="btn-primary text-sm px-3 py-1"
                   >
                     Generate PDF

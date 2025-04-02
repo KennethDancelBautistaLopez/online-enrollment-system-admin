@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import EventForm from "@/components/EventForm"; // Create this component
+import { toast } from "react-hot-toast";
 
 export default function EditEventPage() {
   const [eventInfo, setEventInfo] = useState(null);
@@ -17,13 +18,16 @@ export default function EditEventPage() {
     axios.get(`/api/events?id=${eventId}`).then((response) => {
       console.log('Fetched event data:', response.data); // Log the response data to verify
       if (Array.isArray(response.data)) {
-        setEventInfo(response.data[0]); // Handle case if the response is an array
+        setEventInfo(response.data[0]);
+        toast.success("Event details loaded successfully! 🎉");
       } else {
-        setEventInfo(response.data); // Handle if it's a single event object
+        setEventInfo(response.data);
+        toast.success("Event details loaded successfully! 🎉");
       }
     }).catch((error) => {
       console.error('Error fetching event data:', error.message);
-      setError("Failed to load event data");
+      setError('Failed to fetch event data');
+      toast.error("Failed to fetch event data. Please try again. 🚨");
     });
   }, [id]);
 

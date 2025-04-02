@@ -3,6 +3,7 @@ import {useRouter} from "next/router";
 import Logo from "@/components/Logo";
 import {signOut} from "next-auth/react";
 import Cookies from "js-cookie";
+import {toast} from "react-hot-toast";
 
 export default function Nav({show}) {
   const inactiveLink = 'flex gap-1 p-1';
@@ -13,9 +14,14 @@ export default function Nav({show}) {
   const {pathname} = router;
 
   const logout = async () => {
-    await signOut();
-    Cookies.remove('access_token');
-    router.push('/');
+    try {
+      await signOut({ redirect: false });
+      Cookies.remove('user');
+      toast.success('Logout successful!');
+      router.push('/');
+    } catch (error) {
+      toast.error('Logout failed! Try again.');
+    }
   };
   
   return (

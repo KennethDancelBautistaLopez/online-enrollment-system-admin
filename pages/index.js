@@ -1,8 +1,17 @@
 import Login from "@/pages/Login";
 import { useSession } from "next-auth/react";
+import { toast } from "react-hot-toast";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  // Show a toast when the session is successfully loaded
+  useEffect(() => {
+    if (status === "authenticated") {
+      toast.success(`Welcome, ${session.user.email}! 🎉`);
+    }
+  }, [status, session]); // Depend on session and status to re-run the effect
 
   return (
     <Login>

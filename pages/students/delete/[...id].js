@@ -2,7 +2,8 @@ import Login from "@/pages/Login";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import {toast} from "react-hot-toast";
+ 
 export default function DeleteStudentPage() {
   const router = useRouter();
   const { id } = router.query; // Get student ID from URL
@@ -13,7 +14,10 @@ export default function DeleteStudentPage() {
     
     axios.get(`/api/students?id=${id}`)
       .then(response => setStudentInfo(response.data))
-      .catch(error => console.error("Error fetching student:", error));
+      .catch(error => {
+        console.error("Error fetching student:", error);
+        toast.error("Failed to load student details. 🚨");
+      });
   }, [id]);
 
   function goBack() {
@@ -23,9 +27,11 @@ export default function DeleteStudentPage() {
   async function deleteStudent() {
     try {
       await axios.delete(`/api/students?id=${id}`);
+      toast.success("Student deleted successfully! ✅");
       goBack();
     } catch (error) {
       console.error("Error deleting student:", error);
+      toast.error("Failed to delete student. Please try again. ❌");
     }
   }
 

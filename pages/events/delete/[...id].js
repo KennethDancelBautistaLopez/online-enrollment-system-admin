@@ -2,6 +2,8 @@ import Login from "@/pages/Login";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import { toast } from 'react-hot-toast';
+
 
 export default function DeleteEventPage() {
   const router = useRouter();
@@ -19,8 +21,14 @@ export default function DeleteEventPage() {
     router.push('/events');
   }
   async function deleteEvent() {
+    try {
     await axios.delete('/api/events?id='+id);
+    toast.success("Event deleted successfully! 🎉");
     goBack();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast.error("Failed to delete event. Please try again. ❌");
+    }
   }
   return (
        <Login>

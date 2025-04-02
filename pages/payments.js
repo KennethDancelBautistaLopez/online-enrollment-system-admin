@@ -2,38 +2,69 @@ import Link from "next/link";
 import Login from "@/pages/Login";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function Payments() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [initialized, setInitialized] = useState(false);
+
+  const { data: session } = useSession();
 
   useEffect(() => {
+    if (!session) {
+      return;
+    }
     fetchPayments();
     const interval = setInterval(fetchPayments, 5000); // Auto-refresh every 5s
     return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+  }, [session]); // Only run this effect when the session changes
 
-  const fetchPayments = () => {
-    axios
-    .get("/api/payments")
-    .then((response) => {
-      console.log("Full API Response:", response.data); // Check full response
-      console.log("Payments Data:", response.data?.data); // Check if `data` key exists
-  
-      if (response.data && Array.isArray(response.data)) { // Remove `.data` if not needed
-        setPayments(response.data);
+  const fetchPayments = async () => {
+    console.log("Fetching payments...");
+    
+    try {
+      const response = await axios.get("/api/payments");
+      console.log("Full API Response:", response.data);
+      const paymentsData = response.data?.data || response.data;
+
+      if (Array.isArray(paymentsData)) {
+        // Compare previous and new payments to avoid unnecessary updates
+        if (JSON.stringify(payments) !== JSON.stringify(paymentsData)) {
+          setPayments(paymentsData);
+          setError(null);
+
+          // Show toast only if the user is logged in and the toast hasn't been shown yet
+          if (!initialized && session) {
+            toast.success("Payments loaded successfully! ✅");
+            setInitialized(true); // Prevent repeated success toasts
+          }
+        }
       } else {
         console.error("Unexpected response structure:", response.data);
         setError("Invalid data format received.");
+        toast.error("Invalid data format received. ❌");
       }
-    })
-    .catch((error) => {
+    } catch (error) {
       console.error("Failed to load payments:", error);
       setError("Failed to load payments.");
-    })
-    .finally(() => setLoading(false));
+      toast.error("Failed to fetch payments. Please try again. 🚨");
+    } finally {
+      setLoading(false);
+    }
   };
+
+    useEffect(() => {
+      if (!session) {
+        toast.error("You are not logged in.");
+      }
+    }, [session]);
+  
+    if (!session) {
+      return <Login />;
+    }
 
   return (
     <Login>
