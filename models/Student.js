@@ -28,6 +28,12 @@ const StudentSchema = new mongoose.Schema(
     schoolYear: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     status: { type: String, enum: ["enrolled", "graduated", "dropped", "missing files"], default: "missing files"  },
+    files: [{ // Array of file objects
+      filename: { type: String, required: true },
+      filePath: { type: String, required: true },
+      mimeType: { type: String, required: true },
+      size: { type: Number, required: true }
+    }]
   },
   { timestamps: true }
 );

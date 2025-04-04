@@ -7,9 +7,9 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); // Set the client-side flag after the component mounts
+    setIsClient(true);
   }, []);
-
+  
   return (
     <SessionProvider session={session} refetchInterval={5 * 60}>
       <Component {...pageProps} />
