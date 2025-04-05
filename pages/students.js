@@ -89,7 +89,9 @@ export default function Students() {
               {student.education === "senior-high" && (
                 <td className="border border-gray-300 p-2">{student.strand}</td>
               )}
-              <td className="border border-gray-300 p-2">{student.registrationDate}</td>
+            <td className="border border-gray-300 p-2">
+              {new Date(student.registrationDate).toLocaleDateString("en-US")}
+            </td>
               <td className="border border-gray-300 p-2">{student.email}</td>
               <td className="border border-gray-300 p-2 flex text-center ">
                 <Link className="btn-default" href={`/students/edit/${student._id}`}>

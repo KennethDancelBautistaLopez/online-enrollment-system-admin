@@ -21,6 +21,7 @@ const StudentSchema = new mongoose.Schema(
     guardianOccupation: { type: String },
     registrationDate: { type: Date, default: Date.now },
     lrn: { type: String, unique: true },
+    
     education: { type: String },
     strand: { type: String },
     course: { type: String },

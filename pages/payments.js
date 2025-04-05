@@ -7,16 +7,26 @@ import { useSession } from "next-auth/react";
 
 export default function Payments() {
   const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [initialized, setInitialized] = useState(false);
 
   const { data: session } = useSession();
 
   useEffect(() => {
+
     if (!session) {
+      toast.error("You are not logged in.");
       return;
     }
+
+    // Check if the user is admin and show appropriate toast message
+    if (session.user.role === "admin") {
+      toast.error("Admins cannot access this page. Redirecting...");
+      // Redirect to a different page (e.g., dashboard) for admin
+      window.location.href = "/"; // Change to your admin page URL
+      return;
+    }
+
     fetchPayments();
     const interval = setInterval(fetchPayments, 5000); // Auto-refresh every 5s
     return () => clearInterval(interval); // Cleanup on unmount
@@ -24,7 +34,7 @@ export default function Payments() {
 
   const fetchPayments = async () => {
     console.log("Fetching payments...");
-    
+
     try {
       const response = await axios.get("/api/payments");
       console.log("Full API Response:", response.data);
@@ -51,31 +61,23 @@ export default function Payments() {
       console.error("Failed to load payments:", error);
       setError("Failed to load payments.");
       toast.error("Failed to fetch payments. Please try again. 🚨");
-    } finally {
-      setLoading(false);
     }
   };
 
-    useEffect(() => {
-      if (!session) {
-        toast.error("You are not logged in.");
-      }
-    }, [session]);
-  
-    if (!session) {
-      return <Login />;
-    }
+  if (!session) {
+    return <Login />;
+  }
 
   return (
-    <Login>
+    <Login> 
+    <div>
       <Link className="btn-primary" href="/payments/new">
         Add new payment
       </Link>
 
-      {loading && <p className="text-center mt-4">Loading payments...</p>}
       {error && <p className="text-center mt-4 text-red-500">{error}</p>}
 
-      {!loading && !error && (
+      {!error && (
         <table className="basic mt-2 w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
@@ -106,7 +108,7 @@ export default function Payments() {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center border p-4">
+                <td colSpan="5" className="text-center border p-4">
                   No payments found.
                 </td>
               </tr>
@@ -114,6 +116,7 @@ export default function Payments() {
           </tbody>
         </table>
       )}
+    </div>
     </Login>
   );
 }

@@ -35,7 +35,7 @@ export default function DeleteEventPage() {
          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
            <div className="bg-white p-6 rounded-lg shadow-lg text-center w-96">
              <h1 className="text-lg font-semibold mb-4">
-               Do you really want to delete &quot;{eventInfo?.name}&quot;?
+               Do you really want to delete <b>{eventInfo?.title}</b>?
              </h1>
              <div className="flex justify-center gap-4">
                <button onClick={deleteEvent} className="bg-red-500 text-white px-4 py-2 rounded">

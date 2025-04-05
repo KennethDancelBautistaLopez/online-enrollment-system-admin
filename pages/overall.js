@@ -4,6 +4,8 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContai
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import { format } from "date-fns"; // Install if necessary: npm install date-fns
+import { useRouter } from "next/router"; // Import useRouter for navigation
 
 export default function Payments() {
   const [totalIncome, setTotalIncome] = useState(0);
@@ -11,56 +13,63 @@ export default function Payments() {
   const [initialized, setInitialized] = useState(false);
 
   const { data: session } = useSession();
+  const router = useRouter(); // Initialize router
 
-    
   useEffect(() => {
+    // 1. If the user is not logged in
     if (!session) {
+      toast.error("You are not logged in.");
       return;
     }
+
+    // 2. If the user is logged in as an admin
+    if (session.user.role === "admin") {
+      toast.error("Admins cannot access this page. Redirecting...");
+      router.push("/"); // Redirect to admin dashboard (or another page you prefer)
+      return;
+    }
+
+    // 3. If the user is logged in as a non-admin, fetch payments
     axios
       .get("/api/payments")
       .then((response) => {
-        const payments = response.data; // Ensure correct response structure
+        const payments = response.data;
 
         if (!Array.isArray(payments) || payments.length === 0) {
           console.warn("⚠️ No payments found or invalid format.");
-          setChartData([]); // Ensure chart doesn't break
+          setChartData([]);
           setTotalIncome(0);
           toast.error("No payments found. ❌");
           return;
         }
 
         setTotalIncome(
-          payments.reduce((total, payment) => total + (payment.amount || 0), 0) // Avoid undefined `amount`
+          payments.reduce((total, payment) => total + (payment.amount || 0), 0)
         );
 
         setChartData(
           payments.map((payment) => ({
-            date: payment.createdAt || "Unknown",
+            date: payment.createdAt
+              ? format(new Date(payment.createdAt), "MMM dd, yyyy") // Example: Apr 05, 2025
+              : "Unknown",
             amount: payment.amount || 0,
           }))
         );
 
         if (!initialized) {
           toast.success("Payments loaded successfully! ✅");
-          setInitialized(true); // Prevent repeated success toasts
+          setInitialized(true);
         }
       })
       .catch((error) => {
         console.error("❌ Failed to fetch payments:", error);
         toast.error("Failed to fetch payments. 🚨");
       });
-  }, [session]);
+  }, [session, initialized, router]);
 
-      useEffect(() => {
-        if (!session) {
-          toast.error("You are not logged in.");
-        }
-      }, [session]);
-    
-      if (!session) {
-        return <Login />;
-      }
+  if (!session) {
+    return <Login />;
+  }
 
   return (
     <Login>
