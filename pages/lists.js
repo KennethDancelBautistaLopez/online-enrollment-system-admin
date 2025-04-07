@@ -5,19 +5,38 @@ import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { generatePDFfile } from "@/components/generatePDFfile";
 
-export default function Students() {
-  const [students, setStudents] = useState([]);
+export async function getServerSideProps() {
+  try {
+    const res = await fetch('http://localhost:3000/api/students');
+    const data = await res.json();
+
+    return {
+      props: {
+        initialStudents: data || [],
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    return {
+      props: {
+        initialStudents: [],
+      },
+    };
+  }
+}
+
+export default function Students({ initialStudents }) {
+  const [students, setStudents] = useState(initialStudents || []);
+  const [searchQuery, setSearchQuery] = useState("");
   const [pdfLinks, setPdfLinks] = useState({});
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const { data: session } = useSession();
-  const fileInputRef = useRef(null);  // Reference to the file input
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (!session) {
-      return;
-    }
+    if (!session) return;
     axios.get("/api/students").then((response) => {
       setStudents(response.data);
       toast.success("Students loaded successfully! ✅");
@@ -27,167 +46,153 @@ export default function Students() {
     });
   }, [session]);
 
-  function handleGeneratePDF(student) {
+  useEffect(() => {
+    if (!session) toast.error("You don't have permission to access this page.");
+  }, [session]);
+
+  if (!session) return <Login />;
+
+  const handleGeneratePDF = (student) => {
     const pdfLink = generatePDFfile(student);
-    setPdfLinks((prevPdfLinks) => ({
-      ...prevPdfLinks,
+    setPdfLinks((prev) => ({
+      ...prev,
       [student._studentId]: pdfLink,
     }));
-
-    toast.success(`PDF generated for ${student.fname} ${student.lname}!`, {
-      duration: 3000,
-    });
-  }
+    toast.success(`PDF generated for ${student.fname} ${student.lname}!`);
+  };
 
   const updateStudentStatus = async (studentId, status) => {
     try {
-      const response = await fetch(`/api/students?id=${studentId}`, {
+      const res = await fetch(`/api/students?id=${studentId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Update failed');
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update student status');
-      }
-
-      setStudents((prevStudents) =>
-        prevStudents.map((student) =>
-          student._studentId === studentId
-            ? { ...student, status }
-            : student
+      setStudents((prev) =>
+        prev.map((student) =>
+          student._studentId === studentId ? { ...student, status } : student
         )
       );
-      toast.success("Student status updated! ✅");
-    } catch (error) {
-      toast.error("Failed to update student status.");
-      console.error(error);
+      toast.success("Student status updated!");
+    } catch (err) {
+      toast.error("Failed to update status.");
+      console.error(err);
     }
   };
 
-  useEffect(() => {
-    if (!session) {
-      toast.error("You are not logged in.");
-    }
-  }, [session]);
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    const allowedTypes = ['image/jpeg', 'application/pdf'];
+    const maxSize = 10 * 1024 * 1024;
 
-  if (!session) {
-    return <Login />;
-  }
-
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    const allowedTypes = ['image/jpeg', 'application/pdf']; // Example: restrict to image and PDF files
-    const maxSize = 10 * 1024 * 1024; // Max size 10MB
-  
     if (selectedFile && !allowedTypes.includes(selectedFile.type)) {
-      toast.error("Invalid file type. Only JPEG and PDF are allowed.");
+      toast.error("Only JPEG and PDF are allowed.");
+      e.target.value = '';
       return;
     }
-  
+
     if (selectedFile && selectedFile.size > maxSize) {
-      toast.error("File size exceeds the maximum limit of 10MB.");
+      toast.error("File too large. Max 10MB.");
+      e.target.value = '';
       return;
     }
-  
+
     setFile(selectedFile);
   };
 
   const handleUpload = async (studentId) => {
     if (!file) {
-      toast.error("Please select a file first");
+      toast.error("No file selected.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("studentId", studentId);
+    formData.append('file', file);
+    formData.append('studentId', studentId);
 
     try {
       setUploading(true);
-      const response = await axios.post("/api/upload", formData, {
+      const res = await axios.post("/api/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Assuming the server responds with the file path
-      const { filePath } = response.data;
-
-      setStudents((prevStudents) =>
-        prevStudents.map((student) =>
-          student._studentId === studentId
-            ? { ...student, filePath } // Store file path in student data
-            : student
-        )
+      const { filePath } = res.data;
+      setStudents((prev) =>
+        prev.map((s) => s._studentId === studentId ? { ...s, filePath } : s)
       );
-
-      toast.success("File uploaded successfully!");
-    } catch (error) {
-      toast.error("Failed to upload the file");
-      console.error(error);
+      toast.success("File uploaded!");
+    } catch (err) {
+      toast.error("Upload failed.");
+      console.error(err);
     } finally {
       setUploading(false);
-      setSelectedStudentId(null); // Reset the selected student after upload
+      setFile(null);
+      setSelectedStudentId(null);
     }
   };
 
-  // Trigger file selection dialog
   const triggerFileSelection = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();  // Open the file input dialog
-    }
+    if (fileInputRef.current) fileInputRef.current.click();
   };
+
+  // 🔍 Filter students based on search
+  const filteredStudents = students.filter((student) =>
+    `${student.fname} ${student.lname} ${student.email} ${student._studentId}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Login>
       <div>
         <h1 className="text-2xl font-bold mb-4">List of Students</h1>
+
+        {/* 🔍 Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by Name, Email or Student Number"
+          className="w-full p-2 mb-4 border border-gray-300 rounded-md"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
         <table className="basic mt-4 w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2">#</th>
-              <th className="border border-gray-300 p-2">Student Number</th>
-              <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Email</th>
-              <th className="border border-gray-300 p-2">Files</th>
-              <th className="border border-gray-300 p-2">Upload Files</th>
-              <th className="border border-gray-300 p-2">Status</th>
-              <th className="border border-gray-300 p-2">Download</th>
+              <th className="border p-2">#</th>
+              <th className="border p-2">Student Number</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Email</th>
+              <th className="border p-2">Files</th>
+              <th className="border p-2">Upload Files</th>
+              <th className="border p-2">Status</th>
+              <th className="border p-2">Download</th>
             </tr>
           </thead>
           <tbody>
-            {students.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="text-center py-4">No students found</td>
-              </tr>
+            {filteredStudents.length === 0 ? (
+              <tr><td colSpan="8" className="text-center py-4">No students found</td></tr>
             ) : (
-              students.map((student, index) => (
+              filteredStudents.map((student, index) => (
                 <tr key={student._studentId} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 p-2 text-center">{index + 1}</td>
-                  <td className="border border-gray-300 p-2">{student._studentId}</td>
-                  <td className="border border-gray-300 p-2">{student.fname} {student.mname} {student.lname}</td>
-                  <td className="border border-gray-300 p-2">{student.email}</td>
-
-                  <td className="border border-gray-300 p-2 text-center">
+                  <td className="border p-2 text-center">{index + 1}</td>
+                  <td className="border p-2">{student._studentId}</td>
+                  <td className="border p-2">{student.fname} {student.mname} {student.lname}</td>
+                  <td className="border p-2">{student.email}</td>
+                  <td className="border p-2 text-center">
                     {student.filePath && (
-                      <a
-                      href={`/api/files/${student._studentId}`}
-                      download={`${student.fname}_${student.lname}_info.pdf`}
-                      className="btn-primary text-sm px-3 py-1"
-                      >
-                        View
-                      </a>
+                      <a href={`/uploads/${student._studentId}-download.jpg`} target="_blank" className="btn-primary text-sm px-3 py-1">View</a>
                     )}
                   </td>
-
-                  <td className="border border-gray-300 p-2 text-center">
+                  <td className="border p-2 text-center">
                     <button
                       onClick={() => {
                         setSelectedStudentId(student._studentId);
-                        triggerFileSelection(); // Open file dialog
+                        triggerFileSelection();
                       }}
                       className="btn-primary text-sm px-3 py-1"
                     >
@@ -195,7 +200,7 @@ export default function Students() {
                     </button>
                     {selectedStudentId === student._studentId && file && (
                       <div className="mt-2">
-                        <span>{file.name}</span> {/* Show selected file name */}
+                        <span>{file.name}</span>
                         <button
                           onClick={() => handleUpload(student._studentId)}
                           disabled={uploading}
@@ -206,8 +211,7 @@ export default function Students() {
                       </div>
                     )}
                   </td>
-
-                  <td className="border border-gray-300 p-2">
+                  <td className="border p-2">
                     <select
                       value={student.status}
                       onChange={(e) => updateStudentStatus(student._studentId, e.target.value)}
@@ -220,8 +224,7 @@ export default function Students() {
                       <option value="missing files">Missing Files</option>
                     </select>
                   </td>
-
-                  <td className="border border-gray-300 p-2 text-center">
+                  <td className="border p-2 text-center">
                     {pdfLinks[student._studentId] ? (
                       <a
                         href={pdfLinks[student._studentId]}

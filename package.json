@@ -40,6 +40,7 @@
     "multiparty": "^4.2.3",
     "next": "^15.2.4",
     "next-auth": "^4.24.11",
+    "next-connect": "^0.11.0",
     "paymongo": "^1.3.2",
     "postcss": "^8.4.21",
     "react": "^18.3.1",

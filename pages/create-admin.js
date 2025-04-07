@@ -52,6 +52,8 @@ export default function CreateAdmin() {
 
       if (res.status === 201) {
         toast.success(data.message);
+
+        localStorage.setItem("token", data.token);
         setEmail("");
         setPassword("");
         setRole("admin");

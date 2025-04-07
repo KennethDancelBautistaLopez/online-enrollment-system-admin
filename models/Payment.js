@@ -1,18 +1,34 @@
-
-
+// models/Payment.js
 import mongoose from "mongoose";
 
 const PaymentSchema = new mongoose.Schema({
-  paymentId: { type: String, required: true, unique: true }, // PayMongo payment ID
+  paymentId: { type: String, required: true, unique: true },
   amount: { type: Number, required: true },
-  referenceNumber: { type: String, unique: true }, // PayMongo reference
+  referenceNumber: { type: String, unique: true },
   description: { type: String },
+  method: { type: String },
+
   billingDetails: {
     name: { type: String },
     email: { type: String },
     phone: { type: String },
   },
-  createdAt: { type: Date, default: Date.now }, // Auto timestamp
+
+  // Linked Student
+  studentRef: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
+
+  // Extra Student Info
+  studentId: { type: String },
+  fname : { type: String },
+  mname: { type: String },
+  lname: { type: String },
+  course: { type: String },
+  education: { type: String },
+  yearLevel: { type: String },
+  schoolYear: { type: String },
+
+  status: { type: String, default: "pending" },
+  createdAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.models.Payment || mongoose.model("Payment", PaymentSchema);

@@ -67,7 +67,7 @@ export default function StudentStatusPieChart() {
 
   useEffect(() => {
     if (!session) {
-      toast.error("You are not logged in.");
+      toast.error("You don't have permission to access this page.");
     }
   }, [session]);
 

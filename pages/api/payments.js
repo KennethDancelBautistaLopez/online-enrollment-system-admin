@@ -1,7 +1,8 @@
 import axios from "axios";
-import { connectToDB } from "@/lib/mongoose"; // Ensure correct path
-import Payment from "@/models/Payment"; // Ensure correct path
-import mongoose from "mongoose";
+import { connectToDB } from "@/lib/mongoose";
+import Payment from "@/models/Payment";
+import Student from "@/models/Student";
+import jwt from "jsonwebtoken";
 
 export default async function handler(req, res) {
   await connectToDB();
@@ -11,10 +12,10 @@ export default async function handler(req, res) {
       return handlePostRequest(req, res);
     case "GET":
       return handleGetRequest(req, res);
-    case "DELETE":
-      return handleDeleteRequest(req, res);
     case "PUT":
       return handlePutRequest(req, res);
+    case "DELETE":
+      return handleDeleteRequest(req, res);
     default:
       return res.status(405).json({ error: "Method Not Allowed" });
   }
@@ -22,31 +23,57 @@ export default async function handler(req, res) {
 
 async function handlePostRequest(req, res) {
   try {
-    const { amount, description, method, name, email, phone } = req.body;
+    const { _studentId, amount, description } = req.body;
 
-    if (!amount || !description) {
-      return res.status(400).json({ error: "Amount and description are required" });
+    if (!amount || !description || !_studentId) {
+      return res.status(400).json({ error: "Amount, description, and student ID are required" });
     }
 
     const API_KEY = process.env.PAY_MONGO;
     if (!API_KEY) {
-      console.error("❌ Missing PayMongo API Key");
-      return res.status(500).json({ error: "Server error: PayMongo API Key missing" });
+      return res.status(500).json({ error: "Missing PayMongo API Key" });
     }
 
     const encodedKey = Buffer.from(`${API_KEY}:`).toString("base64");
 
+    // Find student by _studentId
+    const student = await Student.findOne({ _studentId });
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Prepare billing details and metadata
+    const billingDetails = {
+      name: `${student.fname} ${student.mname || ""} ${student.lname}`,
+      email: student.email,
+      phone: student.mobile,
+
+    };
+
+    const metadata = {
+      studentId: student._studentId,
+      email: student.email,
+      course: student.course || "",
+      education: student.education || "",
+      yearLevel: student.yearLevel || "",
+      schoolYear: student.schoolYear || "",
+    
+    };
+
+    // Create PayMongo payment link
     const response = await axios.post(
       "https://api.paymongo.com/v1/links",
       {
         data: {
           attributes: {
-            amount: amount * 100, // PayMongo expects amount in cents
+            amount: amount * 100, // Convert to cents
             description,
             redirect: {
-              success: "http://localhost:3000/payments",
-              failure: "http://localhost:3000/payments",
+              success: "http://localhost:3000/payments/success",
+              failure: "http://localhost:3000/payments/failure",
             },
+            billing: billingDetails,
+            metadata,
           },
         },
       },
@@ -58,66 +85,74 @@ async function handlePostRequest(req, res) {
       }
     );
 
-    if (!response.data || !response.data.data) {
-      return res.status(500).json({ error: "Invalid response from PayMongo" });
-    }
+    const linkData = response.data.data;
 
-    // Save the pending payment to the database
+    // Create payment record in the database
     const payment = await Payment.create({
-      paymentId: response.data.data.id,
+      paymentId: linkData.id, // PayMongo payment ID
       amount,
-      status: "pending",
-      referenceNumber: response.data.data.attributes.reference_number,
+      referenceNumber: linkData.attributes.reference_number,
       description,
-      method,
-      billingDetails: { name, email, phone },
+      billingDetails,
+      studentRef: student._id, // Reference to student document
+      studentId: student._studentId, // Student ID
+      fullName: billingDetails.name, // Full Name of the student
+      course: student.course, // Student's course
+      education: student.education, // Student's education level
+      yearLevel: student.yearLevel, // Student's year level
+      schoolYear: student.schoolYear, // Student's school year
+      status: "pending", // Payment status
+      createdAt: new Date(), // Timestamp
     });
 
-    console.log("Created Payment:", payment); // Log to verify creation
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: payment,
-      checkoutUrl: response.data.data.attributes.checkout_url,
+      checkoutUrl: linkData.attributes.checkout_url, // PayMongo checkout URL
     });
   } catch (error) {
-    console.error("❌ PayMongo API Error:", error.response?.data || error.message);
-    res.status(500).json({ error: error.response?.data || "Payment creation failed" });
+    console.error("❌ PayMongo Error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Payment creation failed" });
   }
 }
 
 async function handleGetRequest(req, res) {
   try {
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    const payments = await Payment.find()
+  .populate("studentRef", "fname mname lname _studentId course education yearLevel schoolYear")
+  .exec();
 
-    if (req.query.id) {
-      if (!mongoose.Types.ObjectId.isValid(req.query.id)) {
-        return res.status(400).json({ error: "Invalid payment ID format" });
-      }
+    // Check if there are any payments
+    if (payments.length === 0) {
+      return res.status(404).json({ error: "No payments found" });
+    }
 
-      const payment = await Payment.findOne({ _id: req.query.id });
-
-      if (!payment) {
-        return res.status(404).json({ error: "Payment not found" });
-      }
-
-      // Return only relevant payment fields
-      return res.status(200).json({
+    // Respond with all payment details and related student information
+    return res.status(200).json({
+      success: true,
+      data: payments.map(payment => ({
         paymentId: payment.paymentId,
         amount: payment.amount,
         referenceNumber: payment.referenceNumber,
         description: payment.description,
         billingDetails: payment.billingDetails,
-      });
-    } else {
-      const payments = await Payment.find();
-      return res.status(200).json(payments);
-    }
+        fullName: `${payment.studentRef?.fname || ""} ${payment.studentRef?.mname || ""} ${payment.studentRef?.lname || ""} `,
+        studentId: payment.studentRef?._studentId || "N/A",
+        course: payment.studentRef?.course || "N/A",
+        education: payment.studentRef?.education || "N/A",
+        yearLevel: payment.studentRef?.yearLevel || "N/A",
+        schoolYear: payment.studentRef?.schoolYear || "N/A",
+        receipt: payment.receipt || "N/A",
+        status: payment.status,
+      })),
+    });
   } catch (error) {
-    console.error("🔥 ERROR in GET /payments:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("❌ Error fetching payments:", error.message);
+    // Return server error in case of failure
+    return res.status(500).json({ error: "Failed to fetch payment details" });
   }
 }
+
 
 async function handlePutRequest(req, res) {
   try {
@@ -150,14 +185,10 @@ async function handlePutRequest(req, res) {
 
 async function handleDeleteRequest(req, res) {
   try {
-    const { id } = req.query; // Get the ID from the query string
-
-    if (!id) {
-      return res.status(400).json({ error: "Payment ID is required" });
-    }
+    const { id } = req.query;
+    if (!id) return res.status(400).json({ error: "Payment ID is required" });
 
     const deletedPayment = await Payment.findByIdAndDelete(id);
-
     if (!deletedPayment) {
       return res.status(404).json({ error: "Payment not found" });
     }

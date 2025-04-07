@@ -29,6 +29,7 @@ export default function StudentForm({
   yearLevel: existingYearLevel = "",
   schoolYear: existingSchoolYear = "",
   email: existingEmail = "",
+  password: existingPassword = "",
 }) {
   const [fname, setFname] = useState(existingFname);
   const [mname, setMname] = useState(existingMname);
@@ -56,6 +57,7 @@ export default function StudentForm({
   const [yearLevel, setYearLevel] = useState(existingYearLevel);
   const [schoolYear, setSchoolYear] = useState(existingSchoolYear);
   const [email, setEmail] = useState(existingEmail);
+  const [password, setPassword] = useState(existingPassword);
   const [goToStudents, setGoToStudents] = useState(false);
   const router = useRouter();
 
@@ -86,6 +88,7 @@ export default function StudentForm({
       yearLevel,
       schoolYear,
       email,
+      password,
     });
   }, [
     _studentId,
@@ -113,12 +116,13 @@ export default function StudentForm({
     yearLevel,
     schoolYear,
     email,
+    password,
   ]);
 
   async function saveStudent(ev) {
     ev.preventDefault();
-    const data = {
-      _studentId,
+  
+    const studentInfo = {
       fname,
       mname,
       lname,
@@ -143,26 +147,33 @@ export default function StudentForm({
       yearLevel,
       schoolYear,
       email,
+      password,
     };
-    
-    console.log("Data being sent:", data);
-      try {
-        const response = await axios({
-          method: _studentId ? "PUT" : "POST",
-          url: _studentId ? `/api/students?id=${_studentId}` : "/api/students",  // ✅ Change `_studentId` to `id`
-          data,
-          headers: { "Content-Type": "application/json" },
-        });
-
-        toast.success('Student saved successfully');
-        
-        if (response.status >= 200 && response.status < 300) {
-          setGoToStudents(true);
-
-        }
-      } catch (error) {
-        toast.error('Error saving student:', error.response ? error.response.data : error.message);
+  
+    // Only include _studentId when updating
+    if (_studentId) {
+      studentInfo._studentId = _studentId;
+    }
+  
+    console.log("Data being sent:", studentInfo);
+  
+    try {
+      const response = await axios({
+        method: _studentId ? "PUT" : "POST",
+        url: _studentId ? `/api/students?id=${_studentId}` : "/api/students",
+        data: studentInfo,
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      toast.success('Student saved successfully');
+  
+      if (response.status >= 200 && response.status < 300) {
+        setGoToStudents(true);
       }
+    } catch (error) {
+      console.error('Error occurred during student save:', error);  // Add more detailed logging
+      toast.error('Error saving student: ' + (error.response ? error.response.data : error.message));
+   }
   }
 
   useEffect(() => {
@@ -208,8 +219,20 @@ export default function StudentForm({
           required
         />
 
-      <label>Landline Number</label>
-      <input type="number" placeholder="Enter landline number" value={landline} onChange={(ev) => setLandline(ev.target.value)} />
+        <label>Landline Number</label>
+        <input
+          type="text"
+          placeholder="Enter landline number"
+          value={landline}
+          maxLength={8}
+          onChange={(ev) => {
+            const val = ev.target.value;
+            // Only allow digits and limit to 8 characters
+            if (/^\d{0,8}$/.test(val)) {
+              setLandline(val);
+            }
+          }}
+        />
 
       <label>Facebook</label>
       <input type="url" placeholder="Enter Facebook link" value={facebook} onChange={(ev) => setFacebook(ev.target.value)} />
@@ -326,9 +349,16 @@ export default function StudentForm({
           onChange={(ev) => setEmail(ev.target.value)}
           required
         />
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="Enter Password"
+          value={password}
+          onChange={(ev) => setPassword(ev.target.value)}
+          required
+        />
 
       <button type="submit" className="btn-primary">Save</button>
     </form>
   );
 }
-

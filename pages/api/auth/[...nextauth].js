@@ -7,6 +7,7 @@ import User from "@/models/User";
 export default NextAuth({
   session: {
     strategy: "jwt",
+    maxAge: 2 * 60 * 60, // Set the JWT session lifetime (2 hours)
   },
   providers: [
     CredentialsProvider({
@@ -24,39 +25,41 @@ export default NextAuth({
           }
 
           // Load default admin and super admin credentials from environment variables
-          const defaultSuperAdminEmail = process.env.DEFAULT_SUPERADMIN_EMAIL;
-          const defaultSuperAdminPassword = process.env.DEFAULT_SUPERADMIN_PASSWORD;
-          const defaultSuperAdminRole = process.env.DEFAULT_SUPERADMIN_ROLE;
+          const {
+            DEFAULT_SUPERADMIN_EMAIL,
+            DEFAULT_SUPERADMIN_PASSWORD,
+            DEFAULT_SUPERADMIN_ROLE,
+            DEFAULT_ADMIN_EMAIL,
+            DEFAULT_ADMIN_PASSWORD,
+            DEFAULT_ADMIN_ROLE,
+          } = process.env;
 
-          const defaultAdminEmail = process.env.DEFAULT_ADMIN_EMAIL;
-          const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
-          const defaultAdminRole = process.env.DEFAULT_ADMIN_ROLE;
+          if (!DEFAULT_SUPERADMIN_EMAIL || !DEFAULT_SUPERADMIN_PASSWORD || !DEFAULT_SUPERADMIN_ROLE ||
+              !DEFAULT_ADMIN_EMAIL || !DEFAULT_ADMIN_PASSWORD || !DEFAULT_ADMIN_ROLE) {
+            throw new Error("Missing required environment variables for default admin creation");
+          }
 
-          // ✅ Check if Super Admin exists
+          // ✅ Check if Super Admin exists, create if not
           const existingSuperAdmin = await User.findOne({ role: "superAdmin" });
-
-          // ✅ If no Super Admin exists, create one
           if (!existingSuperAdmin) {
-            const hashedSuperAdminPassword = await bcrypt.hash(defaultSuperAdminPassword, 10);
+            const hashedSuperAdminPassword = await bcrypt.hash(DEFAULT_SUPERADMIN_PASSWORD, 10);
             const defaultSuperAdmin = new User({
-              email: defaultSuperAdminEmail,
+              email: DEFAULT_SUPERADMIN_EMAIL,
               password: hashedSuperAdminPassword,
-              role: defaultSuperAdminRole,
+              role: DEFAULT_SUPERADMIN_ROLE,
             });
             await defaultSuperAdmin.save();
             console.log("✅ Default Super Admin created");
           }
 
-          // ✅ Check if Admin exists
+          // ✅ Check if Admin exists, create if not
           const existingAdmin = await User.findOne({ role: "admin" });
-
-          // ✅ If no Admin exists, create one
           if (!existingAdmin) {
-            const hashedAdminPassword = await bcrypt.hash(defaultAdminPassword, 10);
+            const hashedAdminPassword = await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10);
             const defaultAdmin = new User({
-              email: defaultAdminEmail,
+              email: DEFAULT_ADMIN_EMAIL,
               password: hashedAdminPassword,
-              role: defaultAdminRole,
+              role: DEFAULT_ADMIN_ROLE,
             });
             await defaultAdmin.save();
             console.log("✅ Default Admin created");
@@ -79,10 +82,11 @@ export default NextAuth({
             throw new Error("Invalid password");
           }
 
+          // Return user object with id, email, and role
           return { id: user._id, email: user.email, role: user.role };
         } catch (error) {
-          console.error("❌ Authentication error:", error);
-          throw new Error(JSON.stringify({ message: error.message }));
+          console.error("❌ Authentication error:", error.message);
+          throw new Error(error.message || "Authentication failed");
         }
       },
     }),
@@ -105,10 +109,10 @@ export default NextAuth({
   },
   secret: process.env.NEXT_SECRET,
   pages: {
-    signIn: "/login",
+    signIn: "/login", // Customize the sign-in page URL if necessary
   },
 });
 
 export const config = {
-  runtime: "nodejs",
+  runtime: "nodejs", // Ensures the code runs in a Node.js runtime
 };

@@ -70,6 +70,7 @@ export default function Students() {
             )}
             <th className="border border-gray-300 p-2">Registration Date</th>
             <th className="border border-gray-300 p-2">Email</th>
+            <th className="border border-gray-300 p-2">Password</th>
             <th className="border border-gray-300 p-2">Action</th>
           </tr>
         </thead>
@@ -93,6 +94,7 @@ export default function Students() {
               {new Date(student.registrationDate).toLocaleDateString("en-US")}
             </td>
               <td className="border border-gray-300 p-2">{student.email}</td>
+              <td className="border border-gray-300 p-2">{student.password}</td >
               <td className="border border-gray-300 p-2 flex text-center ">
                 <Link className="btn-default" href={`/students/edit/${student._id}`}>
                   Edit

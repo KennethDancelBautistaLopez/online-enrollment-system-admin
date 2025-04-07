@@ -18,13 +18,13 @@ export default function Payments() {
   useEffect(() => {
     // 1. If the user is not logged in
     if (!session) {
-      toast.error("You are not logged in.");
+      toast.error("You don't have permission to access this page.");
       return;
     }
 
     // 2. If the user is logged in as an admin
     if (session.user.role === "admin") {
-      toast.error("Admins cannot access this page. Redirecting...");
+      toast.error("You don't have permission to access this page.");
       router.push("/"); // Redirect to admin dashboard (or another page you prefer)
       return;
     }
@@ -33,8 +33,8 @@ export default function Payments() {
     axios
       .get("/api/payments")
       .then((response) => {
-        const payments = response.data;
-
+        const payments = response.data.data; // ✅ FIXED: access actual payments array
+      
         if (!Array.isArray(payments) || payments.length === 0) {
           console.warn("⚠️ No payments found or invalid format.");
           setChartData([]);
@@ -42,20 +42,21 @@ export default function Payments() {
           toast.error("No payments found. ❌");
           return;
         }
-
+      
         setTotalIncome(
           payments.reduce((total, payment) => total + (payment.amount || 0), 0)
         );
-
+      
+        // Prepare chart data
         setChartData(
           payments.map((payment) => ({
             date: payment.createdAt
-              ? format(new Date(payment.createdAt), "MMM dd, yyyy") // Example: Apr 05, 2025
-              : "Unknown",
+              ? `${format(new Date(payment.createdAt), "MMM dd, yyyy")} (${payment.studentId || "No ID"})`
+              : payment.studentId || "No ID",
             amount: payment.amount || 0,
           }))
         );
-
+      
         if (!initialized) {
           toast.success("Payments loaded successfully! ✅");
           setInitialized(true);

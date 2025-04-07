@@ -15,7 +15,6 @@ export default function Login({ children }) {
   const { data: session } = useSession();
   const router = useRouter();
 
-
   const handleLogin = async () => {
     setLoading(true);
     setError("");
@@ -32,7 +31,7 @@ export default function Login({ children }) {
         throw new Error("Invalid email or password.");
       }
 
-      toast.success("Login successful! ✅"); // Success toast
+      toast.success("Login successful! ✅");  
       router.push(result.url || "/"); // Redirect on success
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");

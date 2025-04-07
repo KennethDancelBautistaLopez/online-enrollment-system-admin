@@ -1,3 +1,4 @@
+import Password from "antd/es/input/Password";
 import mongoose from "mongoose";
 
 const StudentSchema = new mongoose.Schema(
@@ -28,7 +29,9 @@ const StudentSchema = new mongoose.Schema(
     yearLevel: { type: String, required: true },
     schoolYear: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
     status: { type: String, enum: ["enrolled", "graduated", "dropped", "missing files"], default: "missing files"  },
+    role: { type: String, default: "student" },
     files: [{ // Array of file objects
       filename: { type: String, required: true },
       filePath: { type: String, required: true },
@@ -36,6 +39,7 @@ const StudentSchema = new mongoose.Schema(
       size: { type: Number, required: true }
     }]
   },
+
   { timestamps: true }
 );
 
