@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { generateReceiptPDF } from "@/components/generateReceiptPDF";
 
-export default function Payments() {
+export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // For search functionality
   const [initialized, setInitialized] = useState(false); // Prevent duplicate toasts
