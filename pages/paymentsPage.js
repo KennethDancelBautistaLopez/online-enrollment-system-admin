@@ -15,11 +15,6 @@ export default function PaymentsPage() {
     // Fetch payments data only once after component mounts
     const fetchPayments = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          toast.error("You are not logged in.");
-          return;
-        }
 
         // Fetch all payments (no studentId filtering needed for admin)
         const response = await axios.get("/api/payments", {
