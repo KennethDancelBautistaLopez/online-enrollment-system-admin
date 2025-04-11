@@ -12,19 +12,23 @@ export default function AllPayments() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || initialized) return;
 
     const fetchPayments = async () => {
       try {
         const response = await axios.get("/api/get-all-payments");
-        setGroupedPayments(response.data.data); // This is now the grouped structure
+        console.log("✅ Payments API response:", response.data);
 
-        if (!initialized && response.data.data.length > 0) {
-          toast.success("Payments loaded successfully! ✅");
-          setInitialized(true);
+        if (response.data.data.length === 0) {
+          toast("No payments returned from backend. 😕");
+          return;
         }
+
+        setGroupedPayments(response.data.data);
+        toast.success("Payments loaded successfully! ✅");
+        setInitialized(true);
       } catch (error) {
-        console.error("Error fetching payments:", error);
+        console.error("❌ Error fetching payments:", error);
         toast.error("Failed to load payments.");
       }
     };
@@ -52,18 +56,19 @@ export default function AllPayments() {
     "Finals",
   ];
 
-  const filteredPayments = groupedPayments
-    .flatMap(student => student.payments) // Flatten the payments array from the grouped structure
-    .filter((payment) =>
-      `${payment.studentId} ${payment.fullName}`.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const filteredStudents = groupedPayments.filter((student) =>
+    `${student.studentId} ${student.fullName}`.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Login>
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row justify-between items-center mb-4">
           <h1 className="text-2xl font-bold mb-2 md:mb-0">All Payments</h1>
-          <Link className="btn-primary px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" href="/payments/new">
+          <Link
+            href="/payments/new"
+            className="btn-primary px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
             Add new payment
           </Link>
         </div>
@@ -83,35 +88,53 @@ export default function AllPayments() {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border p-2">#</th>
-                <th className="border p-2">Student</th>
+                <th className="border p-2">Student Info</th>
                 {examPeriods.map((period, index) => (
-                  <th key={index} className="border p-2">{period}</th>
+                  <th key={index} className="border p-2 text-center">
+                    {period}
+                  </th>
                 ))}
-                <th className="border p-2">Actions</th>
+                <th className="border p-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredPayments.length > 0 ? filteredPayments.map((payment, index) => (
-                <tr key={payment.paymentId} className="hover:bg-gray-50">
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2">{payment.fullName}</td>
-                  {examPeriods.map((period, idx) => {
-                    const paid = payment.examPeriod === period;
-                    return (
-                      <td key={idx} className="border p-2 text-center">
-                        {paid ? "Paid" : "Not Paid"}
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student, index) => {
+                  const paidPeriods = student.payments.map((p) => p.examPeriod);
+                  return (
+                    <tr key={student.studentId} className="hover:bg-gray-50">
+                      <td className="border p-2 text-center">{index + 1}</td>
+                      <td className="border p-2">
+                        <div className="font-semibold">{student.fullName}</div>
+                        <div className="text-sm text-gray-600">ID: {student.studentId}</div>
+                        <div className="text-sm text-gray-500">
+                          {student.course} • {student.education} •  Year Level: {student.yearLevel}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          SY {student.schoolYear} • {student.semester}
+                        </div>
                       </td>
-                    );
-                  })}
-                  <td className="border p-2 flex justify-center space-x-2">
-                    <Link className="btn-default hover:bg-blue-600" href={`/students/${payment.studentId}/payments`}>
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              )) : (
+                      {examPeriods.map((period, idx) => (
+                        <td key={idx} className="border p-2 text-center">
+                          {paidPeriods.includes(period) ? "✅" : "—"}
+                        </td>
+                      ))}
+                      <td className="border p-2 text-center">
+                        <Link
+                          href={`/students/${student.studentId}/payments`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
                 <tr>
-                  <td colSpan={examPeriods.length + 3} className="text-center p-4">No payments found</td>
+                  <td colSpan={examPeriods.length + 3} className="text-center p-4">
+                    No payments found
+                  </td>
                 </tr>
               )}
             </tbody>
