@@ -27,7 +27,7 @@ export default function DeletePaymentPage() {
 
 
   function goBack() {
-    router.push("/payments"); // Redirect back to payments list
+    router.push("/paymentsPage"); // Redirect back to payments list
   }
 
   async function deletePayment() {

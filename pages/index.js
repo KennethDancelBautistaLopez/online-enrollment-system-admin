@@ -12,8 +12,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [totalIncome, setTotalIncome] = useState(0);
   const [chartData, setChartData] = useState([]);
-  const [initialized, setInitialized] = useState(false);
+  const initialized = useRef(false);
   const hasShownWelcome = useRef(false); // flag to prevent multiple toasts
+  const hasCheckedConflicts = useRef(false);
+  const shownConflicts = useRef(new Set());
 
   useEffect(() => {
     if (status === "authenticated" && !hasShownWelcome.current) {
@@ -29,36 +31,49 @@ export default function Home() {
         const res = await fetch("/api/events");
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load events");
-
+  
         setEvents(data);
-
-        // Check for events with the same DATE (ignoring time)
+  
+        if (status !== "authenticated" || hasCheckedConflicts.current) return;
+  
+        // Check for date conflicts (only for logged in users)
         for (let i = 0; i < data.length; i++) {
           const event1 = new Date(data[i].date);
-          const y1 = event1.getFullYear();
-          const m1 = event1.getMonth();
-          const d1 = event1.getDate();
-
+          const dateKey1 = event1.toDateString();
+  
           for (let j = i + 1; j < data.length; j++) {
             const event2 = new Date(data[j].date);
-            const y2 = event2.getFullYear();
-            const m2 = event2.getMonth();
-            const d2 = event2.getDate();
-
-            if (y1 === y2 && m1 === m2 && d1 === d2) {
-              toast.warning(`There is a date conflict between "${data[i].title}" and "${data[j].title}" on ${event1.toDateString()}.`);
+            const dateKey2 = event2.toDateString();
+  
+            if (dateKey1 === dateKey2) {
+              const conflictKey = [data[i].title, data[j].title].sort().join("::") + "::" + dateKey1;
+  
+              if (!shownConflicts.current.has(conflictKey)) {
+                shownConflicts.current.add(conflictKey);
+  
+                toast(`⚠️ Date conflict between "${data[i].title}" and "${data[j].title}" on ${dateKey1}.`, {
+                  icon: "⚠️",
+                  style: {
+                    background: "#fff3cd",
+                    color: "#856404",
+                    border: "1px solid #ffeeba",
+                  },
+                });
+              }
             }
           }
         }
+  
+        hasCheckedConflicts.current = true;
       } catch (err) {
         toast.error(`Error: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchEvents();
-  }, []);
+  }, [status]);
 
   // Fetching payments
   useEffect(() => {
@@ -90,9 +105,9 @@ export default function Home() {
           }))
         );
 
-        if (!initialized) {
+        if (!initialized.current) {
           toast.success("Payments loaded successfully! ✅");
-          setInitialized(true);
+          initialized.current = true;
         }
       })
       .catch((error) => {
@@ -124,10 +139,10 @@ export default function Home() {
           {loading ? (
             <p className="text-gray-500">Loading events...</p>
           ) : events.length === 0 ? (
-            <p className="text-gray-500">No events found.</p>
+            <p className="text-gray-500">No events found.</p> 
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => (
+              {events.slice(0, 3).map((event) => (
                 <div
                   key={event._id}
                   className="border border-gray-200 p-5 rounded-2xl shadow-md bg-gradient-to-br from-white to-blue-50 hover:shadow-xl transition"
@@ -145,6 +160,18 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+
+              {/* Show "Go to Events" Button if more than 3 */}
+              {events.length > 3 && (
+                <div className="col-span-full mt-4">
+                  <button
+                    onClick={() => window.location.href = "/events"}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
+                  >
+                    Go to Events →
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -174,6 +201,14 @@ export default function Home() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            <div className="col-span-full mt-4">
+                  <button
+                    onClick={() => window.location.href = "/overall"}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
+                  >
+                    Go to Overall Payments →
+                  </button>
+                </div>
           </div>
         </div>
       </div>

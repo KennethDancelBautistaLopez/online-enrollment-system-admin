@@ -5,11 +5,14 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { generateReceiptPDF } from "@/components/generateReceiptPDF";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // For search functionality
   const [initialized, setInitialized] = useState(false); // Prevent duplicate toasts
+
+  const router = useRouter();
   const [pdfLinks, setPdfLinks] = useState({});
 
   const { data: session } = useSession();
@@ -19,6 +22,12 @@ export default function PaymentsPage() {
       return;
     }
 
+    // Check if user is not superAdmin, then redirect to home or other page
+    if (session.user.role !== "superAdmin") {
+      router.push("/"); // Redirect to home if not superAdmin
+      toast.error("You do not have access to this page.");
+      return;
+    }
 
     // Fetch payments data only once after component mounts
     const fetchPayments = async () => {
@@ -39,17 +48,17 @@ export default function PaymentsPage() {
     };
 
     fetchPayments(); // Call fetch function to load payments data
-  }, [ session,initialized]); // Trigger the effect only when initialized changes
+  }, [ session,initialized, router]); // Trigger the effect only when initialized changes
 
-    useEffect(() => {
-      if (!session) {
-        toast.error("You are not logged in.");
-      }
-    }, [session]); // Trigger error toast only when session is null
-  
+  useEffect(() => {
     if (!session) {
-      return <Login />;
+      toast.error("You are not logged in.");
     }
+  }, [session]); // Trigger error toast only when session is null
+
+  if (!session || session.user.role !== "superAdmin") {
+    return <Login />; // Or redirect to login if not logged in or not superAdmin
+  }
 
   const filteredPayments = payments.filter((payment) =>
     `${payment.referenceNumber} ${payment.fullName} ${payment.studentId} ${payment.amount}`

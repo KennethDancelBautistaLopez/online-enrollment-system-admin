@@ -25,7 +25,14 @@ export default function EventForm({ _id, title, description, date, location, eve
     // Log the data to inspect the payload
     console.log("Event Data:", { titleState, descriptionState, date: eventDate, locationState, eventTypeState, organizerState });
   
-    const data = { titleState, descriptionState, date: eventDate, locationState, eventTypeState, organizerState };
+    const data = {
+      title: titleState,
+      description: descriptionState,
+      date: eventDate,
+      location: locationState,
+      eventType: eventTypeState,
+      organizer: organizerState
+    };
   
     try {
       if (_id) {
@@ -37,7 +44,7 @@ export default function EventForm({ _id, title, description, date, location, eve
       }
       router.push("/events");
     } catch (error) {
-      console.error("Error saving event:", error);
+      console.error("Error saving event:", error.response ? error.response.data : error.message);
       toast.error("Failed to save event. Please try again.");
     }
   }
@@ -49,12 +56,11 @@ export default function EventForm({ _id, title, description, date, location, eve
       <label>Description</label>
       <textarea placeholder="Enter event description" value={descriptionState} onChange={(ev) => setDescription(ev.target.value)} required />
 
-      <label>Date</label>
       <input
         type="date"
         min="2024-01-01"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
+        value={dateState} // Use dateState here
+        onChange={(e) => setDate(e.target.value)} // Update state correctly
       />
 
       <label>Location</label>

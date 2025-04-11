@@ -70,7 +70,7 @@ export default function StudentStatusPieChart() {
         console.error("❌ Failed to fetch students:", error);
         toast.error("Failed to fetch students. 🚨");
       });
-  }, [session]);
+  }, [session, initialized]);
 
   useEffect(() => {
     if (!session) {

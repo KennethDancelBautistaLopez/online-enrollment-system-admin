@@ -22,13 +22,6 @@ export default function Payments() {
       return;
     }
 
-    // 2. If the user is logged in as an admin
-    if (session.user.role === "admin") {
-      toast.error("You don't have permission to access this page.");
-      router.push("/"); // Redirect to admin dashboard (or another page you prefer)
-      return;
-    }
-
     // 3. If the user is logged in as a non-admin, fetch payments
     axios
       .get("/api/payments")

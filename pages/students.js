@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Login from "@/pages/Login";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 export default function Students() {
   const [students, setStudents] = useState([]);
   const { data: session } = useSession();
-  const [initialized, setInitialized] = useState(false); // Prevent duplicate toasts
+  const initialized = useRef(false);
   const [searchQuery, setSearchQuery] = useState(""); // For search functionality
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function Students() {
         // Show success toast only once after students are loaded
         if (!initialized && response.data.length > 0) {
           toast.success("Students loaded successfully! ✅");
-          setInitialized(true); // Prevent the toast from showing again
+          initialized.current = true;
         }
       } catch (error) {
         console.error("Error fetching students:", error);
@@ -56,8 +56,8 @@ export default function Students() {
   return (
     <Login>
       <div className="container mx-auto p-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold mb-2 md:mb-0">Students List</h1>
+        <div className="flex flex-col  md:flex-row justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold mb-2 md:mb-0">Students List</h1>
           <Link className="btn-primary px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" href="/students/new">
             Add new student
           </Link>

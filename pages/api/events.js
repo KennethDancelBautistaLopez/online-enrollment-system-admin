@@ -40,11 +40,10 @@ export default async function handler(req, res) {
       if (!title || !date || !location || !eventType || !organizer || !description) {
         return res.status(400).json({ error: "All fields are required" });
       }
-
-      const eventDate = new Date(req.body.date);
-      if (isNaN(eventDate)) {
-        return res.status(400).json({ message: 'Invalid date format' });
-      }   
+      const eventDate = new Date(date);
+      if (isNaN(eventDate.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
 
       const newEvent = new Event({ title, description, date, location, eventType, organizer });
       await newEvent.save();

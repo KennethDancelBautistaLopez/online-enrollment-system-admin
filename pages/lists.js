@@ -149,7 +149,9 @@ export default function Students({ initialStudents }) {
   return (
     <Login>
       <div className="container mx-auto p-6">
+        <div className="flex flex-col  md:flex-row justify-between items-center mb-2">
         <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">List of Students</h1>
+        </div>
 
         {/* 🔍 Search Bar */}
         <input

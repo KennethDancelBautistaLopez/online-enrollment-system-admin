@@ -45,10 +45,10 @@ export default function EventsPage() {
     <Login>
       <div className="container mx-auto p-4">
         {/* Title and Add New Event Button */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold mb-2 md:mb-0">List of Events</h1>
-          <Link className="btn-primary px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" href="/students/new">
-            Add new student
+        <div className="flex flex-col md:flex-row justify-between items-center mb-2">
+        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">List of Students</h1>
+          <Link className="btn-primary px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" href="/events/new">
+            Add New Event
           </Link>
         </div>
 
