@@ -65,12 +65,6 @@ export default function AllPayments() {
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row justify-between items-center mb-4">
           <h1 className="text-2xl font-bold mb-2 md:mb-0">All Payments</h1>
-          <Link
-            href="/payments/new"
-            className="btn-primary px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            Add new payment
-          </Link>
         </div>
 
         {/* Search Bar */}
