@@ -16,7 +16,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
     <SessionProvider session={session} refetchInterval={5 * 60}>
    <InactivityHandler timeout={2 * 60 * 60 * 1000} />
       <Component {...pageProps} />
-      {isClient && <Toaster position="top-center" reverseOrder={false} />}
+      {isClient && <Toaster position="top-right" reverseOrder={false} />}
     </SessionProvider>
   );
 }

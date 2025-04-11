@@ -24,12 +24,17 @@ export default function StudentForm({
   registrationDate: existingRegistrationDate = "",
   lrn: existingLrn = "",
   education: existingEducation = "",
-  strand: existingStrand = "",
   course: existingCourse = "",
   yearLevel: existingYearLevel = "",
   schoolYear: existingSchoolYear = "",
   email: existingEmail = "",
   password: existingPassword = "",
+  semester: existingSemester = "",
+  nursery = { yearAttended: "", schoolName: "" },
+  elementary = { yearAttended: "", schoolName: "" },
+  juniorHigh = { yearAttended: "", schoolName: "" },
+  seniorHigh = { yearAttended: "", schoolName: "" },
+  status: existingStatus = "",
 }) {
   const [fname, setFname] = useState(existingFname);
   const [mname, setMname] = useState(existingMname);
@@ -52,12 +57,19 @@ export default function StudentForm({
   );
   const [lrn, setLrn] = useState(existingLrn);
   const [education, setEducation] = useState(existingEducation);
-  const [strand, setStrand] = useState(existingStrand);
   const [course, setCourse] = useState(existingCourse);
   const [yearLevel, setYearLevel] = useState(existingYearLevel);
   const [schoolYear, setSchoolYear] = useState(existingSchoolYear);
   const [email, setEmail] = useState(existingEmail);
   const [password, setPassword] = useState(existingPassword);
+  const [semester, setSemester] = useState(existingSemester);
+  const [status, setStatus] = useState(existingStatus);
+  const [nurseryState, setNursery] = useState(nursery || { schoolName: "", yearAttended: "" });
+  const [elementaryState, setElementary] = useState(elementary || { schoolName: "", yearAttended: "" });
+  const [juniorHighState, setJuniorHigh] = useState(juniorHigh || { schoolName: "", yearAttended: "" });
+  const [seniorHighState, setSeniorHigh] = useState(seniorHigh || { schoolName: "", yearAttended: "" });
+  
+
   const [goToStudents, setGoToStudents] = useState(false);
   const router = useRouter();
 
@@ -83,12 +95,17 @@ export default function StudentForm({
       registrationDate,
       lrn,
       education,
-      strand,
       course,
       yearLevel,
       schoolYear,
       email,
       password,
+      semester,
+      nursery,
+      elementary,
+      juniorHigh,
+      seniorHigh,
+      status
     });
   }, [
     _studentId,
@@ -111,12 +128,17 @@ export default function StudentForm({
     registrationDate,
     lrn,
     education,
-    strand,
     course,
     yearLevel,
     schoolYear,
     email,
     password,
+    semester,
+    nursery,
+    elementary,
+    juniorHigh,
+    seniorHigh,
+    status,
   ]);
 
   async function saveStudent(ev) {
@@ -142,12 +164,17 @@ export default function StudentForm({
       registrationDate,
       lrn,
       education,
-      strand,
       course,
       yearLevel,
       schoolYear,
       email,
       password,
+      semester,
+      nursery: nurseryState,
+      elementary: elementaryState,
+      juniorHigh: juniorHighState,
+      seniorHigh: seniorHighState,
+      status
     };
   
     // Only include _studentId when updating
@@ -164,16 +191,24 @@ export default function StudentForm({
         data: studentInfo,
         headers: { "Content-Type": "application/json" },
       });
-  
+    
       toast.success('Student saved successfully');
-  
+    
       if (response.status >= 200 && response.status < 300) {
         setGoToStudents(true);
       }
     } catch (error) {
-      console.error('Error occurred during student save:', error);  // Add more detailed logging
-      toast.error('Error saving student: ' + (error.response ? error.response.data : error.message));
-   }
+      console.error('Error occurred during student save:', error);  // Detailed logging
+      if (error.response) {
+        // Detailed error message from the server
+        console.error('Response from server:', error.response.data);
+        toast.error('Error saving student: ' + error.response.data);
+      } else {
+        // Generic error message
+        toast.error('Error saving student: ' + error.message);
+      }
+    }
+
   }
 
   useEffect(() => {
@@ -184,181 +219,433 @@ export default function StudentForm({
 
   return (
     <form onSubmit={saveStudent}>
-      <label>First Name</label>
-      <input type="text" placeholder="Enter first name" value={fname} onChange={(ev) => setFname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Middle Name</label>
-      <input type="text" placeholder="Enter middle name" value={mname} onChange={(ev) => setMname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} />
-
-      <label>Last Name</label>
-      <input type="text" placeholder="Enter last name" value={lname} onChange={(ev) => setLname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Address</label>
-      <input type="text" placeholder="Enter address" value={address} onChange={(ev) => setAddress(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Mobile Number</label>
-        <input
-          type="text"
-          placeholder="Enter mobile number"
-          value={mobile}
-          onChange={(ev) => {
-            let input = ev.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-
-            if (input.length > 11) input = input.slice(0, 11); // Limit to 11 digits
-
-            // Format input as 0902-232-2322
-            if (input.length > 7) {
-              input = input.replace(/^(\d{4})(\d{3})(\d{0,4})$/, "$1-$2-$3");
-            } else if (input.length > 4) {
-              input = input.replace(/^(\d{4})(\d{0,3})$/, "$1-$2");
-            }
-
-            setMobile(input);
-          }}
-          maxLength="13" // Ensures user cannot type beyond 11 digits (including dashes)
-          required
-        />
-
-        <label>Landline Number</label>
-        <input
-          type="text"
-          placeholder="Enter landline number"
-          value={landline}
-          maxLength={8}
-          onChange={(ev) => {
-            const val = ev.target.value;
-            // Only allow digits and limit to 8 characters
-            if (/^\d{0,8}$/.test(val)) {
-              setLandline(val);
-            }
-          }}
-        />
-
-      <label>Facebook</label>
-      <input type="url" placeholder="Enter Facebook link" value={facebook} onChange={(ev) => setFacebook(ev.target.value)} />
-
-      <label>Date of Birth</label>
-      <input type="date" value={birthdate} onChange={(ev) => setBirthdate(ev.target.value)} required />
-
-      <label>Place of Birth</label>
-      <input type="text" placeholder="Enter place of birth" value={birthplace} onChange={(ev) => setBirthplace(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Nationality</label>
-      <input type="text" placeholder="Enter nationality" value={nationality} onChange={(ev) => setNationality(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Religion</label>
-      <input type="text" placeholder="Enter religion" value={religion} onChange={(ev) => setReligion(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Sex</label>
-      <select value={sex} onChange={(ev) => setSex(ev.target.value)} required>
-        <option value="">Select Sex</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Other">Other</option>
-      </select>
-
-      <label>Fathers Name</label>
-      <input type="text" placeholder="Enter father's name" value={father} onChange={(ev) => setFather(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Mothers Name</label>
-      <input type="text" placeholder="Enter mother's name" value={mother} onChange={(ev) => setMother(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Guardians Name</label>
-      <input type="text" placeholder="Enter guardian's name" value={guardian} onChange={(ev) => setGuardian(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Guardians Occupation</label>
-      <input type="text" placeholder="Enter guardian's occupation" value={guardianOccupation} onChange={(ev) => setGuardianOccupation(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))} required />
-
-      <label>Registration Date</label>
-      <input type="date" value={registrationDate} onChange={(ev) => setRegistrationDate(ev.target.value)}/>
-                        
-      <label>LRN</label>
-      <input type="number" placeholder="Enter LRN" value={lrn} onChange={(ev) => {
-        const value = ev.target.value.replace(/\D/g, "").slice(0, 12); // Allow only 12 digits
-        setLrn(value);
-      }} required />
-      <label>Education Level</label>
-      <select value={education} onChange={(ev) => setEducation(ev.target.value)} required>
-        <option value="">Select Education Level</option>
-        <option value="elementary">Elementary</option>
-        <option value="junior high">Junior High</option>
-        <option value="senior high">Senior High</option>
-        <option value="college">College</option>
-      </select>
-
-      {/* Show Strand input for Senior High */}
-      {education === "senior high" && (
-        <>
-          <label>Strand</label>
+      <div className="space-y-6">
+        <div className="space-y-2 ">
+          <label>First Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
-            placeholder="Enter Strand"
-            value={strand}
+            placeholder="Enter first name"
+            value={fname}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setFname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Middle Name</label>
+          <input
+            type="text"
+            placeholder="Enter middle name"
+            value={mname}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setMname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Last Name <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter last name"
+            value={lname}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setLname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Address <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter address"
+            value={address}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setAddress(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Mobile Number <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter mobile number"
+            value={mobile}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             onChange={(ev) => {
-              const value = ev.target.value.toUpperCase().slice(0, 10);
-              setStrand(value);
+              let input = ev.target.value.replace(/\D/g, "");
+              if (input.length > 11) input = input.slice(0, 11);
+              if (input.length > 7) input = input.replace(/^(\d{4})(\d{3})(\d{0,4})$/, "$1-$2-$3");
+              else if (input.length > 4) input = input.replace(/^(\d{4})(\d{0,3})$/, "$1-$2");
+              setMobile(input);
+            }}
+            maxLength="13"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Landline Number</label>
+          <input
+            type="text"
+            placeholder="Enter landline number"
+            value={landline}
+            maxLength={8}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => {
+              const val = ev.target.value;
+              if (/^\d{0,8}$/.test(val)) {
+                setLandline(val);
+              }
+            }}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Facebook</label>
+          <input
+            type="url"
+            placeholder="Enter Facebook link"
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={facebook}
+            onChange={(ev) => setFacebook(ev.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Date of Birth <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="date"
+            value={birthdate}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setBirthdate(ev.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Place of Birth <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter place of birth"
+            value={birthplace}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setBirthplace(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Nationality <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter nationality"
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={nationality}
+            onChange={(ev) => setNationality(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Religion <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter religion"
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={religion}
+            onChange={(ev) => setReligion(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Sex <span className="text-red-500 font-bold">*</span></label>
+          <select
+            value={sex}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setSex(ev.target.value)}
+            required
+          >
+            <option value="">Select Sex</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <label>Fathers Name <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter father's name"
+            value={father}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setFather(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Mothers Name <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter mother's name"
+            value={mother}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setMother(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Guardians Name <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter guardian's name"
+            value={guardian}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setGuardian(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Guardians Occupation <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter guardian's occupation"
+            value={guardianOccupation}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setGuardianOccupation(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Registration Date</label>
+          <input
+            type="date"
+            value={registrationDate}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setRegistrationDate(ev.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>LRN <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="number"
+            placeholder="Enter LRN"
+            value={lrn}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => {
+              const value = ev.target.value.replace(/\D/g, "").slice(0, 12);
+              setLrn(value);
             }}
             required
           />
-        </>
-      )}
+        </div>
 
-      {/* Show Course input for College */}
-      {education === "college" && (
-        <>
-          <label>Course</label>
+        <div className="space-y-2">
+          <label>Year Level <span className="text-red-500 font-bold">*</span></label>
           <input
-            type="text"
-            placeholder="Enter Course"
-            value={course}
-            onChange={(ev) => {
-              const value = ev.target.value.toUpperCase().slice(0, 10);
-              setCourse(value);
-            }}
+            type="number"
+            placeholder="Enter year level"
+            value={yearLevel}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setYearLevel(ev.target.value)}
             required
           />
-        </>
-      )}
+        </div>
+
+        <div className="space-y-2">
+          <label>School Year <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="text"
+            placeholder="Enter school year"
+            value={schoolYear}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setSchoolYear(ev.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Education Level</label>
+          <select value={education} onChange={(ev) => setEducation(ev.target.value)} className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            <option value="">Select Education Level</option>
+            <option value="college">College</option>
+          </select>
+
+          <div className="h-2" />
+          {education === "college" && (
+          <div className="space-y-2">
+              <label className="mt-2 pt-2">Course</label>
+              <input
+                type="text"
+                placeholder="Enter Course"
+                value={course}
+                className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onChange={(ev) => {
+                  const value = ev.target.value.toUpperCase().slice(0, 10);
+                  setCourse(value);
+                }}
+                required
+              />
+            </div>
+          )}
+          </div>
+        </div>
 
 
-      <label>Year Level</label>
-      <input
-        type="text"
-        placeholder="Enter Year Level (1-12)"
-        value={yearLevel}
-        onChange={(ev) => {
-          let value = ev.target.value.replace(/\D/g, ""); // Allow only numbers
+        <div className="space-y-2">
+          <label>semester <span className="text-red-500 font-bold">*</span></label>
+          <select
+            value={semester}
+            onChange={(ev) => setSemester(ev.target.value)}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Semester</option>
+            <option value="1st Semester">1st Semester</option>
+            <option value="2nd Semester">2nd Semester</option>
+            <option value="3rd Semester">3rd Semester</option>
+          </select>
+        </div>        
 
-          // Restrict input to values between 1 and 12
-          if (value !== "" && (parseInt(value) < 1 || parseInt(value) > 12)) {
-            return;
-          }
-
-          setYearLevel(value); // Update state
-        }}
-        required
-      />
-      <label>School Year</label>
-      <input type="text" placeholder="Enter School Year (e.g., 2023-2024)" value={schoolYear} onChange={(ev) => setSchoolYear(ev.target.value)} required />
-
-      <label>Email</label>
+      {/* Nursery School */}
+      <div className="space-y-2">
+        <label>Nursery School Attended</label>
         <input
-          type="email"
-          placeholder="Enter Email Address"
-          value={email}
-          onChange={(ev) => setEmail(ev.target.value)}
+          type="text"
+          value={nurseryState.schoolName}
+          onChange={(e) => setNursery({ ...nurseryState, schoolName: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+      <div className="space-y-2">
+        <label>Nursery Year Attended (e.g. 2010-2011)</label>
+        <input
+          type="text"
+          value={nurseryState.yearAttended}
+          onChange={(e) => setNursery({ ...nurseryState, yearAttended: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label>Elementary School Attended *</label>
+        <input
+          type="text"
+          value={elementaryState.schoolName}
+          onChange={(e) => setElementary({ ...elementaryState, schoolName: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
-        <label>Password</label>
+      </div>
+      <div className="space-y-2">
+        <label>Elementary Year Attended *</label>
         <input
-          type="password"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(ev) => setPassword(ev.target.value)}
+          type="text"
+          value={elementaryState.yearAttended}
+          onChange={(e) => setElementary({ ...elementaryState, yearAttended: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
+      </div>
 
-      <button type="submit" className="btn-primary">Save</button>
+      <div className="space-y-2">
+        <label>Junior High School Attended *</label>
+        <input
+          type="text"
+          value={juniorHighState.schoolName}
+          onChange={(e) => setJuniorHigh({ ...juniorHighState, schoolName: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <label>Junior High Year Attended *</label>
+        <input
+          type="text"
+          value={juniorHighState.yearAttended}
+          onChange={(e) => setJuniorHigh({ ...juniorHighState, yearAttended: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label>Senior High School Attended *</label>
+        <input
+          type="text"
+          value={seniorHighState.schoolName}
+          onChange={(e) => setSeniorHigh({ ...seniorHighState, schoolName: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <label>Senior High Year Attended *</label>
+        <input
+          type="text"
+          value={seniorHighState.yearAttended}
+          onChange={(e) => setSeniorHigh({ ...seniorHighState, yearAttended: e.target.value })}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+      </div>
+
+
+      <div className="space-y-2">
+          <label>Email Address <span className="text-red-500">*</span></label>
+          <input
+            type="email"
+            placeholder="Enter email address"
+            value={email}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setEmail(ev.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Password <span className="text-red-500">*</span></label>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setPassword(ev.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label>Status <span className="text-red-500">*</span></label>
+          <select
+            value={status}
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(ev) => setStatus(ev.target.value)}
+            required
+          >
+            <option value="">Select Status</option>
+            <option value="dropped">Dropped</option>
+            <option value="graduated">Graduated</option>
+            <option value="enrolled">Enrolled</option>
+            <option value="missing files">Missing Files</option>
+          </select>
+        </div>
+
+        <div className="flex justify-start mt-6">
+          <button type="submit" className="btn-primary p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Save
+          </button>
+        </div>
     </form>
+
   );
 }

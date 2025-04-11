@@ -6,22 +6,33 @@ import {toast} from "react-hot-toast";
  
 export default function DeleteStudentPage() {
   const router = useRouter();
-  const { id } = router.query; // Get student ID from URL
+  const { id } = router.query;
   const [studentInfo, setStudentInfo] = useState(null);
+  const [studentPayments, setStudentPayments] = useState([]);
 
   useEffect(() => {
     if (!id) return;
-    
+
+    // Fetch student info
     axios.get(`/api/students?id=${id}`)
       .then(response => setStudentInfo(response.data))
       .catch(error => {
         console.error("Error fetching student:", error);
         toast.error("Failed to load student details. 🚨");
       });
+
+    // Fetch related payments
+    axios.get(`/api/payments?studentId=${id}`)
+      .then(response => setStudentPayments(response.data.data || []))
+      .catch(error => {
+        console.error("Error fetching student payments:", error);
+        toast.error("Failed to load student payments. 💸");
+      }); 
+
   }, [id]);
 
   function goBack() {
-    router.push('/students'); // Redirect back to students list
+    router.push('/students');
   }
 
   async function deleteStudent() {
@@ -42,6 +53,13 @@ export default function DeleteStudentPage() {
           <h1 className="text-lg font-semibold mb-4">
             Do you really want to delete <b>{studentInfo?.fname} {studentInfo?.lname}</b>?
           </h1>
+
+          {studentPayments.length > 0 && (
+            <div className="text-sm text-red-600 mb-4">
+              ⚠️ This student has {studentPayments.length} recorded payment(s).
+            </div>
+          )}
+
           <div className="flex justify-center gap-4">
             <button onClick={deleteStudent} className="bg-red-500 text-white px-4 py-2 rounded">
               Yes

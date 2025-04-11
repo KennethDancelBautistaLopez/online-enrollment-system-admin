@@ -1,11 +1,14 @@
 import Link from "next/link";
 import {useRouter} from "next/router";
-import Logo from "@/components/Logo";
 import {signOut} from "next-auth/react";
 import Cookies from "js-cookie";
 import {toast} from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { List } from "antd";
+
+const Logo = dynamic(() => import('@/components/Logo'), { ssr: false });
 
 export default function Nav({show}) {
   const inactiveLink = 'flex gap-1 p-1';
@@ -85,6 +88,8 @@ export default function Nav({show}) {
 
               Total Students
             </Link>
+
+            <Link href={'/all-payments'} className={pathname.includes('/all-payments') ? activeLink : inactiveLink}>List of Payments</Link>
             {session?.user?.role === 'superAdmin' && (
           <>  
             <Link href={'/payments'} className={pathname.includes('/payments') ? activeLink : inactiveLink}>

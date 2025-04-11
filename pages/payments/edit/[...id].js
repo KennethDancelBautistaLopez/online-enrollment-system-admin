@@ -18,47 +18,50 @@ export default function EditPaymentPage() {
       console.log("✅ Payment ID from query:", queryId);
     }
   }, [router.isReady, router.query]);
-
+  
   useEffect(() => {
     if (!paymentId) return;
-
+  
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      toast.error("You must be logged in to view payments.");
+      return;
+    }
+  
     console.log("🔄 Fetching payment data for ID:", paymentId);
-
+  
     axios
-      .get(`/api/payments`, { params: { id: paymentId } })
-      .then((response) => {
-        console.log("✅ Fetched payment data:", response.data);
+  .get(`/api/payments?id=${paymentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then((response) => {
+    console.log("✅ Fetched payment data:", response.data);
+    setPaymentInfo(response.data);
+    toast.success("Payment details loaded successfully! ✅");
+  })
+  .catch((error) => {
+    console.error("❌ Error fetching payment:", error.response?.data?.error || error.message);
+    setError("Failed to load payment data");
+    toast.error("Failed to load payment details. 🚨");
+  });
+  }, [paymentId]); 
 
-        if (response.data) {
-          setPaymentInfo(response.data);
-          toast.success("Payment details loaded successfully! ✅"); // Show success toast
-        } else {
-          setError("Payment not found");
-          toast.error("Payment not found. ❌"); // Show error toast if payment not found
-        }
-      })
-      .catch((error) => {
-        console.error("❌ Error fetching payment:", error.response?.data?.error || error.message);
-        setError("Failed to load payment data");
-        toast.error("Failed to load payment details. 🚨"); // Show error toast on failure
-      });
-  }, [paymentId]);
-
-  // Handle the form submission when editing the payment
   const handleFormSubmit = (updatedPayment) => {
-    toast.loading("Updating payment..."); // Show loading toast while updating payment
-
+    toast.loading("Updating payment...");
     axios
       .put(`/api/payments`, { id: paymentId, ...updatedPayment })
       .then((response) => {
         console.log("✅ Payment updated:", response.data);
-        toast.success("Payment updated successfully! 🎉"); // Show success toast on successful update
-        router.push("/payments"); // Redirect back to payments list after update
+        toast.success("Payment updated successfully! 🎉");
+        router.push("/payments");
       })
       .catch((error) => {
         console.error("❌ Error updating payment:", error.response?.data?.error || error.message);
         setError("Failed to update payment");
-        toast.error("Failed to update payment. Please try again. ❌"); // Show error toast on failure
+        toast.error("Failed to update payment. Please try again. ❌");
       });
   };
 
@@ -69,8 +72,9 @@ export default function EditPaymentPage() {
         {error && <p style={{ color: "red" }}>{error}</p>}
         {paymentInfo ? (
           <PaymentForm
-            paymentInfo={paymentInfo}
-            onSubmit={handleFormSubmit} // Pass the submit handler for form
+            paymentData={paymentInfo} // Pass the fetched payment data
+            studentData={paymentInfo.student} // Pass the student data within paymentInfo
+            onSubmit={handleFormSubmit}
           />
         ) : (
           !error && <p>Loading payment data...</p>

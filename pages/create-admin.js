@@ -72,7 +72,7 @@ export default function CreateAdmin() {
 
   return (
     <Login>
-      <div className="max-w-2xl mx-auto mt-8">
+      <div className="max-w-full sm:max-w-md mx-auto mt-8 px-4">
         <h1 className="text-2xl font-bold text-center mb-4">Create New Admin</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -81,7 +81,7 @@ export default function CreateAdmin() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -91,7 +91,7 @@ export default function CreateAdmin() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -100,7 +100,7 @@ export default function CreateAdmin() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500"
               required
             >
               <option value="admin">Admin</option>
@@ -109,7 +109,7 @@ export default function CreateAdmin() {
           </div>
           <button
             type="submit"
-            className="w-full p-2 bg-blue-500 text-white rounded-md"
+            className="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all disabled:bg-gray-400"
             disabled={loading}
           >
             {loading ? "Creating..." : "Create Admin"}

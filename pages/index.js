@@ -1,28 +1,180 @@
+import { useEffect, useState, useRef } from "react";
 import Login from "@/pages/Login";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
-import { useEffect } from "react";
+import axios from "axios";
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+import { format } from "date-fns"; // Install if necessary: npm install date-fns
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [chartData, setChartData] = useState([]);
+  const [initialized, setInitialized] = useState(false);
+  const hasShownWelcome = useRef(false); // flag to prevent multiple toasts
 
-  // Show a toast when the session is successfully loaded
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && !hasShownWelcome.current) {
       toast.success(`Welcome, ${session.user.email}! 🎉`);
+      hasShownWelcome.current = true;
     }
-  }, [status, session]); // Depend on session and status to re-run the effect
+  }, [status, session]);
+
+  // Fetching events
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch("/api/events");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load events");
+
+        setEvents(data);
+
+        // Check for events with the same DATE (ignoring time)
+        for (let i = 0; i < data.length; i++) {
+          const event1 = new Date(data[i].date);
+          const y1 = event1.getFullYear();
+          const m1 = event1.getMonth();
+          const d1 = event1.getDate();
+
+          for (let j = i + 1; j < data.length; j++) {
+            const event2 = new Date(data[j].date);
+            const y2 = event2.getFullYear();
+            const m2 = event2.getMonth();
+            const d2 = event2.getDate();
+
+            if (y1 === y2 && m1 === m2 && d1 === d2) {
+              toast.warning(`There is a date conflict between "${data[i].title}" and "${data[j].title}" on ${event1.toDateString()}.`);
+            }
+          }
+        }
+      } catch (err) {
+        toast.error(`Error: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  // Fetching payments
+  useEffect(() => {
+    if (!session) return;
+
+    axios
+      .get("/api/payments")
+      .then((response) => {
+        const payments = response.data.data; // Access actual payments array
+
+        if (!Array.isArray(payments) || payments.length === 0) {
+          console.warn("⚠️ No payments found or invalid format.");
+          setChartData([]);
+          setTotalIncome(0);
+          toast.error("No payments found. ❌");
+          return;
+        }
+
+        setTotalIncome(
+          payments.reduce((total, payment) => total + (payment.amount || 0), 0)
+        );
+
+        setChartData(
+          payments.map((payment) => ({
+            date: payment.createdAt
+              ? `${format(new Date(payment.createdAt), "MMM dd, yyyy")} (${payment.studentId || "No ID"})`
+              : payment.studentId || "No ID",
+            amount: payment.amount || 0,
+          }))
+        );
+
+        if (!initialized) {
+          toast.success("Payments loaded successfully! ✅");
+          setInitialized(true);
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Failed to fetch payments:", error);
+        toast.error("Failed to fetch payments. 🚨");
+      });
+  }, [session, initialized]);
+
+  if (!session) {
+    return <Login />;
+  }
 
   return (
     <Login>
-      <div className="text-blue-900 flex justify-between">
-        <h2>
-          Hello, <b>{session?.user?.email}</b> {/* Displaying the email */}
-        </h2>
-        <div className="flex bg-gray-300 gap-1 text-black rounded-lg overflow-hidden">
-          <span className="px-2">
-            {session?.user?.email} {/* Displaying the email */}
-          </span>
+      <div className="p-4 sm:p-8">
+        {/* Welcome Section */}
+        <div className="text-blue-900 flex justify-between items-center mb-8">
+          <h2 className="text-xl font-semibold">
+            Hello, <span className="text-black">{session?.user?.email}</span>
+          </h2>
+          <div className="flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-lg shadow">
+            <span>{session?.user?.email}</span>
+          </div>
+        </div>
+
+        {/* Events Section */}
+        <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">📅 Upcoming Events</h3>
+          {loading ? (
+            <p className="text-gray-500">Loading events...</p>
+          ) : events.length === 0 ? (
+            <p className="text-gray-500">No events found.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <div
+                  key={event._id}
+                  className="border border-gray-200 p-5 rounded-2xl shadow-md bg-gradient-to-br from-white to-blue-50 hover:shadow-xl transition"
+                >
+                  <h4 className="text-xl font-semibold text-blue-900 mb-1">{event.title}</h4>
+                  <p className="text-gray-700 text-sm mb-2">{event.description}</p>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>📍 <span className="font-medium">{event.location}</span></p>
+                    <p>📅 <span className="font-medium">{new Date(event.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric"
+                      })}</span></p>
+                    <p>🎫 <span className="italic">{event.eventType}</span></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-8">
+          <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h2 className="text-xl font-semibold mb-4 text-green-600">
+              Total Income: ₱{totalIncome}
+            </h2>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-2">Income Trends</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#4CAF50"
+                    strokeWidth={2}
+                    animationDuration={1000} // Animation duration (in ms)
+                    animationBegin={0} // Animation start time
+                    animationEasing="ease-in-out" // Animation easing
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
     </Login>

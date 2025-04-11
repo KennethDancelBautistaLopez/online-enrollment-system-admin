@@ -89,7 +89,15 @@ export default function Payments() {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="amount" stroke="#4CAF50" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#4CAF50"
+                  strokeWidth={2}
+                  animationDuration={1000}        // Animation duration (in ms)
+                  animationBegin={0}               // Animation start time
+                  animationEasing="ease-in-out"    // Animation easing
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>

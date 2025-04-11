@@ -31,7 +31,7 @@ export default function Login({ children }) {
         throw new Error("Invalid email or password.");
       }
 
-      toast.success("Login successful! ✅");  
+      toast.success("Login successful! ✅"); // Success toast   
       router.push(result.url || "/"); // Redirect on success
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
@@ -75,7 +75,6 @@ export default function Login({ children }) {
   }
 
   return (
-
     <div className="bg-bgGray w-screen h-screen">
       {/* Mobile Menu Button */}
       <div className="block md:hidden flex items-center p-4">
@@ -99,7 +98,7 @@ export default function Login({ children }) {
       </div>
 
       {/* Main Layout */}
-      <div className="flex h-full">
+      <div className="flex bg-bgGray h-full ">
         {/* Sidebar / Navigation */}
         <Nav show={showNav} />
 

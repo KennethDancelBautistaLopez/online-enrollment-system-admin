@@ -1,16 +1,23 @@
 import { useEffect, useState } from "react";
 import Login from "@/pages/Login";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 
 const STATUS_COLORS = {
-  Enrolled: "#34D399", // Emerald
-  Dropped: "#EF4444", // Red
-  "Missing Files": "#FBBF24", // Amber
-  Graduated: "#3B82F6", // Blue
-  Unknown: "#9CA3AF", // Gray (for any undefined status)
+  enrolled: "#4CAF50",        // Green
+  graduated: "#F44336",         // Red
+  dropped: "#FFEB3B", // Yellow
+  "missing files": "#2196F3",       // Blue
+  unknown: "#9E9E9E",         // Gray
 };
 
 export default function StudentStatusPieChart() {
@@ -24,7 +31,7 @@ export default function StudentStatusPieChart() {
     if (!session) return;
 
     axios
-      .get("/api/students") // Adjust API route if needed
+      .get("/api/students")
       .then((response) => {
         const students = response.data;
 
@@ -38,19 +45,19 @@ export default function StudentStatusPieChart() {
 
         setTotalStudents(students.length);
 
-        // Count students per status
         const statusCounts = students.reduce((acc, student) => {
           const status = student.status || "Unknown";
           acc[status] = (acc[status] || 0) + 1;
           return acc;
         }, {});
 
-        // Convert to array for recharts
-        const formattedData = Object.entries(statusCounts).map(([status, count]) => ({
-          name: status,
-          value: count,
-          color: STATUS_COLORS[status] || STATUS_COLORS.Unknown, // Default to gray if undefined
-        }));
+        const formattedData = Object.entries(statusCounts).map(
+          ([status, count]) => ({
+            name: status,
+            value: count,
+            color: STATUS_COLORS[status] || STATUS_COLORS.Unknown,
+          })
+        );
 
         setChartData(formattedData);
 
@@ -78,11 +85,14 @@ export default function StudentStatusPieChart() {
   return (
     <Login>
       <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-gray-800 text-center">📊 Student Status Distribution</h1>
+        <h1 className="text-3xl font-bold text-gray-800 text-center">
+          📊 Student Status Distribution
+        </h1>
 
         <div className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
           <h2 className="text-xl font-semibold mb-6 text-blue-600 text-center">
-            Total Students: <span className="text-gray-900">{totalStudents}</span>
+            Total Students:{" "}
+            <span className="text-gray-900">{totalStudents}</span>
           </h2>
 
           <div className="flex flex-col items-center">
@@ -93,9 +103,12 @@ export default function StudentStatusPieChart() {
                   cx="50%"
                   cy="50%"
                   outerRadius={110}
-                  fill="#8884d8"
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
+                  isAnimationActive={true}
+                  animationBegin={0}
+                  animationDuration={1000}
+                  animationEasing="ease-out"
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -106,10 +119,13 @@ export default function StudentStatusPieChart() {
               </PieChart>
             </ResponsiveContainer>
 
-            {/* Status Legend */}
+            {/* Status Legend with Fade In */}
             <div className="mt-6 grid grid-cols-2 gap-4 text-sm text-gray-700">
               {chartData.map((item, index) => (
-                <div key={index} className="flex items-center space-x-2">
+                <div
+                  key={index}
+                  className="flex items-center space-x-2 opacity-0 animate-fadeIn"
+                >
                   <span
                     className="inline-block w-4 h-4 rounded-full"
                     style={{ backgroundColor: item.color }}

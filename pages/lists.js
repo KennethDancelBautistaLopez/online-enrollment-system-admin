@@ -148,105 +148,109 @@ export default function Students({ initialStudents }) {
 
   return (
     <Login>
-      <div>
-        <h1 className="text-2xl font-bold mb-4">List of Students</h1>
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">List of Students</h1>
 
         {/* 🔍 Search Bar */}
         <input
           type="text"
           placeholder="Search by Name, Email or Student Number"
-          className="w-full p-2 mb-4 border border-gray-300 rounded-md"
+          className="w-full p-3 mb-6 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <table className="basic mt-4 w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">#</th>
-              <th className="border p-2">Student Number</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Files</th>
-              <th className="border p-2">Upload Files</th>
-              <th className="border p-2">Status</th>
-              <th className="border p-2">Download</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.length === 0 ? (
-              <tr><td colSpan="8" className="text-center py-4">No students found</td></tr>
-            ) : (
-              filteredStudents.map((student, index) => (
-                <tr key={student._studentId} className="hover:bg-gray-50">
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2">{student._studentId}</td>
-                  <td className="border p-2">{student.fname} {student.mname} {student.lname}</td>
-                  <td className="border p-2">{student.email}</td>
-                  <td className="border p-2 text-center">
-                    {student.filePath && (
-                      <a href={`/uploads/${student._studentId}-download.jpg`} target="_blank" className="btn-primary text-sm px-3 py-1">View</a>
-                    )}
-                  </td>
-                  <td className="border p-2 text-center">
-                    <button
-                      onClick={() => {
-                        setSelectedStudentId(student._studentId);
-                        triggerFileSelection();
-                      }}
-                      className="btn-primary text-sm px-3 py-1"
-                    >
-                      Upload
-                    </button>
-                    {selectedStudentId === student._studentId && file && (
-                      <div className="mt-2">
-                        <span>{file.name}</span>
-                        <button
-                          onClick={() => handleUpload(student._studentId)}
-                          disabled={uploading}
-                          className="btn-primary text-sm px-3 py-1 mt-2"
-                        >
-                          {uploading ? "Uploading..." : "Upload File"}
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                  <td className="border p-2">
-                    <select
-                      value={student.status}
-                      onChange={(e) => updateStudentStatus(student._studentId, e.target.value)}
-                      className="bg-white border border-gray-300 p-2"
-                    >
-                      <option value="">Select Status</option>
-                      <option value="enrolled">Enrolled</option>
-                      <option value="graduated">Graduated</option>
-                      <option value="dropped">Dropped</option>
-                      <option value="missing files">Missing Files</option>
-                    </select>
-                  </td>
-                  <td className="border p-2 text-center">
-                    {pdfLinks[student._studentId] ? (
-                      <a
-                        href={pdfLinks[student._studentId]}
-                        download={`${student.fname}_${student.lname}_info.pdf`}
-                        className="btn-primary text-sm px-3 py-1"
-                      >
-                        Download
-                      </a>
-                    ) : (
+        <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+          <table className="min-w-full text-left table-auto border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border p-4">#</th>
+                <th className="border p-4">Student Number</th>
+                <th className="border p-4">Name</th>
+                <th className="border p-4">Email</th>
+                <th className="border p-4">Files</th>
+                <th className="border p-4">Upload Files</th>
+                <th className="border p-4">Status</th>
+                <th className="border p-4">Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.length === 0 ? (
+                <tr><td colSpan="8" className="text-center py-4 text-gray-500">No students found</td></tr>
+              ) : (
+                filteredStudents.map((student, index) => (
+                  <tr key={student._studentId} className="hover:bg-gray-50">
+                    <td className="border p-4 text-center">{index + 1}</td>
+                    <td className="border p-4">{student._studentId}</td>
+                    <td className="border p-4">{student.fname} {student.mname} {student.lname}</td>
+                    <td className="border p-4">{student.email}</td>
+                    <td className="border p-4 text-center">
+                      {student.filePath && (
+                        <a href={`/uploads/${student._studentId}-download.jpg`} target="_blank" className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                          View
+                        </a>
+                      )}
+                    </td>
+                    <td className="border p-4 text-center">
                       <button
-                        onClick={() => handleGeneratePDF(student)}
-                        className="btn-primary text-sm px-3 py-1"
+                        onClick={() => {
+                          setSelectedStudentId(student._studentId);
+                          triggerFileSelection();
+                        }}
+                        className="btn-primary text-sm px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                       >
-                        Generate PDF
+                        Upload
                       </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                      {selectedStudentId === student._studentId && file && (
+                        <div className="mt-2">
+                          <span>{file.name}</span>
+                          <button
+                            onClick={() => handleUpload(student._studentId)}
+                            disabled={uploading}
+                            className="btn-primary text-sm px-3 py-2 mt-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                          >
+                            {uploading ? "Uploading..." : "Upload File"}
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                    <td className="border p-4">
+                      <select
+                        value={student.status}
+                        onChange={(e) => updateStudentStatus(student._studentId, e.target.value)}
+                        className="bg-white border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select Status</option>
+                        <option value="enrolled">Enrolled</option>
+                        <option value="graduated">Graduated</option>
+                        <option value="dropped">Dropped</option>
+                        <option value="missing files">Missing Files</option>
+                      </select>
+                    </td>
+                    <td className="border p-4 text-center">
+                      {pdfLinks[student._studentId] ? (
+                        <a
+                          href={pdfLinks[student._studentId]}
+                          download={`${student.fname}_${student.lname}_info.pdf`}
+                          className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-green-600"
+                        >
+                          Download
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => handleGeneratePDF(student)}
+                          className="btn-primary text-sm px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-green-600"
+                        >
+                          Generate PDF
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Hidden file input */}
         <input

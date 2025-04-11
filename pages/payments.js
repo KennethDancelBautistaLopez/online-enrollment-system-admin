@@ -1,142 +1,155 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import Link from "next/link";
-import { toast } from "react-hot-toast";
-import axios from "axios";
 import Login from "@/pages/Login";
-import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { generateReceiptPDF } from "@/components/generateReceiptPDF";
 
 export default function Payments() {
   const [payments, setPayments] = useState([]);
-  const [error, setError] = useState(null);
-  const router = useRouter();
-  const { data: session } = useSession();
-  const [initialized, setInitialized] = useState(false);
-  const { query } = router;
+  const [searchQuery, setSearchQuery] = useState(""); // For search functionality
+  const [initialized, setInitialized] = useState(false); // Prevent duplicate toasts
+  const [pdfLinks, setPdfLinks] = useState({});
 
   useEffect(() => {
-    if (!session) {
-      toast.error("You are not logged in.");
-      return;
-    }
-    if (session.user.role === "admin") {
-      toast.error("You don't have permission to access this page.");
-      // Redirect to a different page (e.g., dashboard) for admin
-      window.location.href = "/"; // Change to your admin page URL
-      return;
-    }
-
-    // If logged in and superadmin, proceed to fetch payments
-    if (query.amount) {
-      toast.success(`Payment of ₱${query.amount} for ${query.fname} ${query.lname} added successfully! ✅`);
-    }
-
-    fetchPayments();
-    const interval = setInterval(fetchPayments, 5000); // Auto-refresh every 5 seconds
-    return () => clearInterval(interval);
-  }, [session, query]);
-
-  // Fetch Payments
-  const fetchPayments = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("Not logged in.");
-        toast.error("You are not logged in. Please log in to view payments. 🚨");
-        return;
-      }
-
-      const response = await axios.get("/api/payments", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const paymentsData = response.data.data;
-
-      if (Array.isArray(paymentsData)) {
-        setPayments(paymentsData);
-        setError(null);
-        toast.success("Payments loaded successfully! ✅");
-        if (!initialized && session) {
-          toast.success("Payments loaded successfully! ✅");
-          setInitialized(true); // Prevent repeated success toasts
+    // Fetch payments data only once after component mounts
+    const fetchPayments = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          toast.error("You are not logged in.");
+          return;
         }
-      } else {
-        setError("Invalid data format received.");
-        toast.error("Invalid data format received. Please try again. 🚨");
+
+        // Fetch all payments (no studentId filtering needed for admin)
+        const response = await axios.get("/api/payments", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setPayments(response.data.data);
+
+        // Show success toast only once after payments are loaded
+        if (!initialized && response.data.data.length > 0) {
+          toast.success("Payments loaded successfully! ✅");
+          setInitialized(true); // Prevent the toast from showing again
+        }
+      } catch (error) {
+        console.error("Error fetching payments:", error);
+        toast.error("Failed to load payments.");
       }
-    } catch (error) {
-      setError("Failed to load payments.");
-      toast.error("Failed to fetch payments. Please try again. 🚨");
-      console.error("Error fetching payments:", error);
-    }
+    };
+
+    fetchPayments(); // Call fetch function to load payments data
+  }, [initialized]); // Trigger the effect only when initialized changes
+
+  const filteredPayments = payments.filter((payment) =>
+    `${payment.referenceNumber} ${payment.fullName} ${payment.studentId} ${payment.amount}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  const handleGeneratePDF = (payment, student) => {
+    const pdfLink = generateReceiptPDF(payment, student);
+    setPdfLinks((prev) => ({
+      ...prev,
+      [payment.paymentId]: pdfLink,
+    }));
+    toast.success(`PDF generated for ${payment.fullName}!`);
   };
-  if (!session) {
-    return <Login />;
-  }
 
   return (
     <Login>
-      <div>
-        <Link className="btn-primary" href="/payments/new">
+    <div className="container mx-auto p-4">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold mb-2 md:mb-0">Payments List</h1>
+        <Link
+          className="btn-primary px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          href="/payments/new"
+        >
           Add new payment
         </Link>
+      </div>
 
-        {error && <p className="text-center mt-4 text-red-500">{error}</p>}
+      {/* Search Bar */}
+      <input
+        type="text"
+        placeholder="Search by Reference No., Name, Student ID, Amount"
+        className="w-full p-3 mb-6 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
 
-        {!error && (
-          <table className="basic mt-2 w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2">#</th>
-                <th className="border border-gray-300 p-2">Reference No.</th>
-                <th className="border border-gray-300 p-2">Amount</th>
-                <th className="border border-gray-300 p-2">Full Name</th>
-                <th className="border border-gray-300 p-2">Student ID</th>
-                <th className="border border-gray-300 p-2">Course</th>
-                <th className="border border-gray-300 p-2">Year Level</th>
-                <th className="border border-gray-300 p-2">Education</th>
-                <th className="border border-gray-300 p-2">School Year</th>
-                <th className="border border-gray-300 p-2">Receipt</th>
-                <th className="border border-gray-300 p-2">Action</th>
+      <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+        <table className="min-w-full text-left table-auto border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border p-2">ID</th>
+              <th className="border p-2">Student ID</th>
+              <th className="border p-2">Reference No.</th>
+              <th className="border p-2">Amount</th>
+              <th className="border p-2">Payment</th>
+              <th className="border p-2 ">Full Name</th>
+              <th className="border p-2">Education</th>
+              <th className="border p-2">Course</th>
+              <th className="border p-2">Semester</th>  
+              <th className="border p-2">Year Level</th>
+              <th className="border p-2">School Year</th>
+              <th className="border p-2">Receipt</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPayments.length === 0 ? (
+              <tr>
+                <td colSpan="13" className="text-center p-4">
+                  No payments found
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {payments.length > 0 ? (
-                payments.map((payment, index) => (
-                  <tr key={payment.paymentId} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 p-2">{index + 1}</td>
-                    <td className="border border-gray-300 p-2">{payment.referenceNumber || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">₱{payment.amount?.toFixed(2) || "0.00"}</td>
-                    <td className="border border-gray-300 p-2">{payment.fullName || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{payment.studentId || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{payment.course || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{payment.yearLevel || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{payment.education || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{payment.schoolYear || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{payment.receipt || "N/A"}</td>
-                    <td className="border border-gray-300 p-2 flex gap-2">
-                      <Link className="btn-default" href={`/payments/edit/${payment.paymentId}`}>
+            ) : (
+              filteredPayments.map((payment, index) => (
+                <tr key={payment.paymentId} className="hover:bg-gray-50">
+                  <td className="border p-2">{index + 1}</td>
+                  <td className="border p-2">{payment.studentId || "N/A"}</td>
+                  <td className="border p-2">{payment.referenceNumber}</td>
+                  <td className="border p-2">₱{payment.amount?.toFixed(2)}</td>
+                  <td className="border p-2">{payment.examPeriod || "N/A"}</td>
+                  <td className="border p-2">{payment.fullName || "N/A"}</td>
+                  <td className="border p-2">{payment.education}</td>
+                  <td className="border p-2">{payment.course}</td>
+                  <td className="border p-2">{payment.semester || "N/A"}</td>
+                  <td className="border p-2">{payment.yearLevel || "N/A"}</td>
+                  <td className="border p-2">{payment.schoolYear || "N/A"}</td>
+                  <td className="border p-2">
+                  <button
+                      className="btn-primary text-sm px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-green-600"
+                      onClick={() => handleGeneratePDF(payment, payment.studentId)}
+                    >
+                      Generate PDF
+                    </button>
+                  </td>
+                  <td className="border p-2 flex justify-center space-x-2">
+                      <Link
+                        className="btn-default hover:bg-blue-600"
+                        href={`/payments/edit/${payment.paymentId}`}
+                      >
                         Edit
                       </Link>
-                      <Link className="btn-red" href={`/payments/delete/${payment.paymentId}`}>
+                      <Link
+                        className="btn-default hover:bg-red-600"
+                        href={`/payments/delete/${payment.paymentId}`}
+                      >
                         Delete
                       </Link>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="11" className="text-center border p-4">
-                    No payments found.
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        )}
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
+    </div>
     </Login>
   );
 }

@@ -37,9 +37,14 @@ export default async function handler(req, res) {
     try {
       const { title, description, date, location, eventType, organizer } = req.body;
 
-      if (!title || !date || !location || !eventType || !organizer) {
+      if (!title || !date || !location || !eventType || !organizer || !description) {
         return res.status(400).json({ error: "All fields are required" });
       }
+
+      const eventDate = new Date(req.body.date);
+      if (isNaN(eventDate)) {
+        return res.status(400).json({ message: 'Invalid date format' });
+      }   
 
       const newEvent = new Event({ title, description, date, location, eventType, organizer });
       await newEvent.save();
@@ -64,6 +69,36 @@ export default async function handler(req, res) {
       return res.status(200).json({ message: "Event deleted successfully" });
     } catch (error) {
       return res.status(500).json({ error: "Failed to delete event", details: error.message });
+    }
+  }
+
+  if (req.method === "PUT") {
+    try {
+      const { _id, title, description, date, location, eventType, organizer } = req.body;
+
+      if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+        return res.status(400).json({ error: "Invalid or missing event ID" });
+      }
+
+      // Ensure the date is valid
+      const eventDate = new Date(date);
+      if (isNaN(eventDate.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
+
+      const updatedEvent = await Event.findByIdAndUpdate(
+        _id,
+        { title, description, date: eventDate, location, eventType, organizer },
+        { new: true }
+      );
+
+      if (!updatedEvent) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+
+      return res.status(200).json(updatedEvent);
+    } catch (error) {
+      return res.status(500).json({ error: "Failed to update event", details: error.message });
     }
   }
 

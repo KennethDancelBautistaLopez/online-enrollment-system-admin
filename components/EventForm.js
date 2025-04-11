@@ -13,13 +13,20 @@ export default function EventForm({ _id, title, description, date, location, eve
   const router = useRouter();
 
   useEffect(() => {
-    console.log("Editing event:", { _id, title, description, date, location, eventType, organizer });
+    console.log("Editing event:", { _id, title, description,  date, location, eventType, organizer });
   }, [ _id, title, description, date, location, eventType, organizer ]);
 
   async function saveEvent(ev) {
     ev.preventDefault();
-    const data = { titleState, descriptionState, dateState, locationState, eventTypeState, organizerState };
-
+    
+    // Format the date to 'YYYY-MM-DD' string
+    const eventDate = new Date(dateState).toISOString().split("T")[0];  // Converts to "YYYY-MM-DD"
+    
+    // Log the data to inspect the payload
+    console.log("Event Data:", { titleState, descriptionState, date: eventDate, locationState, eventTypeState, organizerState });
+  
+    const data = { titleState, descriptionState, date: eventDate, locationState, eventTypeState, organizerState };
+  
     try {
       if (_id) {
         await axios.put("/api/events", { ...data, _id });
@@ -34,7 +41,6 @@ export default function EventForm({ _id, title, description, date, location, eve
       toast.error("Failed to save event. Please try again.");
     }
   }
-
   return (
     <form onSubmit={saveEvent} className="space-y-4">
       <label>Event Title</label>
@@ -44,7 +50,12 @@ export default function EventForm({ _id, title, description, date, location, eve
       <textarea placeholder="Enter event description" value={descriptionState} onChange={(ev) => setDescription(ev.target.value)} required />
 
       <label>Date</label>
-      <input type="date" value={dateState} onChange={(ev) => setDate(ev.target.value)} required />
+      <input
+        type="date"
+        min="2024-01-01"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+      />
 
       <label>Location</label>
       <input type="text" placeholder="Enter location" value={locationState} onChange={(ev) => setLocation(ev.target.value)} required />
