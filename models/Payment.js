@@ -44,12 +44,7 @@ const PaymentSchema = new mongoose.Schema({
     ],
     required: true
   },
-
-  status: { 
-    type: String, 
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending' 
-  },
+  
   createdAt: { type: Date, default: Date.now },
 });
 

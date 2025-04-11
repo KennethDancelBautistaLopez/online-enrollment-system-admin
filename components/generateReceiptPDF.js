@@ -47,7 +47,6 @@ export function generateReceiptPDF(payment) {
     addField("Reference Number", payment.referenceNumber || "N/A");
     addField("Description", payment.description || "N/A");
     addField("Amount Paid", `₱${payment.amount?.toFixed(2) || "0.00"}`);
-    addField("Payment Status", payment.status || "N/A");
 
     y += 5;
     doc.setFont("helvetica", "bold");

@@ -35,13 +35,12 @@ export default async function handler(req, res) {
         semester: payment.studentRef?.semester || "N/A",
         examPeriod: payment.examPeriod,
         receipt: payment.receipt || "N/A",
-        status: payment.status,
       });
     }
 
     // 📌 Get all payments for a specific studentId
     if (studentId) {
-      const payments = await Payment.find({ status: { $nin: ["failed", "pending"] } })
+      const payments = await Payment.find({})
         .populate({
           path: "studentRef",
           match: { _studentId: studentId },
@@ -78,7 +77,6 @@ export default async function handler(req, res) {
     const allPayments = await Payment.find()
       .populate("studentRef", "fname mname lname _studentId course education yearLevel schoolYear semester");
     
-    console.log("Payments fetched:", allPayments);
 
     const grouped = {};
 
@@ -110,7 +108,6 @@ export default async function handler(req, res) {
         billingDetails: payment.billingDetails,
         examPeriod: payment.examPeriod,
         receipt: payment.receipt || "N/A",
-        status: payment.status,
       });
     }
 

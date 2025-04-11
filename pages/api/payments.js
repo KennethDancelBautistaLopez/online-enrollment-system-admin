@@ -43,7 +43,6 @@ async function handlePostRequest(req, res) {
     const existingPaymentForPeriod = await Payment.findOne({
       studentId: _studentId,
       examPeriod,
-      status: { $ne: "failed" }, // only block if it's not failed
     });
 
     if (existingPaymentForPeriod) {
@@ -122,7 +121,6 @@ async function handlePostRequest(req, res) {
       yearLevel: student.yearLevel,
       schoolYear: student.schoolYear,
       semester: student.semester,
-      status: "pending",
       examPeriod,
       createdAt: new Date(),
     });
@@ -172,7 +170,6 @@ async function handleGetRequest(req, res) {
           semester: student.semester || "N/A",
           examPeriod: payment.examPeriod,
           receipt: payment.receipt || "N/A",
-          status: payment.status,
         };
       });
     
@@ -223,7 +220,6 @@ async function handleGetRequest(req, res) {
           semester: student.semester || "N/A",
           examPeriod: payment.examPeriod,
           receipt: payment.receipt || "N/A",
-          status: payment.status,
         },
       });
     }
@@ -250,7 +246,6 @@ async function handleGetRequest(req, res) {
         semester: student.semester || "N/A",
         examPeriod: payment.examPeriod,
         receipt: payment.receipt || "N/A",
-        status: payment.status,
       };
     });
 
