@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { generateReceiptPDF } from "@/components/generateReceiptPDF";
+import { useSession } from "next-auth/react";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
@@ -11,20 +12,21 @@ export default function PaymentsPage() {
   const [initialized, setInitialized] = useState(false); // Prevent duplicate toasts
   const [pdfLinks, setPdfLinks] = useState({});
 
+  const { data: session } = useSession();
+
   useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+
     // Fetch payments data only once after component mounts
     const fetchPayments = async () => {
       try {
 
-        // Fetch all payments (no studentId filtering needed for admin)
-        const response = await axios.get("/api/payments", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setPayments(response.data.data);
-
+        const response = await axios.get("/api/payments");
+            setPayments(response.data.data);
+        
         // Show success toast only once after payments are loaded
         if (!initialized && response.data.data.length > 0) {
           toast.success("Payments loaded successfully! ✅");
@@ -37,7 +39,17 @@ export default function PaymentsPage() {
     };
 
     fetchPayments(); // Call fetch function to load payments data
-  }, [initialized]); // Trigger the effect only when initialized changes
+  }, [ session,initialized]); // Trigger the effect only when initialized changes
+
+    useEffect(() => {
+      if (!session) {
+        toast.error("You are not logged in.");
+      }
+    }, [session]); // Trigger error toast only when session is null
+  
+    if (!session) {
+      return <Login />;
+    }
 
   const filteredPayments = payments.filter((payment) =>
     `${payment.referenceNumber} ${payment.fullName} ${payment.studentId} ${payment.amount}`
@@ -53,6 +65,8 @@ export default function PaymentsPage() {
     }));
     toast.success(`PDF generated for ${payment.fullName}!`);
   };
+
+
 
   return (
     <Login>
