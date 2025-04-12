@@ -221,59 +221,59 @@ export default function StudentForm({
     <form onSubmit={saveStudent}>
       <div className="space-y-6">
         <div className="space-y-2 ">
-          <label>First Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white">First Name <span className="text-gray-700 dark:text-white">*</span></label>
           <input
             type="text"
             placeholder="Enter first name"
             value={fname}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setFname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Middle Name</label>
+          <label className="text-gray-700 dark:text-white">Middle Name</label>
           <input
             type="text"
             placeholder="Enter middle name"
             value={mname}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setMname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
           />
         </div>
 
         <div className="space-y-2">
-          <label>Last Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white">Last Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter last name"
             value={lname}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setLname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Address <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white">Address <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter address"
             value={address}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setAddress(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Mobile Number <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white">Mobile Number <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter mobile number"
             value={mobile}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => {
               let input = ev.target.value.replace(/\D/g, "");
               if (input.length > 11) input = input.slice(0, 11);
@@ -287,13 +287,13 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label>Landline Number</label>
+          <label className="text-gray-700 dark:text-white">Landline Number</label>
           <input
             type="text"
             placeholder="Enter landline number"
             value={landline}
             maxLength={8}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => {
               const val = ev.target.value;
               if (/^\d{0,8}$/.test(val)) {
@@ -304,45 +304,49 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label>Facebook</label>
+          <label className="text-gray-700 dark:text-white"
+          >Facebook</label>
           <input
             type="url"
             placeholder="Enter Facebook link"
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+           className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             value={facebook}
             onChange={(ev) => setFacebook(ev.target.value)}
           />
         </div>
 
         <div className="space-y-2">
-          <label>Date of Birth <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Date of Birth <span className="text-red-500 font-bold">*</span></label>
           <input
             type="date"
             value={birthdate}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+           className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setBirthdate(ev.target.value)}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Place of Birth <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Place of Birth <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter place of birth"
             value={birthplace}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+           className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setBirthplace(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Nationality <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Nationality <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter nationality"
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             value={nationality}
             onChange={(ev) => setNationality(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
@@ -350,11 +354,12 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label>Religion <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Religion <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter religion"
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             value={religion}
             onChange={(ev) => setReligion(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
@@ -362,10 +367,11 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label>Sex <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Sex <span className="text-red-500 font-bold">*</span></label>
           <select
             value={sex}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setSex(ev.target.value)}
             required
           >
@@ -377,70 +383,76 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label>Fathers Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Fathers Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter father's name"
             value={father}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setFather(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Mothers Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Mothers Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter mother's name"
             value={mother}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setMother(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Guardians Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Guardians Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter guardian's name"
             value={guardian}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setGuardian(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Guardians Occupation <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Guardians Occupation <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter guardian's occupation"
             value={guardianOccupation}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setGuardianOccupation(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Registration Date</label>
+          <label className="text-gray-700 dark:text-white"
+          >Registration Date</label>
           <input
             type="date"
             value={registrationDate}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setRegistrationDate(ev.target.value)}
           />
         </div>
 
         <div className="space-y-2">
-          <label>LRN <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >LRN <span className="text-red-500 font-bold">*</span></label>
           <input
             type="number"
             placeholder="Enter LRN"
             value={lrn}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => {
               const value = ev.target.value.replace(/\D/g, "").slice(0, 12);
               setLrn(value);
@@ -450,32 +462,35 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label>Year Level <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Year Level <span className="text-red-500 font-bold">*</span></label>
           <input
             type="number"
             placeholder="Enter year level"
             value={yearLevel}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setYearLevel(ev.target.value)}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>School Year <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >School Year <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter school year"
             value={schoolYear}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setSchoolYear(ev.target.value)}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Education Level</label>
-          <select value={education} onChange={(ev) => setEducation(ev.target.value)} className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+          <label className="text-gray-700 dark:text-white"
+          >Education Level</label>
+          <select value={education} onChange={(ev) => setEducation(ev.target.value)} className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700" required>
             <option value="">Select Education Level</option>
             <option value="college">College</option>
           </select>
@@ -483,12 +498,12 @@ export default function StudentForm({
           <div className="h-2" />
           {education === "college" && (
           <div className="space-y-2">
-              <label className="mt-2 pt-2">Course</label>
+              <label className="text-gray-700 mt-2 pt-2 dark:text-white">Course</label>
               <input
                 type="text"
                 placeholder="Enter Course"
                 value={course}
-                className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 onChange={(ev) => {
                   const value = ev.target.value.toUpperCase().slice(0, 10);
                   setCourse(value);
@@ -498,15 +513,16 @@ export default function StudentForm({
             </div>
           )}
           </div>
-        </div>
+        
 
 
         <div className="space-y-2">
-          <label>semester <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >semester <span className="text-red-500 font-bold">*</span></label>
           <select
             value={semester}
             onChange={(ev) => setSemester(ev.target.value)}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             required
           >
             <option value="">Select Semester</option>
@@ -518,117 +534,128 @@ export default function StudentForm({
 
       {/* Nursery School */}
       <div className="space-y-2">
-        <label>Nursery School Attended</label>
+        <label className="text-gray-700 dark:text-white"
+        >Nursery School Attended</label>
         <input
           type="text"
           value={nurseryState.schoolName}
           onChange={(e) => setNursery({ ...nurseryState, schoolName: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
         />
       </div>
       <div className="space-y-2">
-        <label>Nursery Year Attended (e.g. 2010-2011)</label>
+        <label className="text-gray-700 dark:text-white"
+        >Nursery Year Attended (e.g. 2010-2011)</label>
         <input
           type="text"
           value={nurseryState.yearAttended}
           onChange={(e) => setNursery({ ...nurseryState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
         />
       </div>
 
       <div className="space-y-2">
-        <label>Elementary School Attended *</label>
+        <label className="text-gray-700 dark:text-white"
+        >Elementary School Attended *</label>
         <input
           type="text"
           value={elementaryState.schoolName}
           onChange={(e) => setElementary({ ...elementaryState, schoolName: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
       <div className="space-y-2">
-        <label>Elementary Year Attended *</label>
+        <label className="text-gray-700 dark:text-white"
+        >Elementary Year Attended *</label>
         <input
           type="text"
           value={elementaryState.yearAttended}
           onChange={(e) => setElementary({ ...elementaryState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label>Junior High School Attended *</label>
+        <label className="text-gray-700 dark:text-white"
+        >Junior High School Attended *</label>
         <input
           type="text"
           value={juniorHighState.schoolName}
           onChange={(e) => setJuniorHigh({ ...juniorHighState, schoolName: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
       <div className="space-y-2">
-        <label>Junior High Year Attended *</label>
+        <label className="text-gray-700 dark:text-white"
+        >Junior High Year Attended *</label>
         <input
           type="text"
           value={juniorHighState.yearAttended}
           onChange={(e) => setJuniorHigh({ ...juniorHighState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label>Senior High School Attended *</label>
+        <label className="text-gray-700 dark:text-white"
+        >Senior High School Attended *</label>
         <input
           type="text"
           value={seniorHighState.schoolName}
           onChange={(e) => setSeniorHigh({ ...seniorHighState, schoolName: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+           className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
       <div className="space-y-2">
-        <label>Senior High Year Attended *</label>
+        <label className="text-gray-700 dark:text-white"
+        >Senior High Year Attended *</label>
         <input
           type="text"
           value={seniorHighState.yearAttended}
           onChange={(e) => setSeniorHigh({ ...seniorHighState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
 
 
       <div className="space-y-2">
-          <label>Email Address <span className="text-red-500">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Email Address <span className="text-red-500">*</span></label>
           <input
             type="email"
             placeholder="Enter email address"
             value={email}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setEmail(ev.target.value)}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Password <span className="text-red-500">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Password <span className="text-red-500">*</span></label>
           <input
             type="password"
             placeholder="Enter password"
             value={password}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setPassword(ev.target.value)}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label>Status <span className="text-red-500">*</span></label>
+          <label className="text-gray-700 dark:text-white"
+          >Status <span className="text-red-500">*</span></label>
           <select
             value={status}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setStatus(ev.target.value)}
             required
           >
@@ -644,6 +671,7 @@ export default function StudentForm({
           <button type="submit" className="btn-primary p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             Save
           </button>
+        </div>
         </div>
     </form>
 

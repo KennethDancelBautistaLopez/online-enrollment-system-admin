@@ -81,14 +81,14 @@ export default function PaymentForm({ paymentData, studentData }) {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+    <div className="max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
         {paymentId ? "Edit Payment" : "Tuition Payment"}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Exam Period */}
         <div>
-          <label className="block text-gray-700 font-medium">Exam Period</label>
+          <label className="block text-gray-700 dark:text-gray-200 font-medium">Exam Period</label>
           <select
             value={examPeriod}
             onChange={(e) => {
@@ -100,7 +100,7 @@ export default function PaymentForm({ paymentData, studentData }) {
                 setAmount(1500);
               }
             }}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600"
             required
           >
             <option value="">Select Exam Period</option>
@@ -115,10 +115,10 @@ export default function PaymentForm({ paymentData, studentData }) {
             <option value="Finals">Finals</option>
           </select>
         </div>
-
+  
         {/* Amount */}
         <div>
-          <label className="block text-gray-700 font-medium">Amount (PHP)</label>
+          <label className="block text-gray-700 dark:text-gray-200 font-medium">Amount (PHP)</label>
           <input
             type="number"
             value={amount}
@@ -133,15 +133,15 @@ export default function PaymentForm({ paymentData, studentData }) {
               setAmount(inputAmount > max ? max : inputAmount);
             }}
             max={examPeriod === "downpayment" ? 2000 : examPeriod !== "" ? 1500 : 9999999.99}
-            className="w-full p-2 border rounded-lg capitalize"
+            className="w-full p-2 border rounded-lg capitalize bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600"
             placeholder="Enter amount"
             required
           />
         </div>
-
+  
         {/* Description */}
         <div>
-          <label className="block text-gray-700 font-medium">Description</label>
+          <label className="block text-gray-700 dark:text-gray-200 font-medium">Description</label>
           <input
             type="text"
             value={description}
@@ -150,15 +150,15 @@ export default function PaymentForm({ paymentData, studentData }) {
               const capitalized = value.charAt(0).toUpperCase() + value.slice(1);
               setDescription(capitalized);
             }}
-            className="w-full p-2 border rounded-lg capitalize"
+            className="w-full p-2 border rounded-lg capitalize bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600"
             placeholder="Enter description"
             required
           />
         </div>
-
+  
         {/* Student ID */}
         <div>
-          <label className="block text-gray-700 font-medium">Student ID</label>
+          <label className="block text-gray-700 dark:text-gray-200 font-medium">Student ID</label>
           <input
             type="text"
             value={studentId}
@@ -168,12 +168,12 @@ export default function PaymentForm({ paymentData, studentData }) {
               if (raw.length > 4) raw = `${raw.slice(0, 4)}-${raw.slice(4)}`;
               setStudentId(raw);
             }}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600"
             placeholder="Student Number"
             required
           />
         </div>
-
+  
         {/* Submit */}
         <button
           type="submit"
@@ -184,4 +184,4 @@ export default function PaymentForm({ paymentData, studentData }) {
       </form>
     </div>
   );
-}
+}  

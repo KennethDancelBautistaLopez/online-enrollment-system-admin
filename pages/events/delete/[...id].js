@@ -31,22 +31,22 @@ export default function DeleteEventPage() {
     }
   }
   return (
-       <Login>
-         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-           <div className="bg-white p-6 rounded-lg shadow-lg text-center w-96">
-             <h1 className="text-lg font-semibold mb-4">
-               Do you really want to delete <b>{eventInfo?.title}</b>?
-             </h1>
-             <div className="flex justify-center gap-4">
-               <button onClick={deleteEvent} className="bg-red-500 text-white px-4 py-2 rounded">
-                 Yes
-               </button>
-               <button onClick={goBack} className="bg-gray-300 px-4 py-2 rounded">
-                 No
-               </button>
-             </div>
-           </div>
-         </div>
-       </Login>
+    <Login>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
+          <h1 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+            Do you really want to delete <b>{eventInfo?.title}</b>?
+          </h1>
+          <div className="flex justify-center gap-4">
+            <button onClick={deleteEvent} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+              Yes
+            </button>
+            <button onClick={goBack} className="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded hover:bg-gray-400">
+              No
+            </button>
+          </div>
+        </div>
+      </div>
+    </Login>
   );
 }

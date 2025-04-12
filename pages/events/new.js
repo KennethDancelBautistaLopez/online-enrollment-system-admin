@@ -14,7 +14,7 @@ export default function NewEvent() {
   }, [session]);
   return (
     <Login>
-      <h1 className="text-2xl font-bold mb-4">New Student</h1>
+      <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">New Event</h1>
       <EventForm />
     </Login>
   );

@@ -75,10 +75,13 @@ export default function Login({ children }) {
   }
 
   return (
-    <div className="bg-bgGray w-screen h-screen">
+    <div className="bg-bgGray dark:bg-gray-900 w-screen h-screen">
       {/* Mobile Menu Button */}
       <div className="block md:hidden flex items-center p-4">
-        <button onClick={() => setShowNav(true)} className="text-gray-800">
+        <button
+          onClick={() => setShowNav(true)}
+          className="text-gray-800 dark:text-gray-200"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -96,14 +99,16 @@ export default function Login({ children }) {
           <Logo />
         </div>
       </div>
-
+  
       {/* Main Layout */}
-      <div className="flex bg-bgGray h-full ">
+      <div className="flex bg-bgGray dark:bg-gray-900 h-full">
         {/* Sidebar / Navigation */}
         <Nav show={showNav} />
-
+  
         {/* Content Area */}
-        <div className="flex-grow p-4 overflow-auto">{children}</div>
+        <div className="flex-grow p-4 overflow-auto text-gray-900 dark:text-gray-100">
+          {children}
+        </div>
       </div>
     </div>
   );

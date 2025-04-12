@@ -13,11 +13,11 @@ import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 
 const STATUS_COLORS = {
-  enrolled: "#4CAF50",        // Green
-  graduated: "#F44336",         // Red
-  dropped: "#FFEB3B", // Yellow
-  "missing files": "#2196F3",       // Blue
-  unknown: "#9E9E9E",         // Gray
+  enrolled: "#22c55e",       // Emerald (Tailwind green-500)
+  graduated: "#ef4444",      // Rose Red (Tailwind red-500)
+  dropped: "#eab308",        // Amber (Tailwind yellow-500)
+  "missing files": "#3b82f6", // Blue (Tailwind blue-500)
+  unknown: "#6b7280",        // Cool Gray (Tailwind gray-500)
 };
 
 export default function StudentStatusPieChart() {
@@ -85,16 +85,16 @@ export default function StudentStatusPieChart() {
   return (
     <Login>
       <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-gray-800 text-center">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 text-center">
           📊 Student Status Distribution
         </h1>
-
-        <div className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-6 text-blue-600 text-center">
+  
+        <div className="max-w-3xl mx-auto bg-white border border-gray-200 dark:bg-gray-900 p-8 rounded-2xl shadow-lg">
+          <h2 className="text-xl font-semibold mb-6 text-blue-600 dark:text-blue-400 text-center">
             Total Students:{" "}
-            <span className="text-gray-900">{totalStudents}</span>
+            <span className="text-gray-900 dark:text-white">{totalStudents}</span>
           </h2>
-
+  
           <div className="flex flex-col items-center">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -114,13 +114,23 @@ export default function StudentStatusPieChart() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1f2937', // Tailwind's gray-800
+                    color: '#f9fafb', // Tailwind's gray-50
+                    border: 'none',
+                  }}
+                />
+                <Legend
+                  wrapperStyle={{
+                    color: 'inherit',
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
-
+  
             {/* Status Legend with Fade In */}
-            <div className="mt-6 grid grid-cols-2 gap-4 text-sm text-gray-700">
+            <div className="mt-6 grid grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
               {chartData.map((item, index) => (
                 <div
                   key={index}
@@ -139,4 +149,4 @@ export default function StudentStatusPieChart() {
       </div>
     </Login>
   );
-}
+}  

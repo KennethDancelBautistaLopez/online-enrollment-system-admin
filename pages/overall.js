@@ -68,34 +68,33 @@ export default function Payments() {
   return (
     <Login>
       <div className="space-y-8">
-        <h1 className="text-2xl font-bold mb-4">Tuition Payments</h1>
-
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-green-600">
-            Total Income: ₱{totalIncome}
-          </h2>
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-2">Income Trends</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="#4CAF50"
-                  strokeWidth={2}
-                  animationDuration={1000}        // Animation duration (in ms)
-                  animationBegin={0}               // Animation start time
-                  animationEasing="ease-in-out"    // Animation easing
-                />
-              </LineChart>
-            </ResponsiveContainer>
+      <h1 className="text-3xl font-bold pt-4 mb-2 md:mb-0 text-gray-800 dark:text-white">Overall Income</h1>
+          <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
+            <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
+              Total Income: ₱{totalIncome}
+            </h2>
+            <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-700 dark:text-white">
+              <h3 className="text-lg font-semibold mb-2 dark:text-white">Income Trends</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#4CAF50"
+                    strokeWidth={2}
+                    animationDuration={1000} // Animation duration (in ms)
+                    animationBegin={0} // Animation start time
+                    animationEasing="ease-in-out" // Animation easing
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
-      </div>
     </Login>
   );
 }

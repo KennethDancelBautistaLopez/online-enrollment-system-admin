@@ -6,15 +6,16 @@ import {toast} from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { List } from "antd";
+import { applyTheme, getSavedTheme, setTheme } from "@/components/darkmode";
 
 const Logo = dynamic(() => import('@/components/Logo'), { ssr: false });
 
 export default function Nav({show}) {
-  const inactiveLink = 'flex gap-1 p-1';
-  const activeLink = inactiveLink+' bg-highlight text-black rounded-sm';
+  const inactiveLink = 'flex gap-1 p-1 text-gray-700 dark:text-gray-300';
+  const activeLink = inactiveLink + ' bg-highlight text-black dark:text-white dark:bg-gray-700';
   const inactiveIcon = 'w-6 h-6';
   const activeIcon = inactiveIcon + ' text-primary';
+  const [theme, setTheme] = useState('light');
   const router = useRouter();
   const {pathname} = router;
 
@@ -36,9 +37,21 @@ export default function Nav({show}) {
       toast.error('Logout failed! Try again.');
     }
   };
+
+  useEffect(() => {
+    const saved = getSavedTheme();
+    applyTheme(saved);
+    setTheme(saved);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    applyTheme(newTheme);
+    setTheme(newTheme);
+  };
   
   return (
-       <aside className={(show ? 'left-0' : '-left-full') + " top-0 text-gray-500 p-4 fixed w-full bg-bgGray h-full md:static md:w-auto transition-all"}>
+<aside className={(show ? 'left-0' : '-left-full') + " top-0 text-gray-500 p-4 fixed w-full bg-bgGray dark:bg-gray-900 h-full md:static md:w-auto transition-all"}>
       {/* Only render the Logo component on the client side */}
       {isClient && (
         <div className="mb-4 mr-4">
@@ -122,6 +135,49 @@ export default function Nav({show}) {
           Logout
         </button>
       </nav>
+      <footer className="mt-auto pt-32 border-t border-gray-300 dark:border-gray-700">
+        <div className="flex justify-center">
+          <button
+            onClick={toggleTheme}
+            className="p-3 rounded-md border dark:border-white border-black sm:px-6 sm:py-3 text-lg sm:text-xl flex items-center justify-center"
+          >
+            {theme === 'light' ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className={activeIcon + ' text-blue-900'}
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className={inactiveIcon}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3v2.25m6.364.386-1.591 1.591M21 
+                        12h-2.25m-.386 6.364-1.591-1.591M12 
+                        18.75V21m-4.773-4.227-1.591 1.591M5.25 
+                        12H3m4.227-4.773L5.636 5.636M15.75 
+                        12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+      </footer>
+
     </aside>
   );
 }

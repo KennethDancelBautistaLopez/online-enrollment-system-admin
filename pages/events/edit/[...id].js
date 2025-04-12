@@ -33,7 +33,7 @@ export default function EditEventPage() {
 
   return (
     <Login>
-      <h1 className="text-2xl font-bold mb-4">Edit Event</h1>
+      <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">Edit Event</h1>
       {eventInfo && <EventForm {...eventInfo} />}
     </Login>
   );

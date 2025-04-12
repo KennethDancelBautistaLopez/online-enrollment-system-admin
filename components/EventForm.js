@@ -50,34 +50,138 @@ export default function EventForm({ _id, title, description, date, location, eve
   }
   return (
     <form onSubmit={saveEvent} className="space-y-4">
-      <label>Event Title</label>
-      <input type="text" placeholder="Enter event title" value={titleState} onChange={(ev) => setTitle(ev.target.value)} required />
-
-      <label>Description</label>
-      <textarea placeholder="Enter event description" value={descriptionState} onChange={(ev) => setDescription(ev.target.value)} required />
-
-      <input
-        type="date"
-        min="2024-01-01"
-        value={dateState} // Use dateState here
-        onChange={(e) => setDate(e.target.value)} // Update state correctly
-      />
-
-      <label>Location</label>
-      <input type="text" placeholder="Enter location" value={locationState} onChange={(ev) => setLocation(ev.target.value)} required />
-
-      <label>Event Type</label>
-      <select value={eventTypeState} onChange={(ev) => setEventType(ev.target.value)} required>
-        <option value="">Select Type</option>
-        <option value="Seminar">Seminar</option>
-        <option value="Workshop">Workshop</option>
-        <option value="Competition">Competition</option>
-      </select>
-
-      <label>Organizer</label>
-      <input type="text" placeholder="Organizer name" value={organizerState} onChange={(ev) => setOrganizer(ev.target.value)} required />
-
-      <button type="submit" className="btn-primary">Save Event</button>
+  
+      {/* Event Title */}
+      <div className="space-y-2">
+        <label
+          htmlFor="eventTitle"
+          className="text-gray-700 dark:text-gray-200"
+        >
+          Event Title
+        </label>
+        <input
+          id="eventTitle"
+          type="text"
+          placeholder="Enter event title"
+          value={titleState}
+          onChange={(ev) => setTitle(ev.target.value)}
+          required
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400
+                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
+        />
+      </div>
+  
+      {/* Description */}
+      <div className="space-y-2">
+        <label
+          htmlFor="description"
+          className="text-gray-700 dark:text-gray-200"
+        >
+          Description
+        </label>
+        <textarea
+          id="description"
+          placeholder="Enter event description"
+          value={descriptionState}
+          onChange={(ev) => setDescription(ev.target.value)}
+          required
+          className="w-full p-3 border rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400
+                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
+        />
+      </div>
+  
+      {/* Date */}
+      <div className="space-y-2">
+        <label
+          htmlFor="eventDate"
+          className="text-gray-700 dark:text-gray-200"
+        >
+          Date
+        </label>
+        <input
+          id="eventDate"
+          type="date"
+          min="2024-01-01"
+          value={dateState}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400
+                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
+        />
+      </div>
+  
+      {/* Location */}
+      <div className="space-y-2">
+        <label
+          htmlFor="location"
+          className="text-gray-700 dark:text-gray-200"
+        >
+          Location
+        </label>
+        <input
+          id="location"
+          type="text"
+          placeholder="Enter location"
+          value={locationState}
+          onChange={(ev) => setLocation(ev.target.value)}
+          required
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400
+                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
+        />
+      </div>
+  
+      {/* Event Type */}
+      <div className="space-y-2">
+        <label
+          htmlFor="eventType"
+          className="text-gray-700 dark:text-gray-200"
+        >
+          Event Type
+        </label>
+        <select
+          id="eventType"
+          value={eventTypeState}
+          onChange={(ev) => setEventType(ev.target.value)}
+          required
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400
+                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-500"
+        >
+          <option value="">Select Type</option>
+          <option value="Seminar">Seminar</option>
+          <option value="Workshop">Workshop</option>
+          <option value="Competition">Competition</option>
+        </select>
+      </div>
+  
+      {/* Organizer */}
+      <div className="space-y-2">
+        <label
+          htmlFor="organizer"
+          className="text-gray-700 dark:text-gray-200"
+        >
+          Organizer
+        </label>
+        <input
+          id="organizer"
+          type="text"
+          placeholder="Organizer name"
+          value={organizerState}
+          onChange={(ev) => setOrganizer(ev.target.value)}
+          required
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400
+                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
+        />
+      </div>
+  
+      {/* Submit */}
+      <div>
+        <button
+          type="submit"
+          className="w-full p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors
+                     dark:bg-blue-500 dark:hover:bg-blue-600"
+        >
+          Save Event
+        </button>
+      </div>
     </form>
   );
 }

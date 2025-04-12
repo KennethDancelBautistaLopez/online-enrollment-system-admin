@@ -116,73 +116,74 @@ export default function Home() {
       });
   }, [session, initialized]);
 
-  if (!session) {
+  if (!session && status !== "loading") {
     return <Login />;
   }
 
   return (
     <Login>
-      <div className="p-4 sm:p-8">
+      <div className="p-4 sm:p-8 dark:bg-gray-900 dark:text-white">
         {/* Welcome Section */}
-        <div className="text-blue-900 flex justify-between items-center mb-8">
+        <div className="text-blue-900 flex justify-between items-center mb-8 dark:text-blue-200">
           <h2 className="text-xl font-semibold">
-            Hello, <span className="text-black">{session?.user?.email}</span>
+            Hello, <span className="text-black dark:text-white">{session?.user?.email}</span>
           </h2>
-          <div className="flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-lg shadow">
+          <div className="flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-lg shadow dark:bg-gray-700 dark:text-blue-200">
             <span>{session?.user?.email}</span>
           </div>
         </div>
+  
 
-        {/* Events Section */}
-        <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">📅 Upcoming Events</h3>
-          {loading ? (
-            <p className="text-gray-500">Loading events...</p>
-          ) : events.length === 0 ? (
-            <p className="text-gray-500">No events found.</p> 
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.slice(0, 3).map((event) => (
-                <div
-                  key={event._id}
-                  className="border border-gray-200 p-5 rounded-2xl shadow-md bg-gradient-to-br from-white to-blue-50 hover:shadow-xl transition"
+      <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
+        <h3 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">📅 Upcoming Events</h3>
+        {loading ? (
+          <p className="text-gray-500 dark:text-gray-400">Loading events...</p>
+        ) : events.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400">No events found.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.slice(0, 3).map((event) => (
+              <div
+                key={event._id}
+                className="border border-gray-200 p-5 rounded-2xl shadow-md bg-gradient-to-br from-white to-blue-50 hover:shadow-xl transition dark:bg-gray-700 dark:border-gray-600"
+              >
+                <h4 className="text-xl font-semibold text-blue-900 mb-1 dark:text-blue-300">{event.title}</h4>
+                <p className="text-gray-700 text-sm mb-2 dark:text-gray-300">{event.description}</p>
+                <div className="text-sm text-gray-600 space-y-1 dark:text-gray-400">
+                  <p>📍 <span className="font-medium">{event.location}</span></p>
+                  <p>📅 <span className="font-medium">{new Date(event.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                  })}</span></p>
+                  <p>🎫 <span className="italic">{event.eventType}</span></p>
+                </div>
+              </div>
+            ))}
+
+            {/* Show "Go to Events" Button if more than 3 */}
+            {events.length > 3 && (
+              <div className="col-span-full mt-4">
+                <button
+                  onClick={() => window.location.href = "/events"}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
                 >
-                  <h4 className="text-xl font-semibold text-blue-900 mb-1">{event.title}</h4>
-                  <p className="text-gray-700 text-sm mb-2">{event.description}</p>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p>📍 <span className="font-medium">{event.location}</span></p>
-                    <p>📅 <span className="font-medium">{new Date(event.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                      })}</span></p>
-                    <p>🎫 <span className="italic">{event.eventType}</span></p>
-                  </div>
-                </div>
-              ))}
+                  Go to Events →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-              {/* Show "Go to Events" Button if more than 3 */}
-              {events.length > 3 && (
-                <div className="col-span-full mt-4">
-                  <button
-                    onClick={() => window.location.href = "/events"}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
-                  >
-                    Go to Events →
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
+          
         <div className="space-y-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-green-600">
+          <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
+            <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
               Total Income: ₱{totalIncome}
             </h2>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2">Income Trends</h3>
+            <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-700 dark:text-white">
+              <h3 className="text-lg font-semibold mb-2 dark:text-white">Income Trends</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -202,16 +203,17 @@ export default function Home() {
               </ResponsiveContainer>
             </div>
             <div className="col-span-full mt-4">
-                  <button
-                    onClick={() => window.location.href = "/overall"}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
-                  >
-                    Go to Overall Payments →
-                  </button>
-                </div>
+              <button
+                onClick={() => window.location.href = "/overall"}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition dark:bg-blue-500 dark:hover:bg-blue-600"
+              >
+                Go to Overall Payments →
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </Login>
   );
+  
 }

@@ -49,22 +49,28 @@ export default function DeleteStudentPage() {
   return (
     <Login>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg text-center w-96">
-          <h1 className="text-lg font-semibold mb-4">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
+          <h1 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
             Do you really want to delete <b>{studentInfo?.fname} {studentInfo?.lname}</b>?
           </h1>
-
+  
           {studentPayments.length > 0 && (
-            <div className="text-sm text-red-600 mb-4">
+            <div className="text-sm text-red-600 dark:text-red-400 mb-4">
               ⚠️ This student has {studentPayments.length} recorded payment(s).
             </div>
           )}
-
+  
           <div className="flex justify-center gap-4">
-            <button onClick={deleteStudent} className="bg-red-500 text-white px-4 py-2 rounded">
+            <button
+              onClick={deleteStudent}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
               Yes
             </button>
-            <button onClick={goBack} className="bg-gray-300 px-4 py-2 rounded">
+            <button
+              onClick={goBack}
+              className="bg-gray-300 dark:bg-gray-600 dark:text-white px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-500"
+            >
               No
             </button>
           </div>
@@ -72,4 +78,5 @@ export default function DeleteStudentPage() {
       </div>
     </Login>
   );
+  
 }

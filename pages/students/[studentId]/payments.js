@@ -35,17 +35,23 @@ export default function StudentPaymentsView() {
 
   return (
     <Login>
-      <div className="container mx-auto p-6 bg-white rounded-xl shadow-lg my-10">
+      <div className="container mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg my-10">
         <Link href="/all-payments">
-          <span className="text-blue-600 hover:underline mb-4 block">← Back to All Payments</span>
+          <span className="text-blue-600 hover:underline mb-4 block dark:text-blue-400">
+            ← Back to All Payments
+          </span>
         </Link>
-
-        <h2 className="text-3xl font-semibold text-gray-800 mb-4">{studentData.fullName}</h2>
-        <p className="text-gray-500 text-lg mb-6">Student ID: {studentId}</p>
-
-        <div className="overflow-x-auto bg-gray-50 rounded-lg shadow-md">
-          <table className="min-w-full table-auto text-sm text-gray-600">
-            <thead className="bg-gray-100">
+  
+        <h2 className="text-3xl font-semibold text-gray-800 dark:text-white mb-4">
+          {studentData.fullName}
+        </h2>
+        <p className="text-gray-500 text-lg dark:text-gray-300 mb-6">
+          Student ID: {studentId}
+        </p>
+  
+        <div className="overflow-x-auto bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md">
+          <table className="min-w-full table-auto text-sm text-gray-600 dark:text-gray-300">
+            <thead className="bg-gray-100 dark:bg-gray-600">
               <tr>
                 <th className="px-4 py-3 text-left font-medium">Reference Number</th>
                 <th className="px-4 py-3 text-left font-medium">Amount</th>
@@ -55,7 +61,7 @@ export default function StudentPaymentsView() {
             <tbody>
               {studentData.payments.length > 0 ? (
                 studentData.payments.map((payment, index) => (
-                  <tr key={index} className="hover:bg-gray-200 transition-colors">
+                  <tr key={index} className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <td className="border-t px-4 py-3">{payment.referenceNumber}</td>
                     <td className="border-t px-4 py-3">
                       ₱{typeof payment.amount === 'number' ? payment.amount.toFixed(2) : 'N/A'}
@@ -65,7 +71,7 @@ export default function StudentPaymentsView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="text-center p-4 text-gray-500">
+                  <td colSpan="3" className="text-center p-4 text-gray-500 dark:text-gray-400">
                     No payments found.
                   </td>
                 </tr>
@@ -76,4 +82,5 @@ export default function StudentPaymentsView() {
       </div>
     </Login>
   );
+  
 }
