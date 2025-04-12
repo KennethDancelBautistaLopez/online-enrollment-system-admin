@@ -6,9 +6,9 @@ export default function Logo() {
       <img
         src="/SCC icon.webp" 
         alt="Admin Logo"
-        className="w-10 h-10 mr-2 rounded-full object-cover shadow-md bg-white"
+        className="w-10 h-10 mr-2 rounded-full object-cover dark:bg-gray-700 shadow-md bg-white"
       />
-      <span className=" text-xl font-bold">
+      <span className=" dark:text-white text-xl font-bold">
         SCC ADMIN
       </span>
     </Link>
