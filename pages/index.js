@@ -186,7 +186,7 @@ export default function Home() {
       <div className="space-y-8">
         <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
           <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
-            Total Income: ₱{totalIncome}
+            Total Payments: ₱{totalIncome}
           </h2>
 
           {paymentLoading ? (

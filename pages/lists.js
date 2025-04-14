@@ -146,7 +146,7 @@ export default function Students({ initialStudents }) {
 
   // 🔍 Filter students based on search
   const filteredStudents = students.filter((student) =>
-    `${student.fname} ${student.lname} ${student.email} ${student._studentId}`
+  `${student.fname} ${student.lname} ${student.email} ${student.status} ${student._studentId}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );

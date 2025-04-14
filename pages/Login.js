@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import Logo from "@/components/Logo";
 import { toast } from "react-hot-toast"; // Import toast
 import BackgroundWrapper from "@/components/background";
+import LoginSpinner from "@/components/loginSpinner";
 
 export default function Login({ children }) {
   const [email, setEmail] = useState("");
@@ -45,31 +46,37 @@ export default function Login({ children }) {
     return (
       <BackgroundWrapper>
         <div className="bg-white bg-opacity-50 p-6 rounded-lg shadow-md text-center w-80">
-        <div className="flex justify-center mb-4"> <Logo /></div>
-          <h2 className="text-xl font-semibold mb-4">Admin Login</h2>
-          {error && <p className="text-red-500 mb-2">{error}</p>}
+        <div className="flex justify-center mb-2"> <Logo /></div>
+          <h2 className="text-xl font-semibold mb-2">Admin Login</h2>
+          {error && <p className="text-red-500 rounded-lg bg-white text-l mb-2">{error}</p>}
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-gray-100 p-2 px-4 rounded-lg mb-2 w-full"
+            className={`bg-gray-100 p-2 px-4 rounded-lg mb-2 w-full ${error ? 'border-3 border-red-500' : ''}`}
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-gray-100 p-2 px-4 rounded-lg mb-2 w-full"
+            className={`bg-gray-100 p-2 px-4 rounded-lg mb-2 w-full ${error ? 'border-3 border-red-500' : ''}`}
           />
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="bg-blue-600 text-white p-2 px-4 rounded-lg w-full"
+            className="bg-blue-600 text-white p-2 px-4 rounded-lg w-full flex justify-center items-center" 
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? <LoginSpinner size="w-6 h-6" color="border-blue-200" /> : "Login"}
           </button>
+          
+          <footer className="text-black text-xs text-center mt-6 opacity-80">
+            <b>&copy; {new Date().getFullYear()} St. Clare College. All rights reserved.<br />
+            Developed by the BSCS College Student In 4-D • For administrative use only.</b>
+          </footer>
         </div>
+        
       </BackgroundWrapper>
     );
   }

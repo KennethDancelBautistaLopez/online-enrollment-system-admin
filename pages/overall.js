@@ -78,7 +78,7 @@ export default function Payments() {
       <h1 className="text-3xl font-bold pt-4 mb-2 md:mb-0 text-gray-800 dark:text-white">Overall Income</h1>
           <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
             <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
-              Total Income: ₱{totalIncome}
+              Total Payments: ₱{totalIncome}
             </h2>
             <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-700 dark:text-white">
               <h3 className="text-lg font-semibold mb-2 dark:text-white">Income Trends</h3>

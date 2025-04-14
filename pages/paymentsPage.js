@@ -65,7 +65,7 @@ export default function PaymentsPage() {
   }
 
   const filteredPayments = payments.filter((payment) =>
-    `${payment.referenceNumber} ${payment.fullName} ${payment.studentId} ${payment.amount}`
+    `${payment.referenceNumber} ${payment.fullName} ${payment.course} ${payment.education} ${payment.yearLevel} ${payment.schoolYear} ${payment.semester} ${payment.examPeriod} ${payment.studentId} ${payment.amount}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );

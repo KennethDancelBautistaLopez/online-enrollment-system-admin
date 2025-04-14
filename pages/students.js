@@ -47,7 +47,7 @@ export default function Students() {
   if (!session) return <Login />;
 
   const filteredStudents = students.filter((student) =>
-    `${student.fname} ${student.lname} ${student._studentId} ${student.email}`
+    `${student.fname} ${student.lname} ${student._studentId} ${student.course} ${student.education} ${student.yearLevel} ${student.semester} ${student.schoolYear} ${student.registrationDate} ${student.email}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
