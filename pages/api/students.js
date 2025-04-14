@@ -170,42 +170,29 @@
     }
     
 
-  if (method === "PUT") {
-    try {
-      const { status } = req.body;
-      const { id } = req.query;  // Student ID from the URL (query param)
-  
-      if (!id) return res.status(400).json({ error: "Student ID is required" });
-      if (!status) return res.status(400).json({ error: "Status is required" });
-  
-      // Ensure status is one of the predefined options
-      const validStatuses = ["enrolled", "graduated", "dropped", "missing files"];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ error: "Invalid status" });
+    if (method === "PUT") {
+      try {
+        const { id } = req.query;
+        const updatedData = req.body;
+    
+        if (!id) return res.status(400).json({ error: "Student ID is required" });
+    
+        const updatedStudent = await Student.findOneAndUpdate(
+          { _studentId: id },
+          updatedData,
+          { new: true, runValidators: true }
+        );
+    
+        if (!updatedStudent) {
+          return res.status(404).json({ error: "Student not found" });
+        }
+    
+        return res.status(200).json(updatedStudent);
+      } catch (error) {
+        console.error("Error updating student:", error);
+        return res.status(500).json({ error: "Internal server error", details: error.message });
       }
-  
-      // Ensure student._studentId is valid (check if it's a string)
-      if (!id || typeof id !== 'string' || !id.trim()) {
-        return res.status(400).json({ error: "Invalid student ID" });
-      }
-  
-      // Find the student and update their status
-      const updatedStudent = await Student.findOneAndUpdate(
-        { _studentId: id },  // Search by student._studentId
-        { status },           // Update the status field
-        { new: true, runValidators: true }  // Ensure the update is validated
-      );
-  
-      if (!updatedStudent) {
-        return res.status(404).json({ error: "Student not found" });
-      }
-  
-      return res.status(200).json(updatedStudent);  // Return the updated student
-    } catch (error) {
-      console.error("Error updating student:", error);
-      return res.status(500).json({ error: "Internal server error", details: error.message });
     }
-  }
   
 // if (method === "DELETE") {
 //   if (req.query?.id) {

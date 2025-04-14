@@ -6,10 +6,13 @@ import axios from "axios";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 import { format } from "date-fns"; // Install if necessary: npm install date-fns
 
+import LoadingSpinner from "@/components/Loading";
+
 export default function Home() {
   const { data: session, status } = useSession();
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [EventsLoading, setEventsLoading] = useState(true);
+  const [paymentLoading, setPaymentLoading] = useState(true);
   const [totalIncome, setTotalIncome] = useState(0);
   const [chartData, setChartData] = useState([]);
   const initialized = useRef(false);
@@ -68,7 +71,7 @@ export default function Home() {
       } catch (err) {
         toast.error(`Error: ${err.message}`);
       } finally {
-        setLoading(false);
+        setEventsLoading(false);
       }
     };
   
@@ -113,6 +116,9 @@ export default function Home() {
       .catch((error) => {
         console.error("❌ Failed to fetch payments:", error);
         toast.error("Failed to fetch payments. 🚨");
+      })
+      .finally(() => {
+        setPaymentLoading(false);
       });
   }, [session, initialized]);
 
@@ -136,8 +142,8 @@ export default function Home() {
 
       <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
         <h3 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">📅 Upcoming Events</h3>
-        {loading ? (
-          <p className="text-gray-500 dark:text-gray-400">Loading events...</p>
+        {EventsLoading ? (
+          <LoadingSpinner />  
         ) : events.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">No events found.</p>
         ) : (
@@ -145,10 +151,10 @@ export default function Home() {
             {events.slice(0, 3).map((event) => (
               <div
                 key={event._id}
-                className="border border-gray-200 p-5 rounded-2xl shadow-md bg-gradient-to-br from-white to-blue-50 hover:shadow-xl transition dark:bg-gray-700 dark:border-gray-600"
+                className="bg-blue-100 p-4 rounded-lg shadow-md dark:bg-gray-700 dark:text-white"
               >
-                <h4 className="text-xl font-semibold text-blue-900 mb-1 dark:text-blue-300">{event.title}</h4>
-                <p className="text-gray-700 text-sm mb-2 dark:text-gray-300">{event.description}</p>
+                <h4 className="text-lg font-semibold mb-2">{event.title}</h4>
+                <p className="text-gray-700 dark:text-gray-400">{event.description}</p>
                 <div className="text-sm text-gray-600 space-y-1 dark:text-gray-400">
                   <p>📍 <span className="font-medium">{event.location}</span></p>
                   <p>📅 <span className="font-medium">{new Date(event.date).toLocaleDateString("en-US", {
@@ -166,7 +172,7 @@ export default function Home() {
               <div className="col-span-full mt-4">
                 <button
                   onClick={() => window.location.href = "/events"}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-blue-500 transition dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
                 >
                   Go to Events →
                 </button>
@@ -177,41 +183,51 @@ export default function Home() {
       </div>
 
           
-        <div className="space-y-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
-            <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
-              Total Income: ₱{totalIncome}
-            </h2>
-            <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-700 dark:text-white">
-              <h3 className="text-lg font-semibold mb-2 dark:text-white">Income Trends</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="amount"
-                    stroke="#4CAF50"
-                    strokeWidth={2}
-                    animationDuration={1000} // Animation duration (in ms)
-                    animationBegin={0} // Animation start time
-                    animationEasing="ease-in-out" // Animation easing
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+      <div className="space-y-8">
+        <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
+          <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
+            Total Income: ₱{totalIncome}
+          </h2>
+
+          {paymentLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
-            <div className="col-span-full mt-4">
-              <button
-                onClick={() => window.location.href = "/overall"}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition dark:bg-blue-500 dark:hover:bg-blue-600"
-              >
-                Go to Overall Payments →
-              </button>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-700 dark:text-white">
+                <h3 className="text-lg font-semibold mb-2 dark:text-white">Income Trends</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="amount"
+                      stroke="#4CAF50"
+                      strokeWidth={2}
+                      animationDuration={1000}
+                      animationBegin={0}
+                      animationEasing="ease-in-out"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="col-span-full mt-4">
+                <button
+                  onClick={() => window.location.href = "/overall"}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition dark:bg-blue-500 dark:hover:bg-blue-600"
+                >
+                  Go to Overall Payments →
+                </button>
+              </div>
+            </>
+          )}
         </div>
+      </div>
+
       </div>
     </Login>
   );

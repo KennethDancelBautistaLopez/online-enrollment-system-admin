@@ -4,6 +4,7 @@ import Login from "@/pages/Login";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { generatePDFfile } from "@/components/generatePDFfile";
+import LoadingSpinner from "@/components/Loading";
 
 export async function getServerSideProps() {
   try {
@@ -29,6 +30,7 @@ export default function Students({ initialStudents }) {
   const [students, setStudents] = useState(initialStudents || []);
   const [searchQuery, setSearchQuery] = useState("");
   const [pdfLinks, setPdfLinks] = useState({});
+  const [loading, setLoading] = useState(true);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
@@ -43,7 +45,7 @@ export default function Students({ initialStudents }) {
     }).catch((error) => {
       toast.error("Failed to load students.");
       console.error(error);
-    });
+    }).finally(() => setLoading(false));
   }, [session]);
 
   useEffect(() => {
@@ -81,6 +83,8 @@ export default function Students({ initialStudents }) {
     } catch (err) {
       toast.error("Failed to update status.");
       console.error(err);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -129,6 +133,7 @@ export default function Students({ initialStudents }) {
       toast.error("Upload failed.");
       console.error(err);
     } finally {
+      setLoading(false);
       setUploading(false);
       setFile(null);
       setSelectedStudentId(null);
@@ -149,13 +154,16 @@ export default function Students({ initialStudents }) {
   return (
     <Login>
       <div className="container mx-auto p-6">
+        {loading ? (
+          <LoadingSpinner/>
+        ) : ( 
+        <>
         <div className="flex flex-col md:flex-row justify-between items-center mb-2">
           <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-white">
             List of Students
           </h1>
         </div>
   
-        {/* 🔍 Search Bar */}
         <input
           type="text"
           placeholder="Search by Name, Email or Student Number"
@@ -267,6 +275,8 @@ export default function Students({ initialStudents }) {
           onChange={handleFileChange}
           className="hidden"
         />
+        </>
+        )}
       </div>
     </Login>
   );

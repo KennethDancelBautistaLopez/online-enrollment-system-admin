@@ -4,9 +4,11 @@ import axios from "axios";
 import PaymentForm from "@/components/PaymentForm";
 import Login from "@/pages/Login";
 import { toast } from "react-hot-toast"; // Import toast
+import LoadingSpinner from "@/components/Loading";
 
 export default function EditPaymentPage() {
   const [paymentInfo, setPaymentInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentId, setPaymentId] = useState(null);
   const router = useRouter();
@@ -46,7 +48,10 @@ export default function EditPaymentPage() {
     console.error("❌ Error fetching payment:", error.response?.data?.error || error.message);
     setError("Failed to load payment data");
     toast.error("Failed to load payment details. 🚨");
-  });
+  })
+  .finally(() => {
+    setLoading(false);
+  })
   }, [paymentId]); 
 
   const handleFormSubmit = (updatedPayment) => {
@@ -67,17 +72,23 @@ export default function EditPaymentPage() {
 
   return (
     <Login>
-      <div>
-        <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">Edit Payment</h1>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {paymentInfo ? (
-          <PaymentForm
-            paymentData={paymentInfo} // Pass the fetched payment data
-            studentData={paymentInfo.student} // Pass the student data within paymentInfo
-            onSubmit={handleFormSubmit}
-          />
+      <div className="container mx-auto p-4">
+        {loading ? (
+          <LoadingSpinner />
         ) : (
-          !error && <p>Loading payment data...</p>
+          <>
+            <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">Edit Payment</h1>
+              {error && <p style={{ color: "red" }}>{error}</p>}
+              {paymentInfo ? (
+                <PaymentForm
+                  paymentData={paymentInfo} // Pass the fetched payment data
+                  studentData={paymentInfo.student} // Pass the student data within paymentInfo
+                  onSubmit={handleFormSubmit}
+                />
+              ) : (
+                !error && <p>Loading payment data...</p>
+              )}
+          </>
         )}
       </div>
     </Login>

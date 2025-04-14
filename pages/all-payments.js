@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import LoadingSpinner from "@/components/Loading";
 
 export default function AllPayments() {
   const [groupedPayments, setGroupedPayments] = useState([]);
+  const [loading, setLoading] = useState(true); 
   const { data: session } = useSession();
   const [initialized, setInitialized] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +32,8 @@ export default function AllPayments() {
       } catch (error) {
         console.error("❌ Error fetching payments:", error);
         toast.error("Failed to load payments.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -63,7 +67,11 @@ export default function AllPayments() {
   return (
     <Login>
       <div className="container mx-auto p-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-2">
+        {loading ? (
+          <LoadingSpinner />
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-2">
           <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
             List of All Payments
           </h1>
@@ -151,6 +159,7 @@ export default function AllPayments() {
             </tbody>
           </table>
         </div>
+        </>)}
       </div>
     </Login>
   );

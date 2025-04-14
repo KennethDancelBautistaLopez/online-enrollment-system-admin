@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import StudentForm from "@/components/StudentForm";
 import {toast} from "react-hot-toast";
+import LoadingSpinner from "@/components/Loading";
 
 export default function EditStudentPage() {
   const [studentInfo, setStudentInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [studentId, setStudentId] = useState(null);
   const router = useRouter();
@@ -42,18 +44,27 @@ export default function EditStudentPage() {
       .catch((error) => {
         console.error("❌ Error fetching student:", error.response?.data?.error || error.message);
         toast.error("Failed to load student data! 🚨");
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [studentId]); 
 
   return (
     <Login>
-      <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">Edit Student</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {studentInfo ? (
-        <StudentForm {...studentInfo} />
-      ) : ( 
-        !error && <p>Loading student data...</p>
-      )}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">Edit Student</h1>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          {studentInfo ? (
+            <StudentForm {...studentInfo} />
+          ) : ( 
+            !error && <p>Loading student data...</p>
+          )}
+        </>
+        )}
     </Login>
   );
 }

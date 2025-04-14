@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+const educationHistorySchema = new mongoose.Schema({
+  schoolName: { type: String, default: "" },
+  yearAttended: { type: String, default: "" },
+});
+
 const StudentSchema = new mongoose.Schema(
   {
     _studentId: { type: String, unique: true, required: true },
@@ -23,22 +28,11 @@ const StudentSchema = new mongoose.Schema(
     lrn: { type: String, unique: true },
 
     semester: { type: String },
-    nursery: {
-      schoolName: { type: String },
-      yearAttended: { type: String },
-    },
-    elementary: {
-      schoolName: { type: String },
-      yearAttended: { type: String },
-    },
-    juniorHigh: {
-      schoolName: { type: String },
-      yearAttended: { type: String },
-    },
-    seniorHigh: {
-      schoolName: { type: String },
-      yearAttended: { type: String },
-    },
+    
+    nursery: { type: educationHistorySchema, default: () => ({}) },
+    elementary: { type: educationHistorySchema, default: () => ({}) },
+    juniorHigh: { type: educationHistorySchema, default: () => ({}) },
+    seniorHigh: { type: educationHistorySchema, default: () => ({}) },
     
     education: { type: String },
     course: { type: String },

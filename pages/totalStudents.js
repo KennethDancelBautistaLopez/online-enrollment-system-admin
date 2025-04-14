@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import LoadingSpinner from "@/components/Loading";
 
 const STATUS_COLORS = {
   enrolled: "#22c55e",       // Emerald (Tailwind green-500)
@@ -22,6 +23,7 @@ const STATUS_COLORS = {
 
 export default function StudentStatusPieChart() {
   const [totalStudents, setTotalStudents] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
   const [initialized, setInitialized] = useState(false);
 
@@ -69,7 +71,8 @@ export default function StudentStatusPieChart() {
       .catch((error) => {
         console.error("❌ Failed to fetch students:", error);
         toast.error("Failed to fetch students. 🚨");
-      });
+      })
+      .finally(() => setLoading(false));
   }, [session, initialized]);
 
   useEffect(() => {
@@ -88,8 +91,12 @@ export default function StudentStatusPieChart() {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 text-center">
           📊 Student Status Distribution
         </h1>
-  
-        <div className="max-w-3xl mx-auto bg-white border border-gray-200 dark:bg-gray-900 p-8 rounded-2xl shadow-lg">
+        {loading ? (
+          <LoadingSpinner />
+        ) :
+        ( 
+          <>
+          <div className="max-w-3xl mx-auto bg-white border border-gray-200 dark:bg-gray-900 p-8 rounded-2xl shadow-lg">
           <h2 className="text-xl font-semibold mb-6 text-blue-600 dark:text-blue-400 text-center">
             Total Students:{" "}
             <span className="text-gray-900 dark:text-white">{totalStudents}</span>
@@ -146,6 +153,9 @@ export default function StudentStatusPieChart() {
             </div>
           </div>
         </div>
+        </>
+        )}
+
       </div>
     </Login>
   );

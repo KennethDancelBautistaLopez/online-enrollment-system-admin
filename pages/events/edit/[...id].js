@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import EventForm from "@/components/EventForm"; // Create this component
 import { toast } from "react-hot-toast";
+import LoadingSpinner from "@/components/Loading";
 
 export default function EditEventPage() {
   const [eventInfo, setEventInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { id } = router.query;
 
@@ -28,13 +30,21 @@ export default function EditEventPage() {
       console.error('Error fetching event data:', error.message);
       setError('Failed to fetch event data');
       toast.error("Failed to fetch event data. Please try again. 🚨");
-    });
+    }).finally(() => {
+      setLoading(false);
+    })
   }, [id]);
 
   return (
     <Login>
-      <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">Edit Event</h1>
-      {eventInfo && <EventForm {...eventInfo} />}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">Edit Event</h1>
+          {eventInfo && <EventForm {...eventInfo} />}
+        </>
+      )}
     </Login>
   );
 }

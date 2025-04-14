@@ -6,9 +6,11 @@ import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns"; // Install if necessary: npm install date-fns
 import { useRouter } from "next/router"; // Import useRouter for navigation
+import LoadingSpinner from "@/components/Loading";
 
 export default function Payments() {
   const [totalIncome, setTotalIncome] = useState(0);
+  const [loading, setLoading] = useState(true)
   const [chartData, setChartData] = useState([]);
   const [initialized, setInitialized] = useState(false);
 
@@ -58,7 +60,7 @@ export default function Payments() {
       .catch((error) => {
         console.error("❌ Failed to fetch payments:", error);
         toast.error("Failed to fetch payments. 🚨");
-      });
+      }).finally(() => setLoading(false))
   }, [session, initialized, router]);
 
   if (!session) {
@@ -68,6 +70,11 @@ export default function Payments() {
   return (
     <Login>
       <div className="space-y-8">
+        {loading ? (
+                  <LoadingSpinner />
+                ) :
+                ( 
+                  <>
       <h1 className="text-3xl font-bold pt-4 mb-2 md:mb-0 text-gray-800 dark:text-white">Overall Income</h1>
           <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
             <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
@@ -94,6 +101,8 @@ export default function Payments() {
               </ResponsiveContainer>
             </div>
           </div>
+          </>
+                )}
         </div>
     </Login>
   );

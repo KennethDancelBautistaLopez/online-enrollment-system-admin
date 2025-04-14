@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import Login from "@/pages/Login";
+import LoadingSpinner from "@/components/Loading";
 
 export default function StudentPaymentsView() {
   const router = useRouter();
@@ -29,14 +30,14 @@ export default function StudentPaymentsView() {
 
     fetchStudentPayments();
   }, [studentId]);
-
-  if (loading) return <p className="p-4">Loading...</p>;
-  if (!studentData) return <p className="p-4 text-red-500">Student not found.</p>;
-
   return (
     <Login>
       <div className="container mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg my-10">
-        <Link href="/all-payments">
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+            <Link href="/all-payments">
           <span className="text-blue-600 hover:underline mb-4 block dark:text-blue-400">
             ← Back to All Payments
           </span>
@@ -79,6 +80,8 @@ export default function StudentPaymentsView() {
             </tbody>
           </table>
         </div>
+        </>
+      )}
       </div>
     </Login>
   );

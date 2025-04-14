@@ -105,6 +105,10 @@ export function generatePDFfile(student) {
 
     addField("School Year", student.schoolYear);
     addField("LRN", student.lrn, 110, 120);
+    y += 7;
+
+    addField("Course", student.course);
+    addField("Student No.", student._studentId, 110, 135);
     y += 10;
 
     sectionTitle("Enrollment Contract");
