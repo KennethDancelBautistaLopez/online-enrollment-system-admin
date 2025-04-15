@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { generatePDFfile } from "@/components/generatePDFfile";
 import LoadingSpinner from "@/components/Loading";
+import Link from "next/link";
 
 export async function getServerSideProps() {
   try {
@@ -92,19 +93,29 @@ export default function Students({ initialStudents }) {
     const selectedFile = e.target.files[0];
     const allowedTypes = ['image/jpeg', 'application/pdf'];
     const maxSize = 10 * 1024 * 1024;
-
+  
     if (selectedFile && !allowedTypes.includes(selectedFile.type)) {
       toast.error("Only JPEG and PDF are allowed.");
       e.target.value = '';
       return;
     }
-
+  
     if (selectedFile && selectedFile.size > maxSize) {
       toast.error("File too large. Max 10MB.");
       e.target.value = '';
       return;
     }
-
+  
+    // Convert to Base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result;
+      console.log("Base64 String:", base64String); // or save to state
+      // You can also store this in state if needed:
+      // setBase64File(base64String);
+    };
+    reader.readAsDataURL(selectedFile);
+  
     setFile(selectedFile);
   };
 
@@ -201,11 +212,11 @@ export default function Students({ initialStudents }) {
                     <td className="border p-2 dark:border-gray-700">{student.fname} {student.mname} {student.lname}</td>
                     <td className="border p-2 dark:border-gray-700">{student.email}</td>
                     <td className="border p-4 text-center dark:border-gray-700 text-gray-100">
-                      {student.filePath && (
-                        <a href={`/uploads/${student._studentId}-download.jpg`} target="_blank" className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                          View
-                        </a>
-                      )}
+                    <Link href={`/students/student-files/${student._id}`}>
+                      <button className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        View
+                      </button>
+                    </Link>
                     </td>
                     <td className="border p-4 text-center dark:border-gray-700 text-gray-100">
                       <button
@@ -213,7 +224,7 @@ export default function Students({ initialStudents }) {
                           setSelectedStudentId(student._studentId);
                           triggerFileSelection();
                         }}
-                        className="btn-primary text-sm px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                        className="btn-primary text-sm px-3 py-2 bg-green-500 text-white rounded-md hover:bg-blue-600"
                       >
                         Upload
                       </button>
@@ -223,7 +234,7 @@ export default function Students({ initialStudents }) {
                           <button
                             onClick={() => handleUpload(student._studentId)}
                             disabled={uploading}
-                            className="btn-primary text-sm px-3 py-2 mt-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                            className="btn-primary text-sm px-3 py-2 mt-2 bg-yellow-500 text-white rounded-md hover:bg-blue-600"
                           >
                             {uploading ? "Uploading..." : "Upload File"}
                           </button>
@@ -243,19 +254,19 @@ export default function Students({ initialStudents }) {
                         <option value="missing files">Missing Files</option>
                       </select>
                     </td>
-                    <td className="border p-4 text-center text-gray-100">
+                    <td className="border p-4 text-center dark:border-gray-700">
                       {pdfLinks[student._studentId] ? (
                         <a
                           href={pdfLinks[student._studentId]}
                           download={`${student.fname}_${student.lname}_info.pdf`}
-                          className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-green-600"
+                          className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                         >
                           Download
                         </a>
                       ) : (
                         <button
                           onClick={() => handleGeneratePDF(student)}
-                          className="btn-primary text-sm px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-green-600"
+                          className="btn-primary text-sm px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-blue-600"
                         >
                           Generate PDF
                         </button>
