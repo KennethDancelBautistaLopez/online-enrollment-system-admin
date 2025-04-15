@@ -1,8 +1,8 @@
-import nextConnect from 'next-connect'; // Correct import syntax
+import nextConnect from 'next-connect';
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import Student from "@/models/Student"; // Import Student model
+import Student from "@/models/Student";
 
 const uploadDir = path.join(process.cwd(), "public", "uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 const apiRoute = nextConnect({
   onError(error, req, res) {
@@ -30,30 +30,25 @@ const apiRoute = nextConnect({
   },
 });
 
-apiRoute.use(upload.single("file"));
-
-apiRoute.post(async (req, res) => {
-  console.log('File upload request received');
+// POST: Upload a file
+apiRoute.post(upload.single("file"), async (req, res) => {
   const file = req.file;
   const studentId = req.body.studentId;
 
-  if (!file) {
-    console.error('No file uploaded');
-    return res.status(400).json({ error: 'No file uploaded' });
+  if (!file || !studentId) {
+    return res.status(400).json({ error: 'Missing file or studentId' });
   }
 
   const filePath = `/uploads/${file.filename}`;
-  console.log('File path:', filePath);
 
   try {
-    console.log('Updating student record in the database');
     const student = await Student.findOneAndUpdate(
       { _studentId: studentId },
       {
         $push: {
           files: {
             filename: file.originalname,
-            filePath: filePath,
+            filePath,
             mimeType: file.mimetype,
             size: file.size,
           },
@@ -62,23 +57,69 @@ apiRoute.post(async (req, res) => {
       { new: true }
     );
 
-    if (!student) {
-      console.error('Student not found');
-      return res.status(404).json({ error: 'Student not found' });
-    }
+    if (!student) return res.status(404).json({ error: 'Student not found' });
 
-    console.log('Student updated successfully');
-    res.status(200).json({ filePath });
+    res.status(200).json({ message: 'File uploaded', filePath });
   } catch (error) {
-    console.error('Database error:', error);
+    console.error('Error uploading file:', error);
     res.status(500).json({ error: 'Failed to update student record with file' });
   }
 });
+
+// GET: Retrieve student files
+apiRoute.get(async (req, res) => {
+  const { studentId } = req.query;
+
+  try {
+    const student = await Student.findOne({ _studentId: studentId });
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+
+    res.status(200).json({ files: student.files || [] });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch files' });
+  }
+});
+
+apiRoute.delete(async (req, res) => {
+  const { studentId, filePath } = req.query; // ⬅️ Use query, not req.body
+
+  if (!studentId || !filePath) {
+    return res.status(400).json({ error: "Missing studentId or filePath" });
+  }
+
+  try {
+    const student =
+      (await Student.findOneAndUpdate(
+        { _studentId: studentId },
+        { $pull: { files: { filePath } } },
+        { new: true }
+      )) ||
+      (await Student.findOneAndUpdate(
+        { _id: studentId },
+        { $pull: { files: { filePath } } },
+        { new: true }
+      ));
+
+    if (!student) {
+      console.warn(`Student not found for ID: ${studentId}`);
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    const absolutePath = path.join(process.cwd(), "public", filePath);
+    await fs.promises.unlink(absolutePath); // Use `fs.promises` directly
+
+    return res.status(200).json({ success: true, student });
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 export default apiRoute;
 
 export const config = {
   api: {
-    bodyParser: false, // Disallow body parsing, consume as stream
+    bodyParser: false, // Needed for multer and raw body reading
   },
 };
