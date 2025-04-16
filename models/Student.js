@@ -48,10 +48,11 @@ const StudentSchema = new mongoose.Schema(
     },
 
     files: [{
-      filename: { type: String, required: true },
-      filePath: { type: String, required: true },
+      filename: { type: String, required: true, index: true },
+      filePath: { type: String, default: "" },
       mimeType: { type: String, required: true },
-      size: { type: Number, required: true }
+      size: { type: Number, required: true },
+      base64: { type: String }
     }],
 
     // 💵 New Fields for Payment Tracking

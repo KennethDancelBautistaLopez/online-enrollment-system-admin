@@ -11,7 +11,7 @@ export default function StudentFiles() {
   const { id } = router.query;
 
   const [student, setStudent] = useState(null);
-  const [actionLoading, setActionLoading] = useState({}); // Track loading by filePath
+  const [actionLoading, setActionLoading] = useState({});
 
   const fetchStudent = () => {
     fetch(`/api/students?id=${id}`)
@@ -28,29 +28,32 @@ export default function StudentFiles() {
     if (id) fetchStudent();
   }, [id]);
 
-  const handleDelete = async (filePath) => {
-    if (!confirm("Are you sure you want to delete this file?")) return;
-    setActionLoading((prev) => ({ ...prev, [filePath]: true }));
-
+  const handleDelete = async (index) => {
+    const confirmDelete = confirm("Are you sure you want to delete this file?");
+    if (!confirmDelete) return;
+  
+    setActionLoading((prev) => ({ ...prev, [index]: true }));
+  
     try {
-      const res = await fetch(`/api/upload?studentId=${id}&filePath=${encodeURIComponent(filePath)}`, {
+      const res = await fetch(`/api/upload?studentId=${student._studentId}&index=${index}`, {
         method: "DELETE",
       });
-
+  
       const data = await res.json();
-
-      if (res.ok) {
-        toast.success("File deleted successfully.");
-        fetchStudent();
+  
+      if (!res.ok) {
+        console.error(data.error || "Unknown error");
+        toast.error(data.error || "Failed to delete file.");
       } else {
-        console.error(data.error);
-        toast.error("Failed to delete file.");
+        toast.success("File deleted successfully.");
+        // Refresh the updated list
+        fetchStudent();
       }
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Something went wrong while deleting the file.");
     } finally {
-      setActionLoading((prev) => ({ ...prev, [filePath]: false }));
+      setActionLoading((prev) => ({ ...prev, [index]: false }));
     }
   };
 
@@ -69,7 +72,11 @@ export default function StudentFiles() {
             {student.files && student.files.length > 0 ? (
               <div className="space-y-3">
                 {student.files.map((file, index) => {
-                  const isBusy = actionLoading[file.filePath];
+                  const isBusy = actionLoading[index];
+                  const viewUrl = `/api/upload?studentId=${student._studentId}&index=${index}&inline=true`;
+                  const downloadUrl = `/api/upload?studentId=${student._studentId}&index=${index}`;
+                  console.log("Download URL:", downloadUrl);
+
                   return (
                     <div
                       key={index}
@@ -82,7 +89,7 @@ export default function StudentFiles() {
 
                       <div className="flex gap-2 ml-4">
                         <a
-                          href={file.filePath}
+                          href={viewUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm ${
@@ -92,14 +99,14 @@ export default function StudentFiles() {
                           {isBusy ? "Opening..." : "View"}
                         </a>
                         <a
-                          href={file.filePath}
-                          download
+                          href={downloadUrl}
+                          download={file.filename}
                           className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm"
                         >
                           Download
                         </a>
                         <button
-                          onClick={() => handleDelete(file.filePath)}
+                          onClick={() => handleDelete(index)}
                           disabled={isBusy}
                           className={`px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm ${
                             isBusy ? "opacity-50" : ""
