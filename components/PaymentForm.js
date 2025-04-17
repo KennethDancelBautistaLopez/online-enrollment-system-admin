@@ -63,7 +63,7 @@ export default function PaymentForm({ paymentData, studentData }) {
 
         setTimeout(() => {
           router.push({
-            pathname: "/payments",
+            pathname: "/paymentsPage",
             query: {
               amount,
               description,
