@@ -3,6 +3,8 @@
   import jwt from "jsonwebtoken";
   import mongoose from "mongoose";
   import {hash} from "bcryptjs";
+  import bcrypt from "bcryptjs";
+  
 
 
   async function handler(req, res) {
