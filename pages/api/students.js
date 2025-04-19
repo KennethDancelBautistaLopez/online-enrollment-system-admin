@@ -176,6 +176,11 @@
         const updatedData = req.body;
     
         if (!id) return res.status(400).json({ error: "Student ID is required" });
+
+        if (updatedData.password) {
+          const salt = await bcrypt.genSalt(10);
+          updatedData.password = await bcrypt.hash(updatedData.password, salt);
+        }
     
         const updatedStudent = await Student.findOneAndUpdate(
           { _studentId: id },
