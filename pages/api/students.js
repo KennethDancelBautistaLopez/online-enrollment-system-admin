@@ -68,6 +68,14 @@
         if (!mobileRegex.test(mobile)) {
           return res.status(400).json({ error: "Invalid mobile number format. Use XXXX-XXX-XXXX." });
         }
+
+        // password validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+          return res.status(400).json({ error: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character." });
+        }
+    
+        // Validate email
     
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
@@ -81,7 +89,8 @@
         }
     
         // Hash password before saving it
-        const hashedPassword = await hash(password, 12);
+        const hashedPassword = await hash(password, 10);
+      
     
         // Generate student ID
         const currentYear = new Date().getFullYear();
@@ -180,8 +189,11 @@
         if (!id) return res.status(400).json({ error: "Student ID is required" });
 
         if (updatedData.password) {
-          const salt = await bcrypt.genSalt(10);
-          updatedData.password = await bcrypt.hash(updatedData.password, salt);
+          const isHashed = /^\$2[aby]\$[\d]+\$/.test(updatedData.password);
+          if (!isHashed) {
+            const salt = await bcrypt.genSalt(10);
+            updatedData.password = await bcrypt.hash(updatedData.password, salt);
+          }
         }
     
         const updatedStudent = await Student.findOneAndUpdate(

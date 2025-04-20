@@ -3,6 +3,51 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
+function formatLandline(value) {
+  const cleaned = value.replace(/\D/g, ""); // Remove non-numeric characters
+  const formatted = cleaned.slice(0, 11); // Limit to 11 digits
+
+  if (formatted.length <= 3) {
+    return formatted; // Return as is if 3 or fewer digits
+  } else if (formatted.length <= 5) {
+    return `${formatted.slice(0, 2)}-${formatted.slice(2)}`; // Format as XX-XXX for 4-5 digits
+  } else if (formatted.length <= 8) {
+    return `${formatted.slice(0, 2)}-${formatted.slice(2, 5)}-${formatted.slice(5)}`; // Format as XX-XXX-XXXX for 6-8 digits
+  } else {
+    return `${formatted.slice(0, 2)}-${formatted.slice(2, 5)}-${formatted.slice(5, 8)}-${formatted.slice(8)}`; // Format as XX-XXX-XXX-XXX for 9-11 digits
+  }
+}
+
+function YearAttendedInput({ name }) {
+  const [value, setValue] = useState("");
+
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
+    let formatted = raw;
+    if (raw.length > 4) {
+      formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+    }
+    setValue(formatted);
+
+    if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+      toast.error("Please use the format YYYY-YYYY");
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        name={name}
+        placeholder="Year Attended (e.g., 2000-2004)"
+        value={value}
+        onChange={handleChange}
+        className="input-style"
+      />
+    </div>
+  );
+}
+
 export default function StudentForm({
   _studentId,
   fname: existingFname = "",
@@ -289,29 +334,29 @@ export default function StudentForm({
         <div className="space-y-2">
           <label className="text-gray-700 dark:text-white">Landline Number</label>
           <input
-            type="text"
-            placeholder="Enter landline number"
-            value={landline}
-            maxLength={8}
+            type="tel"
+            name="landline"
+            placeholder="Landline Number (11 digits)"
+            required
             className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => {
-              const val = ev.target.value;
-              if (/^\d{0,8}$/.test(val)) {
-                setLandline(val);
-              }
+            value={landline}
+            onChange={(e) => {
+              const formattedLandline = formatLandline(e.target.value);
+              setLandline(formattedLandline);
             }}
           />
         </div>
 
         <div className="space-y-2">
           <label className="text-gray-700 dark:text-white"
-          >Facebook</label>
+          >Facebook <span className="text-red-500 font-bold">*</span></label>
           <input
             type="url"
             placeholder="Enter Facebook link"
            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             value={facebook}
             onChange={(ev) => setFacebook(ev.target.value)}
+            required
           />
         </div>
 
@@ -475,14 +520,28 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
-          >School Year <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 dark:text-white">
+            School Year <span className="text-red-500 font-bold">*</span>
+          </label>
           <input
             type="text"
             placeholder="Enter school year"
             value={schoolYear}
             className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setSchoolYear(ev.target.value)}
+            onChange={(ev) => {
+              const raw = ev.target.value.replace(/\D/g, "").slice(0, 8); // remove non-digits, max 8 digits
+              let formatted = raw;
+
+              if (raw.length > 4) {
+                formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+              }
+
+              setSchoolYear(formatted);
+
+              if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+                toast.error("Please use the format YYYY-YYYY");
+              }
+            }}
             required
           />
         </div>
@@ -528,14 +587,13 @@ export default function StudentForm({
             <option value="">Select Semester</option>
             <option value="1st Semester">1st Semester</option>
             <option value="2nd Semester">2nd Semester</option>
-            <option value="3rd Semester">3rd Semester</option>
           </select>
         </div>        
 
       {/* Nursery School */}
       <div className="space-y-2">
         <label className="text-gray-700 dark:text-white"
-        >Nursery School Attended</label>
+        >Nursery School Attended <span className="text-red-500 font-bold">*</span></label>
         <input
           type="text"
           value={nurseryState.schoolName}
@@ -544,19 +602,32 @@ export default function StudentForm({
         />
       </div>
       <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Nursery Year Attended (e.g. 2010-2011)</label>
+        <label className="text-gray-700 dark:text-white">
+          Nursery Year Attended <span className="text-red-500 font-bold">*</span>
+        </label>
         <input
           type="text"
           value={nurseryState.yearAttended}
-          onChange={(e) => setNursery({ ...nurseryState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
+            let formatted = raw;
+            if (raw.length > 4) {
+              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+            }
+            setNursery({ ...nurseryState, yearAttended: formatted });
+            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+              toast.error("Please use the format YYYY-YYYY");
+            }
+          }}
+          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+          required
         />
       </div>
 
+
       <div className="space-y-2">
         <label className="text-gray-700 dark:text-white"
-        >Elementary School Attended *</label>
+        >Elementary School Attended <span className="text-red-500 font-bold">*</span></label>
         <input
           type="text"
           value={elementaryState.schoolName}
@@ -566,20 +637,31 @@ export default function StudentForm({
         />
       </div>
       <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Elementary Year Attended *</label>
+        <label className="text-gray-700 dark:text-white">
+          Elementary Year Attended <span className="text-red-500 font-bold">*</span>
+        </label>
         <input
           type="text"
           value={elementaryState.yearAttended}
-          onChange={(e) => setElementary({ ...elementaryState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
+            let formatted = raw;
+            if (raw.length > 4) {
+              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+            }
+            setElementary({ ...elementaryState, yearAttended: formatted });
+            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+              toast.error("Please use the format YYYY-YYYY");
+            }
+          }}
+          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
 
       <div className="space-y-2">
         <label className="text-gray-700 dark:text-white"
-        >Junior High School Attended *</label>
+        >Junior High School Attended <span className="text-red-500 font-bold">*</span></label>
         <input
           type="text"
           value={juniorHighState.schoolName}
@@ -589,20 +671,31 @@ export default function StudentForm({
         />
       </div>
       <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Junior High Year Attended *</label>
+        <label className="text-gray-700 dark:text-white">Junior High Year Attended <span className="text-red-500 font-bold">*</span></label>
         <input
           type="text"
           value={juniorHighState.yearAttended}
-          onChange={(e) => setJuniorHigh({ ...juniorHighState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
+            let formatted = raw;
+            if (raw.length > 4) {
+              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+            }
+            setJuniorHigh({
+              ...juniorHighState,
+              yearAttended: formatted,
+            });
+            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+              toast.error("Please use the format YYYY-YYYY");
+            }
+          }}
+          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
-
       <div className="space-y-2">
         <label className="text-gray-700 dark:text-white"
-        >Senior High School Attended *</label>
+        >Senior High School Attended <span className="text-red-500 font-bold">*</span></label>
         <input
           type="text"
           value={seniorHighState.schoolName}
@@ -612,17 +705,29 @@ export default function StudentForm({
         />
       </div>
       <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Senior High Year Attended *</label>
+        <label className="text-gray-700 dark:text-white">
+          Senior High Year Attended <span className="text-red-500 font-bold">*</span>
+        </label>
         <input
           type="text"
           value={seniorHighState.yearAttended}
-          onChange={(e) => setSeniorHigh({ ...seniorHighState, yearAttended: e.target.value })}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
+            let formatted = raw;
+            if (raw.length > 4) {
+              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+            }
+
+            setSeniorHigh({ ...seniorHighState, yearAttended: formatted });
+
+            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+              toast.error("Please use the format YYYY-YYYY");
+            }
+          }}
+          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
           required
         />
       </div>
-
 
       <div className="space-y-2">
           <label className="text-gray-700 dark:text-white"
@@ -644,6 +749,7 @@ export default function StudentForm({
             type="password"
             placeholder="Enter password"
             value={password}
+            minLength={8}
             className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setPassword(ev.target.value)}
             required
