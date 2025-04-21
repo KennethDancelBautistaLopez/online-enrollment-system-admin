@@ -181,7 +181,7 @@
     }
     
 
-    if (method === "PUT") {
+    if (method === "PUT" || method === "PATCH") {
       try {
         const { id } = req.query;
         const updatedData = req.body;

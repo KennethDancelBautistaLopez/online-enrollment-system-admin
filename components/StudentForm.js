@@ -50,36 +50,7 @@ function YearAttendedInput({ name }) {
 
 export default function StudentForm({
   _studentId,
-  fname: existingFname = "",
-  mname: existingMname = "",
-  lname: existingLname = "",
-  address: existingAddress = "",
-  mobile: existingMobile = "",
-  landline: existingLandline = "",
-  facebook: existingFacebook = "",
-  birthdate: existingBirthdate = "",
-  birthplace: existingBirthplace = "",
-  nationality: existingNationality = "",
-  religion: existingReligion = "",
-  sex: existingSex = "",
-  father: existingFather = "",
-  mother: existingMother = "",
-  guardian: existingGuardian = "",
-  guardianOccupation: existingGuardianOccupation = "",
-  registrationDate: existingRegistrationDate = "",
-  lrn: existingLrn = "",
-  education: existingEducation = "",
-  course: existingCourse = "",
-  yearLevel: existingYearLevel = "",
-  schoolYear: existingSchoolYear = "",
-  email: existingEmail = "",
-  password: existingPassword = "",
-  semester: existingSemester = "",
-  nursery = { yearAttended: "", schoolName: "" },
-  elementary = { yearAttended: "", schoolName: "" },
-  juniorHigh = { yearAttended: "", schoolName: "" },
-  seniorHigh = { yearAttended: "", schoolName: "" },
-  status: existingStatus = "",
+  fname: existingFname = "",mname: existingMname = "",lname: existingLname = "",address: existingAddress = "",mobile: existingMobile = "",landline: existingLandline = "",facebook: existingFacebook = "",birthdate: existingBirthdate = "",birthplace: existingBirthplace = "",nationality: existingNationality = "",religion: existingReligion = "",sex: existingSex = "",father: existingFather = "",mother: existingMother = "",guardian: existingGuardian = "",guardianOccupation: existingGuardianOccupation = "",registrationDate: existingRegistrationDate = "",lrn: existingLrn = "",education: existingEducation = "",course: existingCourse = "",yearLevel: existingYearLevel = "",schoolYear: existingSchoolYear = "",email: existingEmail = "",password: existingPassword = "",semester: existingSemester = "",nursery = { yearAttended: "", schoolName: "" },elementary = { yearAttended: "", schoolName: "" },juniorHigh = { yearAttended: ""},highSchool = { yearAttended: "", schoolName: "" },seniorHigh = { yearAttended: "", schoolName: "" },status: existingStatus = "",
 }) {
   const [fname, setFname] = useState(existingFname);
   const [mname, setMname] = useState(existingMname);
@@ -113,113 +84,21 @@ export default function StudentForm({
   const [elementaryState, setElementary] = useState(elementary || { schoolName: "", yearAttended: "" });
   const [juniorHighState, setJuniorHigh] = useState(juniorHigh || { schoolName: "", yearAttended: "" });
   const [seniorHighState, setSeniorHigh] = useState(seniorHigh || { schoolName: "", yearAttended: "" });
-  
-
   const [goToStudents, setGoToStudents] = useState(false);
   const router = useRouter();
-
   useEffect(() => {
     console.log("Props received in StudentForm:", {
-      _studentId,
-      fname,
-      mname,
-      lname,
-      address,
-      mobile,
-      landline,
-      facebook,
-      birthdate,
-      birthplace,
-      nationality,
-      religion,
-      sex,
-      father,
-      mother,
-      guardian,
-      guardianOccupation,
-      registrationDate,
-      lrn,
-      education,
-      course,
-      yearLevel,
-      schoolYear,
-      email,
-      password,
-      semester,
-      nursery,
-      elementary,
-      juniorHigh,
-      seniorHigh,
-      status
+      _studentId,fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,password,semester,nursery,elementary,juniorHigh,seniorHigh,status
     });
   }, [
-    _studentId,
-    fname,
-    mname,
-    lname,
-    address,
-    mobile,
-    landline,
-    facebook,
-    birthdate,
-    birthplace,
-    nationality,
-    religion,
-    sex,
-    father,
-    mother,
-    guardian,
-    guardianOccupation,
-    registrationDate,
-    lrn,
-    education,
-    course,
-    yearLevel,
-    schoolYear,
-    email,
-    password,
-    semester,
-    nursery,
-    elementary,
-    juniorHigh,
-    seniorHigh,
-    status,
+    _studentId, fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,password,semester, nursery,elementary,juniorHigh,seniorHigh,status,
   ]);
 
   async function saveStudent(ev) {
     ev.preventDefault();
   
     const studentInfo = {
-      fname,
-      mname,
-      lname,
-      address,
-      mobile,
-      landline,
-      facebook,
-      birthdate,
-      birthplace,
-      nationality,
-      religion,
-      sex,
-      father,
-      mother,
-      guardian,
-      guardianOccupation,
-      registrationDate,
-      lrn,
-      education,
-      course,
-      yearLevel,
-      schoolYear,
-      email,
-      password,
-      semester,
-      nursery: nurseryState,
-      elementary: elementaryState,
-      juniorHigh: juniorHighState,
-      seniorHigh: seniorHighState,
-      status
+      fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,password,semester,nursery: nurseryState,elementary: elementaryState,juniorHigh: juniorHighState,seniorHigh: seniorHighState,status
     };
   
     // Only include _studentId when updating
@@ -230,8 +109,9 @@ export default function StudentForm({
     console.log("Data being sent:", studentInfo);
   
     try {
+      const updateMethod = shouldUsePatch() ? "PATCH" : "PUT";
       const response = await axios({
-        method: _studentId ? "PUT" : "POST",
+        method: _studentId ? updateMethod : "POST",
         url: _studentId ? `/api/students?id=${_studentId}` : "/api/students",
         data: studentInfo,
         headers: { "Content-Type": "application/json" },
