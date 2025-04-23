@@ -10,8 +10,6 @@ export default async function handler(req, res) {
       return handlePostRequest(req, res);
     case "GET":
       return handleGetRequest(req, res);
-    case "PUT":
-      return handlePutRequest(req, res);
     case "DELETE":
       return handleDeleteRequest(req, res);
     default:
@@ -256,77 +254,33 @@ async function handleGetRequest(req, res) {
   }
 }
 
-
-async function handlePutRequest(req, res) {
-  try {
-    const { id, amount, description, fname, mname, lname , studentId, lrn, education, course, yearLevel, schoolYear, semester,  } = req.body;
-
-    if (!id || !amount || !description || !fname || !lname || !studentId || !lrn || !education || !yearLevel || !schoolYear || !semester) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const updatedPayment = await Payment.findByIdAndUpdate(
-      id,
-      {
-        amount,
-        description,
-        fname,
-        mname,
-        lname,
-        studentId,
-        lrn,
-        education,
-        course,
-        yearLevel,
-        schoolYear,
-        semester
-      },
-      { new: true }
-    );
-
-    if (!updatedPayment) {
-      return res.status(404).json({ error: "Payment not found" });
-    }
-
-    res.status(200).json(updatedPayment);
-  } catch (error) {
-    console.error("Error updating payment:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
 async function handleDeleteRequest(req, res) {
-  const { id } = req.query; // Get the dynamic 'id' from the URL
+  const { id } = req.query;
 
   try {
     if (!id) {
       return res.status(400).json({ error: "Payment ID is required" });
     }
 
-    // Find the payment based on the 'id'
     const payment = await Payment.findOne({ paymentId: id }).exec();
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });
     }
 
-    // Find the student related to this payment
     const student = await Student.findById(payment.studentRef);
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // Remove the payment reference from the student's payments array
-    student.payments = student.payments.filter(
+    // Safe filter in case student.payments is undefined
+    student.payments = (student.payments || []).filter(
       (paymentId) => paymentId.toString() !== payment._id.toString()
     );
 
-    // Update the student's totalPaid and balance
     student.totalPaid -= payment.amount;
     student.balance = student.tuitionFee - student.totalPaid;
 
-    // Save the student data
     await student.save();
-
-    // Delete the payment record
     await payment.deleteOne();
 
     return res.status(200).json({ success: true, message: "Payment deleted successfully" });

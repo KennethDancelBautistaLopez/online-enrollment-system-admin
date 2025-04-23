@@ -60,8 +60,10 @@ const StudentSchema = new mongoose.Schema(
     totalPaid: { type: Number, default: 0 },  // Sum of completed payments
     balance: { type: Number, default: 0 },    // tuitionFee - totalPaid
 
-    // 🔗 Reference to related payments (optional, for fast lookup)
-    payments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Payment" }]
+  payments: {
+  type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Payment" }],
+  default: []
+}
   },
   { timestamps: true }
 );

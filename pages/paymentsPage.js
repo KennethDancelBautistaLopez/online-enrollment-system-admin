@@ -123,6 +123,7 @@ export default function PaymentsPage() {
                     <th className="border p-2 text-gray-900 dark:text-white">Semester</th>  
                     <th className="border p-2 text-gray-900 dark:text-white">Year Level</th>
                     <th className="border p-2 text-gray-900 dark:text-white">School Year</th>
+                    <th className="border p-2 text-gray-900 dark:text-white">Status</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Receipt</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Actions</th>
                   </tr>
@@ -148,6 +149,7 @@ export default function PaymentsPage() {
                         <td className="border p-2">{payment.semester || "N/A"}</td>
                         <td className="border p-2">{payment.yearLevel || "N/A"}</td>
                         <td className="border p-2">{payment.schoolYear || "N/A"}</td>
+                        <td className="border p-2">{payment.status}</td>
                         <td className="border p-2">
                           <button
                             className="btn-primary text-sm px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-green-600 dark:bg-indigo-600 dark:hover:bg-indigo-500"

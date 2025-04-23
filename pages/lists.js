@@ -110,9 +110,7 @@ export default function Students({ initialStudents }) {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result;
-      console.log("Base64 String:", base64String); // or save to state
-      // You can also store this in state if needed:
-      // setBase64File(base64String);
+      console.log("Base64 String:", base64String); 
     };
     reader.readAsDataURL(selectedFile);
   
@@ -208,9 +206,9 @@ export default function Students({ initialStudents }) {
                 filteredStudents.map((student, index) => (
                   <tr key={student._studentId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="border p-2 text-center dark:border-gray-700">{index + 1}</td>
-                    <td className="border p-2 dark:border-gray-700">{student._studentId}</td>
+                    <td className="border p-2 dark:border-gray-700">{student._studentId || "N/A"}</td>
                     <td className="border p-2 dark:border-gray-700">{student.fname} {student.mname} {student.lname}</td>
-                    <td className="border p-2 dark:border-gray-700">{student.email}</td>
+                    <td className="border p-2 dark:border-gray-700">{student.email || "N/A"}</td>
                     <td className="border p-4 text-center dark:border-gray-700 text-gray-100">
                     <Link href={`/students/student-files/${student._id}`}>
                       <button className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">

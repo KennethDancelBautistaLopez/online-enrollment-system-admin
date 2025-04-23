@@ -109,9 +109,9 @@ export default function StudentForm({
     console.log("Data being sent:", studentInfo);
   
     try {
-      const updateMethod = shouldUsePatch() ? "PATCH" : "PUT";
+   
       const response = await axios({
-        method: _studentId ? updateMethod : "POST",
+        method: _studentId ? "PUT" : "POST",
         url: _studentId ? `/api/students?id=${_studentId}` : "/api/students",
         data: studentInfo,
         headers: { "Content-Type": "application/json" },

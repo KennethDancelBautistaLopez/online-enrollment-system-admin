@@ -1,89 +1,65 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 
-export default function PaymentForm({ paymentData, studentData }) {
+export default function PaymentForm({ studentData }) {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [examPeriod, setExamPeriod] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [paymentId, setPaymentId] = useState("");
+  const [studentId, setStudentId] = useState(studentData?._studentId || "");
   const router = useRouter();
-
-  useEffect(() => {
-    if (paymentData) {
-      setAmount(paymentData.amount);
-      setDescription(paymentData.description);
-      setPaymentId(paymentData._id);
-      setExamPeriod(paymentData.examPeriod || "");
-    }
-
-    if (studentData) {
-      setStudentId(studentData._studentId);
-    }
-  }, [paymentData, studentData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!amount || !description || !examPeriod || !studentId) {
+    const numericAmount = parseFloat(amount); 
+
+    if (!numericAmount || !description || !examPeriod || !studentId) {
       toast.error("Please fill in all required fields.");
       return;
     }
 
-    if (amount > 9999999.99) {
+    if (numericAmount > 9999999.99) {
       toast.error("Maximum allowed amount is ₱9,999,999.99");
       return;
     }
 
-    await handlePayment(amount, description, examPeriod, studentId);
-  };
 
-  const handlePayment = async (amount, description, examPeriod, studentId) => {
-    try {
-      const res = await fetch(`/api/payments${paymentId ? `/${paymentId}` : ""}`, {
-        method: paymentId ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          amount,
-          description,
-          examPeriod,
-          _studentId: studentId,
-        }),
-      });
 
-      const data = await res.json();
-
-      if (res.ok && data?.checkoutUrl) {
-        toast.success("Payment created. Redirecting to checkout...");
-        window.open(data.checkoutUrl, "_blank");
-
-        setTimeout(() => {
-          router.push({
-            pathname: "/paymentsPage",
-            query: {
-              amount,
-              description,
-              studentId,
-              examPeriod,
-            },
-          });
-        }, 5000);
-      } else {
-        toast.error(data?.error || "Something went wrong. Please try again.");
-      }
-    } catch (error) {
-      toast.error(error?.response?.data?.error || "Payment failed. Please try again.");
+    const res = await fetch("/api/payments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        amount: numericAmount,
+        description,
+        examPeriod,
+        _studentId: studentId,
+      }),
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok && data?.checkoutUrl) {
+      toast.success("Redirecting to checkout...");
+      window.open(data.checkoutUrl, "_blank");
+      setTimeout(() => {
+        router.push({
+          pathname: "/paymentsPage",
+          query: { amount, description, studentId, examPeriod },
+        });
+      }, 5000);
+    } else {
+      toast.error(data?.error || "Something went wrong. Please try again.");
     }
   };
 
   return (
     <div className="max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-        {paymentId ? "Edit Payment" : "Tuition Payment"}
+        Tuition Payment
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Exam Period */}
@@ -115,7 +91,7 @@ export default function PaymentForm({ paymentData, studentData }) {
             <option value="Finals">Finals</option>
           </select>
         </div>
-  
+
         {/* Amount */}
         <div>
           <label className="block text-gray-700 dark:text-gray-200 font-medium">Amount (PHP)</label>
@@ -138,7 +114,7 @@ export default function PaymentForm({ paymentData, studentData }) {
             required
           />
         </div>
-  
+
         {/* Description */}
         <div>
           <label className="block text-gray-700 dark:text-gray-200 font-medium">Description</label>
@@ -155,7 +131,7 @@ export default function PaymentForm({ paymentData, studentData }) {
             required
           />
         </div>
-  
+
         {/* Student ID */}
         <div>
           <label className="block text-gray-700 dark:text-gray-200 font-medium">Student ID</label>
@@ -173,15 +149,15 @@ export default function PaymentForm({ paymentData, studentData }) {
             required
           />
         </div>
-  
+
         {/* Submit */}
         <button
           type="submit"
           className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
-          {paymentId ? "Update Payment" : "Submit Payment"}
+          Submit Payment
         </button>
       </form>
     </div>
   );
-}  
+}

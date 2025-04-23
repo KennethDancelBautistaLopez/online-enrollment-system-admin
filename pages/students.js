@@ -112,22 +112,22 @@ export default function Students() {
                       <tr key={student._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="border p-2 text-center dark:border-gray-700">{index + 1}</td>
                         <td className="border p-2 dark:border-gray-700">{student._studentId}</td>
-                        <td className="border p-2 dark:border-gray-700">{student.fname}</td>
-                        <td className="border p-2 dark:border-gray-700">{student.mname}</td>
-                        <td className="border p-2 dark:border-gray-700">{student.lname}</td>
-                        <td className="border p-2 dark:border-gray-700">{student.mobile}</td>
-                        <td className="border p-2 dark:border-gray-700">{student.education}</td>
+                        <td className="border p-2 dark:border-gray-700">{student.fname || "N/A"}</td>
+                        <td className="border p-2 dark:border-gray-700">{student.mname || "N/A"}</td>
+                        <td className="border p-2 dark:border-gray-700">{student.lname || "N/A"}</td>
+                        <td className="border p-2 dark:border-gray-700">{student.mobile || "N/A"}</td>
+                        <td className="border p-2 dark:border-gray-700">{student.education || "N/A"}</td>
                         {student.education === "college" && (
-                          <td className="border p-2 dark:border-gray-700">{student.course}</td>
+                          <td className="border p-2 dark:border-gray-700">{student.course || "N/A"}</td>
                         )}
                         {student.education === "senior-high" && (
-                          <td className="border p-2 dark:border-gray-700">{student.strand}</td>
+                          <td className="border p-2 dark:border-gray-700">{student.strand || "N/A"}</td>
                         )}
-                        <td className="border p-2 dark:border-gray-700">{student.semester}</td>
+                        <td className="border p-2 dark:border-gray-700">{student.semester || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">
                           {new Date(student.registrationDate).toLocaleDateString("en-US")}
                         </td>
-                        <td className="border p-2 dark:border-gray-700">{student.email}</td>
+                        <td className="border p-2 dark:border-gray-700">{student.email || "N/A"}</td>
                         <td
                           className="border p-2 dark:border-gray-700 cursor-pointer select-none"
                           onClick={() => setShowPassword(!showPassword)}

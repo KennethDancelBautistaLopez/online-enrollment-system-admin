@@ -135,11 +135,11 @@ export default function Nav({show}) {
           Logout
         </button>
       </nav>
-      <footer className="mt-auto pt-32 border-t border-gray-300 dark:border-gray-700">
+      <footer className="mt-auto pt-4 border-t border-gray-300 dark:border-gray-700">
         <div className="flex justify-center">
           <button
             onClick={toggleTheme}
-            className="p-3 rounded-md border dark:border-white border-black sm:px-6 sm:py-3 text-lg sm:text-xl flex items-center justify-center"
+            className="p-2 rounded-md border dark:border-white border-black sm:px-6 sm:py-3 text-lg sm:text-xl flex items-center justify-center"
           >
             {theme === 'light' ? (
               <svg

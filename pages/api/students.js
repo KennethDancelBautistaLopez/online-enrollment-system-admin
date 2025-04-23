@@ -68,12 +68,6 @@
         if (!mobileRegex.test(mobile)) {
           return res.status(400).json({ error: "Invalid mobile number format. Use XXXX-XXX-XXXX." });
         }
-
-        // password validation
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (!passwordRegex.test(password)) {
-          return res.status(400).json({ error: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character." });
-        }
     
         // Validate email
     
@@ -181,7 +175,7 @@
     }
     
 
-    if (method === "PUT" || method === "PATCH") {
+    if (method === "PUT") {
       try {
         const { id } = req.query;
         const updatedData = req.body;

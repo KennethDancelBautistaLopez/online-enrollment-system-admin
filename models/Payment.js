@@ -6,7 +6,7 @@ const PaymentSchema = new mongoose.Schema({
   amount: { type: Number, required: true },  // Amount paid for the grading period
   referenceNumber: { type: String, unique: true },
   description: { type: String },
-  method: { type: String },  
+  method: { type: String },
 
   billingDetails: {
     name: { type: String },
@@ -43,6 +43,11 @@ const PaymentSchema = new mongoose.Schema({
       "Finals"
     ],
     required: true
+  },
+
+  status: {
+    type: String,
+    default: "pending"
   },
   
   createdAt: { type: Date, default: Date.now },
