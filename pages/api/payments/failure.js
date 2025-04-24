@@ -1,5 +1,5 @@
 // /pages/api/payments/failure.js
-import {connectToDB} from "@/lib/dbConnect";
+import {connectToDB} from "@/lib/mongoose";
 import Payment from "@/models/Payment";
 
 export default async function handler(req, res) {

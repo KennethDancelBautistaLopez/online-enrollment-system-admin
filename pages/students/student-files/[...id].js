@@ -15,22 +15,23 @@ export default function StudentFiles() {
 
   const fetchStudent = () => {
     fetch(`/api/students?id=${id}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch student data.");
+        }
+        return res.json();
+      })
       .then((data) => setStudent(data))
       .catch((err) => {
         console.error(err);
-        toast.error("Failed to fetch student data.");
+        toast.error(err.message);
       })
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    if (id) fetchStudent();
-  }, [id]);
-
   const handleDelete = async (index) => {
     const confirmDelete = confirm("Are you sure you want to delete this file?");
-    if (!confirmDelete) return;
+    if (!confirmDelete || !student?._studentId || index === undefined) return;
   
     setActionLoading((prev) => ({ ...prev, [index]: true }));
   
@@ -42,16 +43,14 @@ export default function StudentFiles() {
       const data = await res.json();
   
       if (!res.ok) {
-        console.error(data.error || "Unknown error");
-        toast.error(data.error || "Failed to delete file.");
+        throw new Error(data.error || "Failed to delete file.");
       } else {
         toast.success("File deleted successfully.");
-        // Refresh the updated list
-        fetchStudent();
+        fetchStudent(); // Refresh the updated list
       }
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error("Something went wrong while deleting the file.");
+      toast.error(error.message || "Something went wrong while deleting the file.");
     } finally {
       setActionLoading((prev) => ({ ...prev, [index]: false }));
     }
