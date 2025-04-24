@@ -7,8 +7,8 @@ export default function Logo() {
       <Image
         src="/SCC icon.webp" 
         alt="Admin Logo"
-        width={40}  // Specify the width (you can adjust as needed)
-        height={40} // Specify the height (you can adjust as needed)
+        width={40}
+        height={40}
         className="mr-2 rounded-full object-cover dark:bg-gray-700 shadow-md bg-white"
       />
       <span className="dark:text-white text-xl font-bold">

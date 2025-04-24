@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Login from "@/pages/Login";
 import Link from "next/link";
 import LoadingSpinner from "@/components/Loading";
@@ -7,18 +7,20 @@ import toast, { Toaster } from "react-hot-toast";
 
 export default function StudentFiles() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const { id } = router.query;
 
   const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
 
-  const fetchStudent = () => {
-    fetch(`/api/students?id=${id}`)
+  const studentId = Array.isArray(id) ? id[0] : id;
+
+  const fetchStudent = useCallback(() => {
+    if (!studentId) return;
+
+    fetch(`/api/students?id=${studentId}`)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch student data.");
-        }
+        if (!res.ok) throw new Error("Failed to fetch student data.");
         return res.json();
       })
       .then((data) => setStudent(data))
@@ -27,26 +29,33 @@ export default function StudentFiles() {
         toast.error(err.message);
       })
       .finally(() => setLoading(false));
-  };
+  }, [studentId]);
+
+  useEffect(() => {
+    if (studentId) {
+      fetchStudent();
+    }
+  }, [studentId, fetchStudent]);
 
   const handleDelete = async (index) => {
+    if (!student?._studentId || index === undefined) return;
     const confirmDelete = confirm("Are you sure you want to delete this file?");
-    if (!confirmDelete || !student?._studentId || index === undefined) return;
-  
+    if (!confirmDelete) return;
+
     setActionLoading((prev) => ({ ...prev, [index]: true }));
-  
+
     try {
       const res = await fetch(`/api/upload?studentId=${student._studentId}&index=${index}`, {
         method: "DELETE",
       });
-  
+
       const data = await res.json();
-  
+
       if (!res.ok) {
         throw new Error(data.error || "Failed to delete file.");
       } else {
         toast.success("File deleted successfully.");
-        fetchStudent(); // Refresh the updated list
+        fetchStudent(); // Refresh list
       }
     } catch (error) {
       console.error("Delete error:", error);
@@ -74,7 +83,6 @@ export default function StudentFiles() {
                   const isBusy = actionLoading[index];
                   const viewUrl = `/api/upload?studentId=${student._studentId}&index=${index}&inline=true`;
                   const downloadUrl = `/api/upload?studentId=${student._studentId}&index=${index}`;
-                  console.log("Download URL:", downloadUrl);
 
                   return (
                     <div
