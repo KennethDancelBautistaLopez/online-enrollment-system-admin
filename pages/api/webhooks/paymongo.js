@@ -41,12 +41,19 @@ export default async function handler(req, res) {
   try {
     const { data } = JSON.parse(rawBody.toString());  // Parse the raw body to get the event data
     const eventType = data?.type;
-    const paymentId = data?.attributes?.id;
-    const status = data?.attributes?.status;
-    const referenceNumber = data?.attributes?.reference_number;
-
-    console.log('📥 Webhook received:', eventType, paymentId, status);
-
+    const attributes = data?.attributes;
+  
+    const paymentId = attributes?.link_id || attributes?.id;
+    const status = attributes?.status;
+    const referenceNumber = attributes?.reference_number;
+  
+    console.log('📥 Webhook Received:');
+    console.log('  Type:', eventType);
+    console.log('  Payment ID:', paymentId);
+    console.log('  Reference:', referenceNumber);
+    console.log('  Status:', status);
+    console.log('🧾 Full Payload:', JSON.stringify(data, null, 2));  // optional, for full debugging
+  
     if (
       (eventType === 'link.payment.paid' || eventType === 'payment.failed') &&
       paymentId && referenceNumber
@@ -56,14 +63,14 @@ export default async function handler(req, res) {
         { status },
         { new: true }
       );
-
+  
       if (updated) {
-        console.log(`✅ Payment ${status} for`, referenceNumber);
+        console.log(`✅ Payment ${status} for ${referenceNumber}`);
       } else {
         console.warn(`⚠️ Webhook received but payment not found: ${paymentId}`);
       }
     }
-
+  
     res.status(200).send('Webhook handled successfully');
   } catch (error) {
     console.error('❌ Webhook error:', error);
