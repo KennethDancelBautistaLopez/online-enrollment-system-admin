@@ -18,11 +18,9 @@ export default async function handler(req, res) {
 
   await connectToDB();  // Connect to MongoDB
 
-  const rawBody = await buffer(req);  // Get raw request body
-  const signatureHeader = req.headers['paymongo-signature'];  // Get PayMongo signature from headers
-  const webhookSecret = process.env.PAYMONGO_WEBHOOK_SECRET;  // Secret key for webhook verification
-
-  // Extract the timestamp and signature from the header
+  const rawBody = await buffer(req);
+  const signatureHeader = req.headers['paymongo-signature'];
+  const webhookSecret = process.env.PAYMONGO_WEBHOOK_SECRET;
   const [timestamp, signature] = signatureHeader?.split(',')?.map(s => s.split('=')[1]) || [];
   
   if (!timestamp || !signature) {
