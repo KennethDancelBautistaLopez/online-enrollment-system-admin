@@ -84,8 +84,8 @@ async function handlePostRequest(req, res) {
             amount: amount * 100, // cents
             description,
             redirect: {
-              success: "https://online-enrollment-admin.vercel.app/success",
-              failure: "https://online-enrollment-admin.vercel.app/failure",
+              success: "https://online-enrollment-system-admin.vercel.app/successPage",
+              failure: "https://online-enrollment-system-admin.vercel.app/failurePage",
             },
             billing: billingDetails,
             metadata,
