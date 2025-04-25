@@ -84,8 +84,8 @@ async function handlePostRequest(req, res) {
             amount: amount * 100, // cents
             description,
             redirect: {
-              success: "http://localhost:3000/payments/success",
-              failure: "http://localhost:3000/payments/failure",
+              success: "https://online-enrollment-admin.vercel.app/success",
+              failure: "https://online-enrollment-admin.vercel.app/failure",
             },
             billing: billingDetails,
             metadata,
@@ -120,6 +120,7 @@ async function handlePostRequest(req, res) {
       schoolYear: student.schoolYear,
       semester: student.semester,
       examPeriod,
+      status: linkData.attributes.status,
       createdAt: new Date(),
     });
 
