@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     console.log('📥 Webhook received:', eventType, paymentId, status);
 
     if (
-      (eventType === 'link.payment.paid' || eventType === 'link.payment.failed') &&
+      (eventType === 'link.payment.paid' || eventType === 'payment.failed') &&
       paymentId && referenceNumber
     ) {
       const updated = await Payment.findOneAndUpdate(
