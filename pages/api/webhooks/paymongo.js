@@ -47,8 +47,10 @@ export default async function handler(req, res) {
 
     console.log('📥 Webhook received:', eventType, paymentId, status);
 
-    if ((eventType === 'payment.paid' || eventType === 'payment.failed') && paymentId && referenceNumber) {
-      // Update the payment status in MongoDB based on the event
+    if (
+      (eventType === 'link.payment.paid' || eventType === 'link.payment.failed') &&
+      paymentId && referenceNumber
+    ) {
       const updated = await Payment.findOneAndUpdate(
         { paymentId, referenceNumber },
         { status },

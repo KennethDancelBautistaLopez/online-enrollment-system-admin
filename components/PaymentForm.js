@@ -23,9 +23,6 @@ export default function PaymentForm({ studentData }) {
       toast.error("Maximum allowed amount is ₱9,999,999.99");
       return;
     }
-
-
-
     const res = await fetch("/api/payments", {
       method: "POST",
       headers: {
