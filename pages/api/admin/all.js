@@ -5,11 +5,6 @@ import User from "@/models/User";
 
 export default async function handler(req, res) {
   await connectToDB();
-  const session = await getSession({ req });
-
-  if (!session || session.user.role !== "superAdmin") {
-    return res.status(403).json({ message: "Unauthorized" });
-  }
 
   if (req.method === "GET") {
     try {
