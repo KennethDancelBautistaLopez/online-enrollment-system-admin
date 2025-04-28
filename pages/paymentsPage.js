@@ -25,7 +25,7 @@ export default function PaymentsPage() {
     }
 
     // Check if user is not superAdmin, then redirect to home or other page
-    if (session.user.role !== "superAdmin") {
+    if (session.user.role !== "superAdmin" && session.user.role !== "admin") {
       router.push("/"); // Redirect to home if not superAdmin
       toast.error("You do not have access to this page.");
       return;
@@ -60,7 +60,7 @@ export default function PaymentsPage() {
     }
   }, [session]); // Trigger error toast only when session is null
 
-  if (!session || session.user.role !== "superAdmin") {
+  if (!session || session.user.role !== "superAdmin" && session.user.role !== "admin") {
     return <Login />; // Or redirect to login if not logged in or not superAdmin
   }
 
@@ -91,12 +91,14 @@ export default function PaymentsPage() {
             <>
               <div className="flex flex-col md:flex-row justify-between items-center mb-4">
               <h1 className="text-2xl font-bold mb-2 md:mb-0 text-gray-800 dark:text-white">Payments List</h1>
-              <Link
-                className="btn-primary-filled px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 dark:border-blue-500"
-                href="/payments/new"
-              >
-                Add new payment
-              </Link>
+              {session?.user.role === "superAdmin" && (
+                <Link
+                  className="btn-primary-filled px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 dark:border-blue-500"
+                  href="/payments/new"
+                >
+                  Add new payment
+                </Link>
+              )}
             </div>
       
             {/* Search Bar */}
@@ -113,19 +115,21 @@ export default function PaymentsPage() {
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
                     <th className="border p-2 text-gray-900 dark:text-white">ID</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Student ID</th>
+                    <th className="border p-4 text-gray-900 dark:text-white">Student ID</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Reference No.</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Amount</th>
+                    <th className="border p-1 text-gray-900 dark:text-white">Amount</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Payment</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Full Name</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Education</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Course</th>
+                    <th className="border p-1 text-gray-900 dark:text-white">Course</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Semester</th>  
-                    <th className="border p-2 text-gray-900 dark:text-white">Year Level</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">School Year</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Status</th>
+                    <th className="border p-1 items-center text-gray-900 dark:text-white">Year Level</th>
+                    <th className="border p-1 text-gray-900 dark:text-white">School Year</th>
+                    <th className="border p-7 text-gray-900 dark:text-white">Status</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Receipt</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Actions</th>
+                    {session?.user.role === "superAdmin" && (
+                      <th className="border p-2 text-gray-900 dark:text-white">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -149,31 +153,56 @@ export default function PaymentsPage() {
                         <td className="border p-2">{payment.semester || "N/A"}</td>
                         <td className="border p-2">{payment.yearLevel || "N/A"}</td>
                         <td className="border p-2">{payment.schoolYear || "N/A"}</td>
-                        <td className="border p-2">{payment.status}</td>
                         <td className="border p-2">
+                        <select
+                          value={payment.status}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value;
+                            try {
+                              await axios.put("/api/payments", {
+                                paymentId: payment.paymentId,
+                                status: newStatus,
+                              });
+                              toast.success("Status updated!");
+                              setPayments((prev) =>
+                                prev.map((p) =>
+                                  p.paymentId === payment.paymentId ? { ...p, status: newStatus } : p
+                                )
+                              );
+                            } catch (err) {
+                              toast.error("Failed to update status.");
+                              console.error(err);
+                            }
+                          }}
+                          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-2 py-1"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="paid">Paid</option>
+                          <option value="failed">Failed</option>
+                          <option value="refund">Refund</option>
+                        </select>
+                        </td>
+
+                        <td className="border p-1">
                           <button
-                            className="btn-primary text-sm px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-green-600 dark:bg-indigo-600 dark:hover:bg-indigo-500"
+                            className="btn-primary-filled bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 dark:border-blue-500"
                             onClick={() => handleGeneratePDF(payment, payment.studentId)}
                           >
                             Generate PDF
                           </button>
                         </td>
-                        <td className="border p-2 flex justify-center items-center border-gray-300 dark:border-white-800">
-                          <div className="flex items-center justify-center space-x-4" >
-                          <Link
-                            className="btn-default hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
-                            href={`/payments/edit/${payment.paymentId}`}
-                          >
-                            Edit
-                          </Link>
-                          <Link
-                            className="btn-default hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 dark:text-white"
-                            href={`/payments/delete/${payment.paymentId}`}
-                          >
-                            Delete
-                          </Link>
-                          </div>
-                        </td>
+                        {session?.user.role === "superAdmin" && (
+                          <td className="border p-2">
+                            <div className="flex items-center justify-center space-x-4">
+                              <Link
+                                className="btn-default hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 dark:text-white"
+                                href={`/payments/delete/${payment.paymentId}`}
+                              >
+                                Delete
+                              </Link>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}

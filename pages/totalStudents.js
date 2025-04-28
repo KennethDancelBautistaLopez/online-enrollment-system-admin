@@ -14,11 +14,10 @@ import { useSession } from "next-auth/react";
 import LoadingSpinner from "@/components/Loading";
 
 const STATUS_COLORS = {
-  enrolled: "#22c55e",       // Emerald (Tailwind green-500)
-  graduated: "#ef4444",      // Rose Red (Tailwind red-500)
-  dropped: "#eab308",        // Amber (Tailwind yellow-500)
-  "missing files": "#3b82f6", // Blue (Tailwind blue-500)
-  unknown: "#6b7280",        // Cool Gray (Tailwind gray-500)
+  enrolled: "#4ade80",
+  graduated: "#f87171",
+  dropped: "#facc15",
+  "missing files": "#60a5fa",
 };
 
 export default function StudentStatusPieChart() {
@@ -57,7 +56,7 @@ export default function StudentStatusPieChart() {
           ([status, count]) => ({
             name: status,
             value: count,
-            color: STATUS_COLORS[status] || STATUS_COLORS.Unknown,
+            color: STATUS_COLORS[status] || "#9ca3af", // fallback to gray-400 if not found
           })
         );
 

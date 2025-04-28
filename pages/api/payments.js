@@ -10,11 +10,33 @@ export default async function handler(req, res) {
       return handlePostRequest(req, res);
     case "GET":
       return handleGetRequest(req, res);
+    case "PUT":
+      return handlePutRequest(req, res);
     case "DELETE":
       return handleDeleteRequest(req, res);
     default:
       return res.status(405).json({ error: "Method Not Allowed" });
   }
+}
+
+async function handlePutRequest(req, res) {
+  const { paymentId, status } = req.body;
+
+  if (!paymentId || !["paid", "failed", "refund"].includes(status)) {
+    return res.status(400).json({ error: "Invalid paymentId or status" });
+  }
+
+  const updated = await Payment.findOneAndUpdate(
+    { paymentId },
+    { status },
+    { new: true }
+  );
+
+  if (!updated) {
+    return res.status(404).json({ error: "Payment not found" });
+  }
+
+  return res.status(200).json({ success: true, data: updated });
 }
 
 async function handlePostRequest(req, res) {
@@ -120,7 +142,7 @@ async function handlePostRequest(req, res) {
       schoolYear: student.schoolYear,
       semester: student.semester,
       examPeriod,
-      status: linkData.attributes.status,
+      status: "pending",
       createdAt: new Date(),
     });
 
