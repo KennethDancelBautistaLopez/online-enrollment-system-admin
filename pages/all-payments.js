@@ -109,7 +109,10 @@ export default function AllPayments() {
             <tbody>
               {filteredStudents.length > 0 ? (
                 filteredStudents.map((student, index) => {
-                  const paidPeriods = student.payments.map((p) => p.examPeriod);
+                  const paymentsByPeriod = {};
+                  student.payments.forEach((payment) => {
+                    paymentsByPeriod[payment.examPeriod] = payment.status;
+                  });
                   return (
                     <tr key={student.studentId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="border p-2 text-center dark:border-gray-700 dark:text-gray-200">
@@ -128,11 +131,16 @@ export default function AllPayments() {
                         </div>
                       </td>
                       {examPeriods.map((period, idx) => (
-                        <td
-                          key={idx}
-                          className="border p-2 text-center dark:border-gray-700 dark:text-gray-200"
-                        >
-                          {paidPeriods.includes(period) ? "✅" : "—"}
+                        <td key={idx} className="border p-2 text-center dark:border-gray-700 dark:text-gray-200">
+                          {paymentsByPeriod[period] === "paid" ? (
+                            "✅"
+                          ) : paymentsByPeriod[period] === "pending" || paymentsByPeriod[period] === "unpaid" ? (
+                            "🕓"
+                          ) : paymentsByPeriod[period] === "failed" ? (
+                            "❌"
+                          ) : (
+                            "—"
+                          )}
                         </td>
                       ))}
                       <td className="border p-2 text-center dark:border-gray-700">

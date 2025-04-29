@@ -65,7 +65,7 @@ export default function PaymentsPage() {
   }
 
   const filteredPayments = payments.filter((payment) =>
-    `${payment.referenceNumber} ${payment.fullName} ${payment.course} ${payment.education} ${payment.yearLevel} ${payment.schoolYear} ${payment.semester} ${payment.examPeriod} ${payment.studentId} ${payment.amount}`
+    `${payment.referenceNumber} ${payment.fullName} ${payment.course} ${payment.education} ${payment.yearLevel} ${payment.schoolYear} ${payment.semester} ${payment.examPeriod} ${payment.studentId} ${payment.status} ${payment.amount}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
@@ -153,36 +153,7 @@ export default function PaymentsPage() {
                         <td className="border p-2">{payment.semester || "N/A"}</td>
                         <td className="border p-2">{payment.yearLevel || "N/A"}</td>
                         <td className="border p-2">{payment.schoolYear || "N/A"}</td>
-                        <td className="border p-2">
-                        <select
-                          value={payment.status}
-                          onChange={async (e) => {
-                            const newStatus = e.target.value;
-                            try {
-                              await axios.put("/api/payments", {
-                                paymentId: payment.paymentId,
-                                status: newStatus,
-                              });
-                              toast.success("Status updated!");
-                              setPayments((prev) =>
-                                prev.map((p) =>
-                                  p.paymentId === payment.paymentId ? { ...p, status: newStatus } : p
-                                )
-                              );
-                            } catch (err) {
-                              toast.error("Failed to update status.");
-                              console.error(err);
-                            }
-                          }}
-                          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-2 py-1"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="paid">Paid</option>
-                          <option value="failed">Failed</option>
-                          <option value="refund">Refund</option>
-                        </select>
-                        </td>
-
+                        <td className="border p-2">{payment.status || "N/A"}</td>
                         <td className="border p-1">
                           <button
                             className="btn-primary-filled bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 dark:border-blue-500"

@@ -1,3 +1,4 @@
+// pages/students/[studentId]/payments.js
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -52,13 +53,15 @@ export default function StudentPaymentsView() {
   
         <div className="overflow-x-auto bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md">
           <table className="min-w-full table-auto text-sm text-gray-600 dark:text-gray-300">
-            <thead className="bg-gray-100 dark:bg-gray-600">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium">Reference Number</th>
-                <th className="px-4 py-3 text-left font-medium">Amount</th>
-                <th className="px-4 py-3 text-left font-medium">Exam Period</th>
-              </tr>
-            </thead>
+          <thead className="bg-gray-100 dark:bg-gray-600">
+            <tr>
+              <th className="px-4 py-3 text-left font-medium">Reference Number</th>
+              <th className="px-4 py-3 text-left font-medium">Amount</th>
+              <th className="px-4 py-3 text-left font-medium">Exam Period</th>
+              <th className="px-4 py-3 text-left font-medium">Status</th>
+              <th className="px-4 py-3 text-left font-medium">Payment Date</th>
+            </tr>
+          </thead>
             <tbody>
               {studentData.payments.length > 0 ? (
                 studentData.payments.map((payment, index) => (
@@ -68,11 +71,17 @@ export default function StudentPaymentsView() {
                       ₱{typeof payment.amount === 'number' ? payment.amount.toFixed(2) : 'N/A'}
                     </td>
                     <td className="border-t px-4 py-3">{payment.examPeriod}</td>
+                    <td className="border-t px-4 py-3">
+                      {payment.status ? payment.status : 'Unknown'}
+                    </td> {/* ADD THIS */}
+                    <td className="border-t px-4 py-3">
+                      {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}
+                    </td> {/* ADD THIS */}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="text-center p-4 text-gray-500 dark:text-gray-400">
+                  <td colSpan="5" className="text-center p-4 text-gray-500 dark:text-gray-400">
                     No payments found.
                   </td>
                 </tr>

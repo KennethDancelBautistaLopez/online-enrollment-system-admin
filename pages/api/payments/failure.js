@@ -1,5 +1,5 @@
 // /pages/api/payments/failure.js
-import {connectToDB} from "@/lib/mongoose";
+import { connectToDB } from "@/lib/mongoose";
 import Payment from "@/models/Payment";
 
 export default async function handler(req, res) {
@@ -10,16 +10,26 @@ export default async function handler(req, res) {
   await connectToDB();
 
   try {
-    const payment = await Payment.findOneAndUpdate(
-      { studentId, examPeriod },
-      { status: "failed" },
-      { new: true }
-    );
+    console.log("Looking for payment:", studentId, examPeriod);
+    const payment = await Payment.findOne({ studentId, examPeriod });
+    console.log("Found payment:", payment);
 
-    if (!payment) return res.status(404).json({ success: false, message: "Payment not found" });
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found" });
+    }
 
-    return res.status(200).json({ success: true });
+    // If the payment is not already marked as failed, mark it as failed
+    if (payment.status !== "failed") {
+      payment.status = "failed";
+      payment.failureReason = "Payment not completed or cancelled";
+      payment.failedAt = new Date();
+      await payment.save();
+      console.log(`Payment for ${studentId} ${examPeriod} marked as failed.`);
+    }
+
+    return res.status(200).json({ success: true, message: "Payment marked as failed" });
   } catch (error) {
+    console.error("Error processing failed payment:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 }

@@ -1,5 +1,6 @@
 import Payment from "@/models/Payment";
 import { connectToDB } from "@/lib/mongoose";
+import { create } from "sortablejs";
 
 export default async function handler(req, res) {
   const {
@@ -40,8 +41,10 @@ export default async function handler(req, res) {
         referenceNumber: payment.referenceNumber,
         amount: payment.amount,
         examPeriod: payment.examPeriod,
-        date: payment.createdAt,  // If you want to use the created date for the payment
+        date: payment.createdAt, 
+        status: payment.status,
         method: payment.method,
+        createdAt: payment.createdAt
       })),
     });
   } catch (error) {

@@ -60,23 +60,16 @@ async function handlePostRequest(req, res) {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    const existingPaymentForPeriod = await Payment.findOne({
-      studentId: _studentId,
-      examPeriod,
-    });
-
-    if (existingPaymentForPeriod) {
-      let errorMessage = "";
-
-      if (examPeriod === "downpayment") {
-        errorMessage = "Downpayment has already been made by this student.";
-      } else {
-        errorMessage = `${examPeriod} payment has already been made by this student.`;
-      }
+    // Check existing payment for the same exam period
+    const existingPayment = await Payment.findOne({ studentId: _studentId, examPeriod });
+    if (existingPayment) {
+      const errorMessage = examPeriod === "downpayment"
+        ? "Downpayment has already been made by this student."
+        : `${examPeriod} payment has already been made by this student.`;
       return res.status(400).json({ error: errorMessage });
     }
 
-    // Set default tuitionFee if not set or zero
+    // Set default tuitionFee if missing
     if (!student.tuitionFee || student.tuitionFee === 0) {
       student.tuitionFee = 14000;
     }
@@ -97,19 +90,42 @@ async function handlePostRequest(req, res) {
       semester: student.semester || "",
     };
 
-    // Create PayMongo link
+    // Create Checkout Session via PayMongo
     const response = await axios.post(
-      "https://api.paymongo.com/v1/links",
+      "https://api.paymongo.com/v1/checkout_sessions",
       {
         data: {
           attributes: {
-            amount: amount * 100, // cents
-            description,
-            redirect: {
-              success: "https://online-enrollment-system-admin.vercel.app/successPage",
-              failure: "https://online-enrollment-system-admin.vercel.app/failurePage",
+            billing: {
+              name: billingDetails.name,
+              email: billingDetails.email,
+              phone: billingDetails.phone,
+              address: {
+                line1: "N/A",
+                line2: "",
+                city: "N/A",
+                state: "N/A",
+                postal_code: "0000",
+                country: "PH",
+              },
             },
-            billing: billingDetails,
+            description,
+            line_items: [
+              {
+                amount: amount * 100,
+                currency: "PHP",
+                name: examPeriod,
+                quantity: 1,
+              }
+            ],
+            payment_method_types: ["card", "gcash", "paymaya"], // ✅ FIXED: Required field
+            send_email_receipt: true,
+            show_description: true,
+            show_line_items: true,
+            reference_number: `ref-${student._studentId}-${Date.now()}`,
+            success_url: `https://online-enrollment-system-admin.vercel.app/successPage?studentId=${student._studentId}&examPeriod=${examPeriod}`,
+            expiry_url: "https://online-enrollment-system-admin.vercel.app/expiryPage",
+            cancel_url: "https://online-enrollment-system-admin.vercel.app/failurePage",
             metadata,
           },
         },
@@ -122,13 +138,13 @@ async function handlePostRequest(req, res) {
       }
     );
 
-    const linkData = response.data.data;
+    const session = response.data.data;
 
-    // Save payment
+    // Save payment info
     const payment = await Payment.create({
-      paymentId: linkData.id,
+      paymentId: session.id,
       amount,
-      referenceNumber: linkData.attributes.reference_number,
+      referenceNumber: session.attributes.reference_number,
       description,
       billingDetails,
       studentRef: student._id,
@@ -146,7 +162,7 @@ async function handlePostRequest(req, res) {
       createdAt: new Date(),
     });
 
-    // 💰 Update student payment fields
+    // Update student's payment records
     student.payments.push(payment._id);
     student.totalPaid += amount;
     student.balance = student.tuitionFee - student.totalPaid;
@@ -155,11 +171,12 @@ async function handlePostRequest(req, res) {
     return res.status(201).json({
       success: true,
       data: payment,
-      checkoutUrl: linkData.attributes.checkout_url,
+      checkoutUrl: session.attributes.checkout_url,
     });
+
   } catch (error) {
-    console.error("❌ PayMongo Error:", error.response?.data || error.message);
-    return res.status(500).json({ error: error.message || "Payment creation failed" });
+    console.error("❌ PayMongo Checkout Error:", error.response?.data || error.message);
+    return res.status(500).json({ error: error.message || "Checkout session creation failed" });
   }
 }
 
@@ -191,6 +208,7 @@ async function handleGetRequest(req, res) {
           semester: student.semester || "N/A",
           examPeriod: payment.examPeriod,
           receipt: payment.receipt || "N/A",
+          status: payment.status,
         };
       });
     
@@ -241,6 +259,7 @@ async function handleGetRequest(req, res) {
           semester: student.semester || "N/A",
           examPeriod: payment.examPeriod,
           receipt: payment.receipt || "N/A",
+          status: payment.status,
         },
       });
     }
@@ -267,6 +286,7 @@ async function handleGetRequest(req, res) {
         semester: student.semester || "N/A",
         examPeriod: payment.examPeriod,
         receipt: payment.receipt || "N/A",
+        status: payment.status,
       };
     });
 

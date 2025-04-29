@@ -10,17 +10,24 @@ export default async function handler(req, res) {
   await connectToDB();
 
   try {
-    const payment = await Payment.findOne({
-      studentId,
-      examPeriod,
-      status: "pending",
-    });
+    console.log('Looking for payment:', studentId, examPeriod);
+    const payment = await Payment.findOne({ studentId, examPeriod });
+    console.log('Found payment:', payment);
 
-    if (!payment) return res.status(404).json({ success: false, message: "Payment not found or already updated" });
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found" });
+    }
 
-    // Status will be updated via webhook, just confirming presence
-    return res.status(200).json({ success: true });
+    // If the payment is not marked as paid, mark it as paid
+    if (payment.status !== "paid") {
+      payment.status = "paid";
+      await payment.save();
+      console.log(`Payment for ${studentId} ${examPeriod} marked as paid.`);
+    }
+
+    return res.status(200).json({ success: true, message: "Payment confirmed" });
   } catch (error) {
+    console.error("Error processing payment confirmation:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 }

@@ -117,12 +117,7 @@ export default function Students() {
                         <td className="border p-2 dark:border-gray-700">{student.lname || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.mobile || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.education || "N/A"}</td>
-                        {student.education === "college" && (
-                          <td className="border p-2 dark:border-gray-700">{student.course || "N/A"}</td>
-                        )}
-                        {student.education === "senior-high" && (
-                          <td className="border p-2 dark:border-gray-700">{student.strand || "N/A"}</td>
-                        )}
+                        <td className="border p-2 dark:border-gray-700">{student.course || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.semester || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">
                           {new Date(student.registrationDate).toLocaleDateString("en-US")}
