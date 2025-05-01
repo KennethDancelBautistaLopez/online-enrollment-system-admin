@@ -1,6 +1,5 @@
 import Payment from "@/models/Payment";
 import { connectToDB } from "@/lib/mongoose";
-import { create } from "sortablejs";
 
 export default async function handler(req, res) {
   const {
@@ -15,37 +14,46 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Log the query to confirm the studentId
     console.log("Searching for student with ID:", studentId);
 
-    // Fetch the student's payments from the Payment model
-    const payments = await Payment.find({ studentId: studentId }).lean();
+    const payments = await Payment.find({ studentId }).lean();
 
     if (!payments || payments.length === 0) {
       return res.status(404).json({ success: false, message: "No payments found for this student" });
     }
 
-    // Optionally, you can also get student details if needed
-    const student = payments[0];  // Assuming all payments are for the same student, so we can grab the student info from the first payment.
+    const student = payments[0]; // assuming all have same student info
+
+    const mapPayment = (payment) => ({
+      referenceNumber: payment.referenceNumber,
+      amount: payment.amount,
+      examPeriod: payment.examPeriod,
+      date: payment.createdAt,
+      status: payment.status,
+      method: payment.method,
+      createdAt: payment.createdAt,
+    });
+
+    const firstSemPayments = payments
+      .filter(p => p.semester === "1st Semester")
+      .map(mapPayment);
+
+    const secondSemPayments = payments
+      .filter(p => p.semester === "2nd Semester")
+      .map(mapPayment);
 
     return res.status(200).json({
       success: true,
-      fullName: `${student.fname} ${student.lname}`,
-      studentId: studentId,
+      fullName: `${student.fname} ${student.mname} ${student.lname}`,
+      studentId,
       course: student.course,
       education: student.education,
       yearLevel: student.yearLevel,
       schoolYear: student.schoolYear,
-      semester: student.semester,
-      payments: payments.map(payment => ({
-        referenceNumber: payment.referenceNumber,
-        amount: payment.amount,
-        examPeriod: payment.examPeriod,
-        date: payment.createdAt, 
-        status: payment.status,
-        method: payment.method,
-        createdAt: payment.createdAt
-      })),
+      payments: {
+        firstSemester: firstSemPayments,
+        secondSemester: secondSemPayments,
+      },
     });
   } catch (error) {
     console.error("API Error:", error);

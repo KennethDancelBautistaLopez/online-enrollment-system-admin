@@ -55,10 +55,9 @@ const StudentSchema = new mongoose.Schema(
       base64: { type: String }
     }],
 
-    // 💵 New Fields for Payment Tracking
-    tuitionFee: { type: Number, default: 0 }, // Set this per student
-    totalPaid: { type: Number, default: 0 },  // Sum of completed payments
-    balance: { type: Number, default: 0 },    // tuitionFee - totalPaid
+    tuitionFee: { type: Number, default: 0 },
+    totalPaid: { type: Number, default: 0 },
+    balance: { type: Number, default: 0 },
 
   payments: {
   type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Payment" }],

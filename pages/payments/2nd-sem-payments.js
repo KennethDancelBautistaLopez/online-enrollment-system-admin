@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "@/components/Loading";
 
-export default function FirstSemester() {
+export default function SecondSemester() {
   const [groupedPayments, setGroupedPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
@@ -27,7 +27,7 @@ export default function FirstSemester() {
         }
 
         const semesterPayments = response.data.data.filter(
-          (payment) => payment.semester === "1st Semester"
+          (payment) => payment.semester === "2nd Semester"
         );
 
         const grouped = {};
@@ -54,7 +54,7 @@ export default function FirstSemester() {
 
         const groupedArray = Object.values(grouped);
         setGroupedPayments(groupedArray);
-        toast.success("First Semester Payments loaded! ✅");
+        toast.success("Second Semester Payments loaded! ✅");
         setInitialized(true);
       } catch (error) {
         console.error("❌ Error fetching payments:", error);
@@ -100,14 +100,14 @@ export default function FirstSemester() {
           <>
             <div className="flex flex-col md:flex-row justify-between items-center mb-2">
               <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
-                First Semester Payments Only
+                Second Semester Payments Only
               </h1>
               <div className="flex justify-end mb-4">
                 <Link
-                  href={`/payments/2nd-sem-payments`}
+                  href={`/all-payments`}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
                 >
-                  Go to Second Semester Payments →
+                  ← Go to First Semester Payments
                 </Link>
               </div>
             </div>
@@ -173,7 +173,7 @@ export default function FirstSemester() {
                           ))}
                           <td className="border p-2 text-center dark:border-gray-700">
                             <Link
-                              href={`/payments/view/1stsem/${student.studentId}/payments`}
+                              href={`/payments/view/2ndsem/${student.studentId}/payments`}
                               className="text-blue-600 hover:underline dark:text-blue-400"
                             >
                               View
@@ -185,7 +185,7 @@ export default function FirstSemester() {
                   ) : (
                     <tr>
                       <td colSpan={examPeriods.length + 3} className="text-center p-4 dark:text-gray-300">
-                        No First Semester payments found
+                        No Second Semester payments found
                       </td>
                     </tr>
                   )}

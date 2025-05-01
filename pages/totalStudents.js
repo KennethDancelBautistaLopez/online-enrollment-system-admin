@@ -14,10 +14,11 @@ import { useSession } from "next-auth/react";
 import LoadingSpinner from "@/components/Loading";
 
 const STATUS_COLORS = {
-  enrolled: "#4ade80",
-  graduated: "#f87171",
-  dropped: "#facc15",
-  "missing files": "#60a5fa",
+  "enrolled": "#4ade80",       // green-400
+  "graduated": "#f87171",      // red-400
+  "dropped": "#facc15",        // yellow-300
+  "missing files": "#60a5fa",// blue-400
+  "unknown": "#9ca3af"         // gray-400 fallback
 };
 
 export default function StudentStatusPieChart() {
@@ -47,7 +48,8 @@ export default function StudentStatusPieChart() {
         setTotalStudents(students.length);
 
         const statusCounts = students.reduce((acc, student) => {
-          const status = student.status || "Unknown";
+          const rawStatus = student.status || "Unknown";
+          const status = rawStatus.toLowerCase().trim();
           acc[status] = (acc[status] || 0) + 1;
           return acc;
         }, {});
@@ -96,7 +98,7 @@ export default function StudentStatusPieChart() {
         ( 
           <>
           <div className="max-w-3xl mx-auto bg-white border border-gray-200 dark:bg-gray-900 p-8 rounded-2xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-6 text-blue-600 dark:text-blue-400 text-center">
+          <h2 className="text-xl font-semibold mb-6 text-gray-600 dark:text-blue-400 text-center">
             Total Students:{" "}
             <span className="text-gray-900 dark:text-white">{totalStudents}</span>
           </h2>
@@ -108,8 +110,12 @@ export default function StudentStatusPieChart() {
                   data={chartData}
                   cx="50%"
                   cy="50%"
+                  innerRadius={60}
                   outerRadius={110}
+                  fill="#8884d8"
+                  paddingAngle={5}
                   dataKey="value"
+                  labelLine={false}
                   label={({ name, value }) => `${name}: ${value}`}
                   isAnimationActive={true}
                   animationBegin={0}
@@ -122,7 +128,7 @@ export default function StudentStatusPieChart() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1f2937', // Tailwind's gray-800
+                    backgroundColor: '#1f2935', // Tailwind's gray-800
                     color: '#f9fafb', // Tailwind's gray-50
                     border: 'none',
                   }}

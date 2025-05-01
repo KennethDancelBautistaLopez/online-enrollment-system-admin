@@ -32,7 +32,7 @@ const PaymentSchema = new mongoose.Schema({
   examPeriod: {
     type: String,
     enum: [
-      "downpayment",
+      "Downpayment",
       "1st Periodic",
       "Prelim",
       "2nd Periodic",

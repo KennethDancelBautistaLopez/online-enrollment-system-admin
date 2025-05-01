@@ -10,12 +10,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { id, studentId } = req.query;
+    const { id, studentId, semester } = req.query;
 
     // 📌 Get a specific payment by paymentId
     if (id) {
-      const payment = await Payment.findOne({ paymentId: id })
-        .populate("studentRef", "fname mname lname _studentId course education yearLevel schoolYear semester");
+      const payment = await Payment.findOne({ paymentId: id });
 
       if (!payment) {
         return res.status(404).json({ error: "Payment not found" });
@@ -27,13 +26,13 @@ export default async function handler(req, res) {
         referenceNumber: payment.referenceNumber,
         description: payment.description,
         billingDetails: payment.billingDetails,
-        fullName: `${payment.studentRef?.fname || ""} ${payment.studentRef?.mname || ""} ${payment.studentRef?.lname || ""}`.trim(),
-        studentId: payment.studentRef?._studentId || "N/A",
-        course: payment.studentRef?.course || "N/A",
-        education: payment.studentRef?.education || "N/A",
-        yearLevel: payment.studentRef?.yearLevel || "N/A",
-        schoolYear: payment.studentRef?.schoolYear || "N/A",
-        semester: payment.studentRef?.semester || "N/A",
+        fullName: `${payment.fname || ""} ${payment.mname || ""} ${payment.lname || ""}`.trim() || "Unknown",
+        studentId: payment.studentId || "N/A",
+        course: payment.course || "N/A",
+        education: payment.education || "N/A",
+        yearLevel: payment.yearLevel || "N/A",
+        schoolYear: payment.schoolYear || "N/A",
+        semester: payment.semester || "N/A",
         examPeriod: payment.examPeriod,
         receipt: payment.receipt || "N/A",
       });
@@ -41,83 +40,60 @@ export default async function handler(req, res) {
 
     // 📌 Get all payments for a specific studentId
     if (studentId) {
-      const payments = await Payment.find({})
-        .populate({
-          path: "studentRef",
-          match: { _studentId: studentId },
-          select: "fname mname lname _studentId course education yearLevel schoolYear semester",
-        });
+      const payments = await Payment.find({ studentId });
 
-      const studentPayments = payments.filter(p => p.studentRef !== null);
-
-      if (studentPayments.length === 0) {
+      if (payments.length === 0) {
         return res.status(404).json({ error: "No payments found for this student" });
       }
 
-      const student = studentPayments[0].studentRef;
+      const student = payments[0];
 
       return res.status(200).json({
         success: true,
         student: {
-          fullName: `${student.fname} ${student.mname} ${student.lname}`.trim(),
-          studentId: student._studentId,
-          course: student.course,
-          education: student.education,
-          yearLevel: student.yearLevel,
-          schoolYear: student.schoolYear,
-          semester: student.semester,
-        },
-        payments: studentPayments.map(p => ({
-          examPeriod: p.examPeriod,
-          referenceNumber: p.referenceNumber,
-        })),
-      });
-    }
-
-    console.log("Fetching payments...");
-    const allPayments = await Payment.find()
-      .populate("studentRef", "fname mname lname _studentId course education yearLevel schoolYear semester");
-    
-
-    const grouped = {};
-
-    for (const payment of allPayments) {
-      const student = payment.studentRef;
-
-      if (!student || !student._studentId) continue;
-
-      const sid = student._studentId;
-
-      if (!grouped[sid]) {
-        grouped[sid] = {
-          studentId: sid,
-          fullName: `${student.fname} ${student.mname} ${student.lname}`.trim(),
+          fullName: `${student.fname || ""} ${student.mname || ""} ${student.lname || ""}`.trim() || "Unknown",
+          studentId: student.studentId,
           course: student.course || "N/A",
           education: student.education || "N/A",
           yearLevel: student.yearLevel || "N/A",
           schoolYear: student.schoolYear || "N/A",
           semester: student.semester || "N/A",
-          payments: [],
-        };
-      }
-
-      grouped[sid].payments.push({
-        paymentId: payment.paymentId,
-        amount: payment.amount,
-        referenceNumber: payment.referenceNumber,
-        description: payment.description,
-        billingDetails: payment.billingDetails,
-        examPeriod: payment.examPeriod,
-        receipt: payment.receipt || "N/A",
-        status: payment.status,
+        },
+        payments: payments.map(p => ({
+          examPeriod: p.examPeriod,
+          referenceNumber: p.referenceNumber,
+          status: p.status,
+        })),
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      data: Object.values(grouped),
-    });
+    // 📌 Get all payments without grouping
+const allPayments = await Payment.find();
 
+const payments = allPayments
+  .filter(p => !semester || p.semester === semester)
+  .map(payment => ({
+    paymentId: payment.paymentId,
+    studentId: payment.studentId,
+    fullName: `${payment.fname || ""} ${payment.mname || ""} ${payment.lname || ""}`.trim() || "Unknown",
+    amount: payment.amount,
+    referenceNumber: payment.referenceNumber,
+    description: payment.description,
+    billingDetails: payment.billingDetails,
+    education: payment.education || "N/A",
+    course: payment.course || "N/A",
+    semester: payment.semester || "N/A",
+    yearLevel: payment.yearLevel || "N/A",
+    schoolYear: payment.schoolYear || "N/A",
+    examPeriod: payment.examPeriod,
+    receipt: payment.receipt || "N/A",
+    status: payment.status,
+  }));
+
+return res.status(200).json({
+  success: true,
+  data: payments,
+});
   } catch (error) {
     console.error("❌ Error fetching payments:", error.message);
     return res.status(500).json({ error: "Failed to fetch payment details" });

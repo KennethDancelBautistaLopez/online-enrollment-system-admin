@@ -1,4 +1,4 @@
-// pages/students/[studentId]/payments.js
+// pages/payments/view/1stsem/[studentId]/payments.js
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 import Login from "@/pages/Login";
 import LoadingSpinner from "@/components/Loading";
 
-export default function StudentPaymentsView() {
+export default function FirstSEMStudentPaymentsView() {
   const router = useRouter();
   const { studentId } = router.query;
   const [studentData, setStudentData] = useState(null);
@@ -19,6 +19,7 @@ export default function StudentPaymentsView() {
     const fetchStudentPayments = async () => {
       try {
         const response = await axios.get(`/api/students/${studentId}/payments`);
+        console.log(response.data);
         setStudentData(response.data);
         toast.success("Student payment data loaded! ✅");
       } catch (error) {
@@ -44,12 +45,20 @@ export default function StudentPaymentsView() {
           </span>
         </Link>
   
-        <h2 className="text-3xl font-semibold text-gray-800 dark:text-white mb-4">
-          {studentData.fullName}
-        </h2>
-        <p className="text-gray-500 text-lg dark:text-gray-300 mb-6">
-          Student ID: {studentId}
-        </p>
+        {studentData ? (
+          <>
+            <h2 className="text-3xl font-semibold text-gray-800 dark:text-white mb-4">
+              {studentData.fullName || "No name available"}
+            </h2>
+            <p className="text-gray-500 text-lg dark:text-gray-300 mb-6">
+              Student ID: {studentId}
+            </p>
+            {/* ... render the table */}
+          </>
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 text-center">No student data available.</p>
+        )}
+
   
         <div className="overflow-x-auto bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md">
           <table className="min-w-full table-auto text-sm text-gray-600 dark:text-gray-300">
@@ -63,8 +72,8 @@ export default function StudentPaymentsView() {
             </tr>
           </thead>
             <tbody>
-              {studentData.payments.length > 0 ? (
-                studentData.payments.map((payment, index) => (
+            {studentData.payments?.firstSemester?.length > 0 ? (
+              studentData.payments.firstSemester.map((payment, index) => (
                   <tr key={index} className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <td className="border-t px-4 py-3">{payment.referenceNumber}</td>
                     <td className="border-t px-4 py-3">

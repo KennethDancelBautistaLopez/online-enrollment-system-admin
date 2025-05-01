@@ -50,10 +50,28 @@ export default function PaymentsPage() {
         setLoading(false);
       }
     };
+    
 
     fetchPayments(); // Call fetch function to load payments data
   }, [ session,initialized, router]); // Trigger the effect only when initialized changes
 
+  const handleDeleteAll = async () => {
+    if (!confirm("Are you sure you want to delete all payments? This action is irreversible.")) {
+      return;
+    }
+  
+    try {
+      const response = await axios.delete("/api/payments?deleteAll=true");
+      if (response.data.success) {
+        toast.success("All payments deleted successfully.");
+        setPayments([]); // Clear payments from the UI
+      }
+    } catch (error) {
+      console.error("Error deleting all payments:", error);
+      toast.error("Failed to delete payments.");
+    }
+  };
+  
   useEffect(() => {
     if (!session) {
       toast.error("You are not logged in.");
@@ -89,15 +107,15 @@ export default function PaymentsPage() {
             <LoadingSpinner/>
           ) : (
             <>
-              <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-              <h1 className="text-2xl font-bold mb-2 md:mb-0 text-gray-800 dark:text-white">Payments List</h1>
+              <div className="flex flex-col md:flex-row md:items-center justify-between items-center gap-2 mb-4">
+              <h1 className="text-2xl font-bold mb-3 md:mb-0 text-gray-800 dark:text-white">Payments List</h1>
               {session?.user.role === "superAdmin" && (
-                <Link
-                  className="btn-primary-filled px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 dark:border-blue-500"
-                  href="/payments/new"
+                <button
+                  onClick={handleDeleteAll}
+                  className="btn-primary-filled px-6 py-3 bg-red-500 text-white rounded-lg border border-red-600 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-600 dark:border-red-500"
                 >
-                  Add new payment
-                </Link>
+                  Delete All Payments
+                </button>
               )}
             </div>
       
