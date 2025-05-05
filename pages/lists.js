@@ -1,3 +1,4 @@
+// pages/lists.js
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Login from "@/pages/Login";
@@ -55,15 +56,17 @@ export default function Students({ initialStudents }) {
 
   if (!session) return <Login />;
 
-  const handleGeneratePDF = (student) => {
-    const pdfLink = generatePDFfile(student);
+  const handleGeneratePDF = async (student) => {
+    const pdfBlob = await generatePDFfile(student); // Make sure this returns a Blob
+    const pdfURL = URL.createObjectURL(pdfBlob);
+  
     setPdfLinks((prev) => ({
       ...prev,
-      [student._studentId]: pdfLink,
+      [student._studentId]: pdfURL,
     }));
+  
     toast.success(`PDF generated for ${student.fname} ${student.lname}!`);
   };
-
   const updateStudentStatus = async (studentId, status) => {
     try {
       const res = await fetch(`/api/students?id=${studentId}`, {
@@ -189,6 +192,7 @@ export default function Students({ initialStudents }) {
                 <th className="border p-2 dark:border-gray-700">Student Number</th>
                 <th className="border p-2 dark:border-gray-700">Name</th>
                 <th className="border p-2 dark:border-gray-700">Email</th>
+                <th className="border p-2 dark:border-gray-700">Subject</th>
                 <th className="border p-2 dark:border-gray-700">Files</th>
                 <th className="border p-2 dark:border-gray-700">Upload Files</th>
                 <th className="border p-2 dark:border-gray-700">Status</th>
@@ -209,9 +213,24 @@ export default function Students({ initialStudents }) {
                     <td className="border p-2 dark:border-gray-700">{student._studentId || "N/A"}</td>
                     <td className="border p-2 dark:border-gray-700">{student.fname} {student.mname} {student.lname}</td>
                     <td className="border p-2 dark:border-gray-700">{student.email || "N/A"}</td>
+                    <td className="border p-2 dark:border-gray-700">
+                      <Link href={`/students/subjects/${student._id}`} passHref>
+                        <button
+                          className="flex items-center gap-2 text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                          aria-label="View Student Subjects"
+                        >
+                          
+                          View
+                        </button>
+                      </Link>
+                    </td>
                     <td className="border p-4 text-center dark:border-gray-700 text-gray-100">
                     <Link href={`/students/student-files/${student._id}`}>
-                      <button className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                      <button className="flex items-center gap-2 text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                          aria-label="View Student Subjects">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+                            <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640H447l-80-80H160v480l96-320h684L837-217q-8 26-29.5 41.5T760-160H160Zm84-80h516l72-240H316l-72 240Z"/>
+                          </svg>
                         View
                       </button>
                     </Link>
@@ -222,20 +241,46 @@ export default function Students({ initialStudents }) {
                           setSelectedStudentId(student._studentId);
                           triggerFileSelection();
                         }}
-                        className="btn-primary text-sm px-3 py-2 bg-green-500 text-white rounded-md hover:bg-blue-600"
+                        className="flex items-center justify-center gap-2 text-sm px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                        aria-label="Select file to upload"
                       >
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+                          <path d="M440-200h80v-167l64 64 56-57-160-160-160 160 57 56 63-63v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520Z"/>
+                        </svg>
                         Upload
                       </button>
+
                       {selectedStudentId === student._studentId && file && (
-                        <div className="mt-2">
-                          <span className=" text-gray-800 dark:text-gray-400"> Selected File: {file.name}</span>
-                          <button
-                            onClick={() => handleUpload(student._studentId)}
-                            disabled={uploading}
-                            className="btn-primary text-sm px-3 py-2 mt-2 bg-yellow-500 text-white rounded-md hover:bg-blue-600"
-                          >
-                            {uploading ? "Uploading..." : "Upload File"}
-                          </button>
+                        <div className="mt-3 space-y-2">
+                          <p className="text-gray-800 dark:text-gray-400 text-sm">
+                            Selected File: <span className="font-medium">{file.name}</span>
+                          </p>
+
+                          <div className="flex flex-col sm:flex-row sm:justify-center gap-2">
+                            <button
+                              onClick={() => handleUpload(student._studentId)}
+                              disabled={uploading}
+                              className="flex items-center justify-center gap-2 text-sm px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 disabled:opacity-50"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+                                <path d="M720-330q0 104-73 177T470-80q-104 0-177-73t-73-177v-370q0-75 52.5-127.5T400-880q75 0 127.5 52.5T580-700v350q0 46-32 78t-78 32q-46 0-78-32t-32-78v-370h80v370q0 13 8.5 21.5T470-320q13 0 21.5-8.5T500-350v-350q-1-42-29.5-71T400-800q-42 0-71 29t-29 71v370q-1 71 49 120.5T470-160q70 0 119-49.5T640-330v-390h80v390Z"/>
+                              </svg>
+                              {uploading ? "Uploading..." : "Upload File"}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setFile(null);
+                                setSelectedStudentId(null);
+                              }}
+                              className="flex items-center justify-center gap-2 text-sm px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+                                <path d="M480-416 313-250q-11 11-26 11t-26-11q-11-11-11-26t11-26l166-166-166-166q-11-11-11-26t11-26q11-11 26-11t26 11l166 166 166-166q11-11 26-11t26 11q11 11 11 26t-11 26L533-480l166 166q11 11 11 26t-11 26q-11 11-26 11t-26-11L480-416Z"/>
+                              </svg>
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       )}
                     </td>
@@ -257,19 +302,26 @@ export default function Students({ initialStudents }) {
                         <a
                           href={pdfLinks[student._studentId]}
                           download={`${student.fname}_${student.lname}_info.pdf`}
-                          className="btn-primary text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                          className="inline-flex items-center gap-2 text-sm px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                         >
-                          Download
+                          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+                            <path d="M382-320 155-547l57-57 170 170 366-366 57 57-423 423ZM200-160v-80h560v80H200Z"/>
+                          </svg>
+                          Downloaded
                         </a>
                       ) : (
                         <button
                           onClick={() => handleGeneratePDF(student)}
-                          className="btn-primary text-sm px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-blue-600"
+                          className="inline-flex items-center gap-2 text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                         >
+                          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+                            <path d="M360-460h40v-80h40q17 0 28.5-11.5T480-580v-40q0-17-11.5-28.5T440-660h-80v200Zm40-120v-40h40v40h-40Zm120 120h80q17 0 28.5-11.5T640-500v-120q0-17-11.5-28.5T600-660h-80v200Zm40-40v-120h40v120h-40Zm120 40h40v-80h40v-40h-40v-40h40v-40h-80v200ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/>
+                          </svg>
                           Generate PDF
                         </button>
                       )}
                     </td>
+
                   </tr>
                 ))
               )}

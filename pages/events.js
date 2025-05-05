@@ -54,9 +54,16 @@ export default function EventsPage() {
               List of Events
             </h1>
             <Link
-              className="btn-primary-filled px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
               href="/events/new"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg border border-blue-700 shadow-md transition focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 fill-current text-white"
+                viewBox="0 -960 960 960"
+              >
+                <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+              </svg>
               Add New Event
             </Link>
           </div>
@@ -110,18 +117,34 @@ export default function EventsPage() {
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.eventType}</td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.organizer}</td>
                         <td className="border p-2 flex justify-center space-x-2 dark:border-gray-700">
-                          <Link
-                            className="btn-default hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
-                            href={`/events/edit/${event._id}`}
+                        <Link
+                          href={`/events/edit/${event._id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium rounded-md transition"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4"
+                            viewBox="0 -960 960 960"
+                            fill="currentColor"
                           >
-                            Edit
-                          </Link>
-                          <Link
-                            className="btn-default hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 dark:text-white"
-                            href={`/events/delete/${event._id}`}
+                            <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
+                          </svg>
+                          Edit
+                        </Link>
+                        <Link
+                          href={`/events/delete/${event._id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4"
+                            viewBox="0 -960 960 960"
+                            fill="currentColor"
                           >
-                            Delete
-                          </Link>
+                            <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                          </svg>
+                          Delete
+                        </Link>
                         </td>
                       </tr>
                     );

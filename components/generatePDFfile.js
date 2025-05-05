@@ -11,7 +11,7 @@ const convertImageToBase64 = async (imageUrl) => {
   });
 };
 
-export function generatePDFfile(student) {
+export async function generatePDFfile(student) {
   const doc = new jsPDF();
   const formatDate = (date) => new Date(date).toLocaleDateString("en-US");
 
@@ -133,7 +133,9 @@ export function generatePDFfile(student) {
     doc.text("Registrar's Signature", 80, y);
 
     doc.save(`${student.fname || "Student"}_${student.lname || "Name"}_Enrollment_Form.pdf`);
+
+    return doc.output("blob");
   };
 
-  loadLogoAndGeneratePDF();
+  return await loadLogoAndGeneratePDF();
 }

@@ -248,7 +248,7 @@ export default function StudentForm({
             value={birthdate}
            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setBirthdate(ev.target.value)}
-            required
+            // required
           />
         </div>
 

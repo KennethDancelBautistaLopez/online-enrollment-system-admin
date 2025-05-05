@@ -172,9 +172,17 @@ export default function Home() {
               <div className="col-span-full mt-4">
                 <button
                   onClick={() => window.location.href = "/events"}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-blue-500 transition dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
                 >
-                  Go to Events →
+                  Go to Events
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 -960 960 960"
+                    fill="currentColor"
+                  >
+                    <path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z" />
+                  </svg>
                 </button>
               </div>
             )}
@@ -218,9 +226,17 @@ export default function Home() {
               <div className="col-span-full mt-4">
                 <button
                   onClick={() => window.location.href = "/overall"}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition dark:bg-blue-500 dark:hover:bg-blue-600"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
                 >
-                  Go to Overall Payments →
+                  Go to Overall Payments
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 -960 960 960"
+                    fill="currentColor"
+                  >
+                    <path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z" />
+                  </svg>
                 </button>
               </div>
             </>

@@ -1,70 +1,83 @@
 import mongoose from "mongoose";
 
+const subjectSchema = new mongoose.Schema({
+  subjectCode: String,
+  subjectDescription: String,
+  day: String,
+  time: String,
+  teacher: String,
+  unit: Number,
+  mode: String,
+  room: String,
+  // grade: String,
+}, { _id: false });
+
+// Education history schema
 const educationHistorySchema = new mongoose.Schema({
   schoolName: { type: String, default: "" },
   yearAttended: { type: String, default: "" },
 });
 
-const StudentSchema = new mongoose.Schema(
-  {
-    _studentId: { type: String, unique: true, required: true },
-    fname: { type: String, required: true },
-    mname: { type: String },
-    lname: { type: String, required: true },
-    address: { type: String, required: true },
-    mobile: { type: String, required: true },
-    landline: { type: String },
-    facebook: { type: String },
-    birthdate: { type: Date, required: true },
-    birthplace: { type: String, required: true },
-    nationality: { type: String, required: true },
-    religion: { type: String },
-    sex: { type: String, enum: ["Male", "Female", "Other"], required: true },
-    father: { type: String },
-    mother: { type: String },
-    guardian: { type: String },
-    guardianOccupation: { type: String },
-    registrationDate: { type: Date, default: Date.now },
-    lrn: { type: String, unique: true },
+const StudentSchema = new mongoose.Schema({
+  _studentId: { type: String, unique: true, required: true },
+  fname: { type: String, required: true },
+  mname: { type: String },
+  lname: { type: String, required: true },
+  address: { type: String, required: true },
+  mobile: { type: String, required: true },
+  landline: { type: String },
+  facebook: { type: String },
+  birthdate: { type: Date, },
+  birthplace: { type: String, required: true },
+  nationality: { type: String, required: true },
+  religion: { type: String },
+  sex: { type: String, enum: ["Male", "Female", "Other"], required: true },
+  father: { type: String },
+  mother: { type: String },
+  guardian: { type: String },
+  guardianOccupation: { type: String },
+  registrationDate: { type: Date, default: Date.now },
+  lrn: { type: String, unique: true },
+  education: { type: String, required: true },
+  course: { type: String, required: true },
+  yearLevel: { type: String, required: true },
+  semester: { type: String, required: true },
+  schoolYear: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
 
-    semester: { type: String },
-    
-    nursery: { type: educationHistorySchema, default: () => ({}) },
-    elementary: { type: educationHistorySchema, default: () => ({}) },
-    juniorHigh: { type: educationHistorySchema, default: () => ({}) },
-    seniorHigh: { type: educationHistorySchema, default: () => ({}) },
-    
-    education: { type: String },
-    course: { type: String },
-    yearLevel: { type: String, required: true },
-    schoolYear: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+  nursery: { type: educationHistorySchema, default: () => ({}) },
+  elementary: { type: educationHistorySchema, default: () => ({}) },
+  juniorHigh: { type: educationHistorySchema, default: () => ({}) },
+  seniorHigh: { type: educationHistorySchema, default: () => ({}) },
 
-    status: {
-      type: String,
-      enum: ["enrolled", "graduated", "dropped", "missing files"],
-      default: "missing files"
-    },
-
-    files: [{
-      filename: { type: String, required: true, index: true },
-      filePath: { type: String, default: "" },
-      mimeType: { type: String, required: true },
-      size: { type: Number, required: true },
-      base64: { type: String }
-    }],
-
-    tuitionFee: { type: Number, default: 0 },
-    totalPaid: { type: Number, default: 0 },
-    balance: { type: Number, default: 0 },
-
-  payments: {
-  type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Payment" }],
-  default: []
-}
+  status: {
+    type: String,
+    enum: ["enrolled", "graduated", "dropped", "missing files"],
+    default: "missing files",
   },
-  { timestamps: true }
-);
+
+  files: [{
+    filename: { type: String, required: true, index: true },
+    filePath: { type: String, default: "" },
+    mimeType: { type: String, required: true },
+    size: { type: Number, required: true },
+    base64: { type: String },
+  }],
+
+  tuitionFee: { type: Number, default: 0 },
+  totalPaid: { type: Number, default: 0 },
+  balance: { type: Number, default: 0 },
+
+  payments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Payment"
+  }],
+
+  subjectsBySemester: {
+    type: Map,
+    of: [subjectSchema]
+  }
+}, { timestamps: true });
 
 export default mongoose.models.Student || mongoose.model("Student", StudentSchema);

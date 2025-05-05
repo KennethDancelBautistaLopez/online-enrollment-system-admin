@@ -112,8 +112,16 @@ export default function PaymentsPage() {
               {session?.user.role === "superAdmin" && (
                 <button
                   onClick={handleDeleteAll}
-                  className="btn-primary-filled px-6 py-3 bg-red-500 text-white rounded-lg border border-red-600 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-600 dark:border-red-500"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg border border-red-600 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-600 dark:border-red-500 transition"
                 >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 -960 960 960"
+                    fill="currentColor"
+                  >
+                    <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                  </svg>
                   Delete All Payments
                 </button>
               )}
@@ -184,9 +192,17 @@ export default function PaymentsPage() {
                           <td className="border p-2">
                             <div className="flex items-center justify-center space-x-4">
                               <Link
-                                className="btn-default hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 dark:text-white"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition"
                                 href={`/payments/delete/${payment.paymentId}`}
                               >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="w-4 h-4"
+                                  viewBox="0 -960 960 960"
+                                  fill="currentColor"
+                                >
+                                  <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                                </svg>
                                 Delete
                               </Link>
                             </div>
