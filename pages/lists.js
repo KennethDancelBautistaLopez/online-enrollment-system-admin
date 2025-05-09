@@ -7,12 +7,10 @@ import { useSession } from "next-auth/react";
 import { generatePDFfile } from "@/components/generatePDFfile";
 import LoadingSpinner from "@/components/Loading";
 import Link from "next/link";
-
 export async function getServerSideProps() {
   try {
     const res = await fetch('http://localhost:3000/api/students');
     const data = await res.json();
-
     return {
       props: {
         initialStudents: data || [],
@@ -36,6 +34,7 @@ export default function Students({ initialStudents }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [showEmail, setShowEmail] = useState(false);
   const { data: session } = useSession();
   const fileInputRef = useRef(null);
 
@@ -67,27 +66,27 @@ export default function Students({ initialStudents }) {
   
     toast.success(`PDF generated for ${student.fname} ${student.lname}!`);
   };
-  const updateStudentStatus = async (studentId, status) => {
+  const updateStudentInfo = async (studentId, updatedFields) => {
     try {
       const res = await fetch(`/api/students?id=${studentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify(updatedFields),
       });
-
+  
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Update failed');
-
+  
       setStudents((prev) =>
         prev.map((student) =>
-          student._studentId === studentId ? { ...student, status } : student
+          student._studentId === studentId ? { ...student, ...updatedFields } : student
         )
       );
-      toast.success("Student status updated!");
+      toast.success("Student info updated!");
     } catch (err) {
-      toast.error("Failed to update status.");
+      toast.error("Failed to update student info.");
       console.error(err);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -189,14 +188,16 @@ export default function Students({ initialStudents }) {
             <thead>
             <tr className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
                 <th className="border p-2 dark:border-gray-700">#</th>
-                <th className="border p-2 dark:border-gray-700">Student Number</th>
-                <th className="border p-2 dark:border-gray-700">Name</th>
-                <th className="border p-2 dark:border-gray-700">Email</th>
-                <th className="border p-2 dark:border-gray-700">Subject</th>
-                <th className="border p-2 dark:border-gray-700">Files</th>
-                <th className="border p-2 dark:border-gray-700">Upload Files</th>
-                <th className="border p-2 dark:border-gray-700">Status</th>
-                <th className="border p-2 dark:border-gray-700">Download</th>
+                <th className="border p-1 dark:border-gray-700"><div className="flex items-center justify-center">Student Number </div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Name</div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Email </div></th>
+                <th className="border p-2 dark:border-gray-700"> <div className="flex items-center justify-center">Year Level </div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">School Year</div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Semester</div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Files</div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Upload Files </div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Status </div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Download</div></th>
               </tr>
             </thead>
             <tbody>
@@ -212,17 +213,43 @@ export default function Students({ initialStudents }) {
                     <td className="border p-2 text-center dark:border-gray-700">{index + 1}</td>
                     <td className="border p-2 dark:border-gray-700">{student._studentId || "N/A"}</td>
                     <td className="border p-2 dark:border-gray-700">{student.fname} {student.mname} {student.lname}</td>
-                    <td className="border p-2 dark:border-gray-700">{student.email || "N/A"}</td>
-                    <td className="border p-2 dark:border-gray-700">
-                      <Link href={`/students/subjects/${student._id}`} passHref>
-                        <button
-                          className="flex items-center gap-2 text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                          aria-label="View Student Subjects"
+                    <td className="border p- dark:border-gray-700 text-center"
+                      onClick={() => setShowEmail(!showEmail)}
+                      title="Click to show email"
+                    >
+                      {showEmail ? student.email : "Click to show email"}
+                      </td>
+                    <td className="border p-2 text-center dark:border-gray-700">
+                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={student.yearLevel}
+                        onChange={(e) => updateStudentInfo(student._studentId, { yearLevel: e.target.value })}
                         >
-                          
-                          View
-                        </button>
-                      </Link>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                      </select>
+                    </td>
+                    <td className="border p-2 text-center dark:border-gray-700 text-gray-100">
+                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={student.schoolYear}
+                      onChange={(e) => updateStudentInfo(student._studentId, { schoolYear: e.target.value })}>
+                        <option value="2023-2024">2023-2024</option>
+                        <option value="2024-2025">2024-2025</option>
+                        <option value="2025-2026">2025-2026</option>
+                        <option value="2026-2027">2026-2027</option>
+                        <option value="2027-2028">2027-2028</option>
+                        <option value="2028-2029">2028-2029</option>
+                        <option value="2029-2030">2029-2030</option>
+                      </select>
+                    </td>
+                    <td className="border p-2 text-center dark:border-gray-700 text-gray-100">
+                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={student.semester}
+                      onChange={(e) => updateStudentInfo(student._studentId, { semester: e.target.value })}>
+                        <option value="1st Semester">1st Semester</option>
+                        <option value="2nd Semester">2nd Semester</option>
+                      </select>
                     </td>
                     <td className="border p-4 text-center dark:border-gray-700 text-gray-100">
                     <Link href={`/students/student-files/${student._id}`}>
@@ -287,7 +314,7 @@ export default function Students({ initialStudents }) {
                     <td className="border p-4 text-center dark:border-gray-700">
                     <select
                       value={student.status}
-                      onChange={(e) => updateStudentStatus(student._studentId, e.target.value)}
+                      onChange={(e) => updateStudentInfo(student._studentId, { status: e.target.value })}
                       className="bg-white text-gray-900 border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400">
 
                         <option value="">Select Status</option>

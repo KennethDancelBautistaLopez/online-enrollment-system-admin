@@ -18,35 +18,6 @@ function formatLandline(value) {
   }
 }
 
-function YearAttendedInput({ name }) {
-  const [value, setValue] = useState("");
-
-  const handleChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
-    let formatted = raw;
-    if (raw.length > 4) {
-      formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
-    }
-    setValue(formatted);
-
-    if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
-      toast.error("Please use the format YYYY-YYYY");
-    }
-  };
-
-  return (
-    <div>
-      <input
-        type="text"
-        name={name}
-        placeholder="Year Attended (e.g., 2000-2004)"
-        value={value}
-        onChange={handleChange}
-        className="input-style"
-      />
-    </div>
-  );
-}
 
 export default function StudentForm({
   _studentId,
@@ -86,20 +57,14 @@ export default function StudentForm({
   const [seniorHighState, setSeniorHigh] = useState(seniorHigh || { schoolName: "", yearAttended: "" });
   const [goToStudents, setGoToStudents] = useState(false);
   const router = useRouter();
-  useEffect(() => {
-    console.log("Props received in StudentForm:", {
-      _studentId,fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,password,semester,nursery,elementary,juniorHigh,seniorHigh,status
-    });
-  }, [
-    _studentId, fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,password,semester, nursery,elementary,juniorHigh,seniorHigh,status,
-  ]);
-
   async function saveStudent(ev) {
     ev.preventDefault();
   
     const studentInfo = {
       fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,password,semester,nursery: nurseryState,elementary: elementaryState,juniorHigh: juniorHighState,seniorHigh: seniorHighState,status
     };
+
+    console.log("Form state data being sent to server:", studentInfo);
   
     // Only include _studentId when updating
     if (_studentId) {
@@ -144,91 +109,130 @@ export default function StudentForm({
 
   return (
     <form onSubmit={saveStudent}>
-      <div className="space-y-6">
-        <div className="space-y-2 ">
-          <label className="text-gray-700 dark:text-white">First Name <span className="text-gray-700 dark:text-white">*</span></label>
-          <input
-            type="text"
-            placeholder="Enter first name"
-            value={fname}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setFname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
-            required
-          />
+      <div className="space-y-2">
+        <div className="flex justify-center items-center gap-4">
+          <label className="block text-gray-700 dark:text-white dark:text-white font-bold mb-2 text-2xl">
+            Personal Information
+          </label>
         </div>
+      <div className="flex flex-wrap gap-4 items-start">
+  <div className="space-y-2 w-full sm:w-[30%]">
+    <label className="block font-bold text-gray-700 dark:text-white">
+      First Name <span className="text-gray-700 dark:text-white">*</span>
+    </label>
+    <input
+      type="text"
+      placeholder="Enter first name"
+      value={fname}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+      onChange={(ev) =>
+        setFname(
+          ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+        )
+      }
+      required
+    />
+  </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white">Middle Name</label>
-          <input
-            type="text"
-            placeholder="Enter middle name"
-            value={mname}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setMname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
-          />
-        </div>
+  <div className="space-y-2 w-full sm:w-[30%]">
+    <label className="block font-bold text-gray-700 dark:text-white">
+      Middle Name
+    </label>
+    <input
+      type="text"
+      placeholder="Enter middle name"
+      value={mname}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+      onChange={(ev) =>
+        setMname(
+          ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+        )
+      }
+    />
+  </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white">Last Name <span className="text-red-500 font-bold">*</span></label>
-          <input
-            type="text"
-            placeholder="Enter last name"
-            value={lname}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setLname(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
-            required
-          />
-        </div>
+  <div className="space-y-2 w-full sm:w-[30%]">
+    <label className="block font-bold text-gray-700 dark:text-white">
+      Last Name <span className="text-red-500 font-bold">*</span>
+    </label>
+    <input
+      type="text"
+      placeholder="Enter last name"
+      value={lname}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+      onChange={(ev) =>
+        setLname(
+          ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+        )
+      }
+      required
+    />
+  </div>
+</div>
+<div className="flex flex-wrap gap-4 items-start">
+  <div className="space-y-2 w-full sm:w-[30%]">
+    <label className="block font-bold text-gray-700 dark:text-white">
+      Address <span className="text-red-500 font-bold">*</span>
+    </label>
+    <input
+      type="text"
+      placeholder="Enter address"
+      value={address}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+      onChange={(ev) =>
+        setAddress(
+          ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+        )
+      }
+      required
+    />
+  </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white">Address <span className="text-red-500 font-bold">*</span></label>
-          <input
-            type="text"
-            placeholder="Enter address"
-            value={address}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setAddress(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
-            required
-          />
-        </div>
+  <div className="space-y-2 w-full sm:w-[30%]">
+    <label className="block font-bold text-gray-700 dark:text-white">
+      Mobile Number <span className="text-red-500 font-bold">*</span>
+    </label>
+    <input
+      type="text"
+      placeholder="Enter mobile number"
+      value={mobile}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+      onChange={(ev) => {
+        let input = ev.target.value.replace(/\D/g, "");
+        if (input.length > 11) input = input.slice(0, 11);
+        if (input.length > 7)
+          input = input.replace(/^(\d{4})(\d{3})(\d{0,4})$/, "$1-$2-$3");
+        else if (input.length > 4)
+          input = input.replace(/^(\d{4})(\d{0,3})$/, "$1-$2");
+        setMobile(input);
+      }}
+      maxLength="13"
+      required
+    />
+  </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white">Mobile Number <span className="text-red-500 font-bold">*</span></label>
-          <input
-            type="text"
-            placeholder="Enter mobile number"
-            value={mobile}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => {
-              let input = ev.target.value.replace(/\D/g, "");
-              if (input.length > 11) input = input.slice(0, 11);
-              if (input.length > 7) input = input.replace(/^(\d{4})(\d{3})(\d{0,4})$/, "$1-$2-$3");
-              else if (input.length > 4) input = input.replace(/^(\d{4})(\d{0,3})$/, "$1-$2");
-              setMobile(input);
-            }}
-            maxLength="13"
-            required
-          />
-        </div>
+  <div className="space-y-2 w-full sm:w-[30%]">
+    <label className="block font-bold text-gray-700 dark:text-white">
+      Landline Number
+    </label>
+    <input
+      type="tel"
+      name="landline"
+      placeholder="Landline Number (11 digits)"
+      required
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+      value={landline}
+      onChange={(e) => {
+        const formattedLandline = formatLandline(e.target.value);
+        setLandline(formattedLandline);
+      }}
+    />
+  </div>
+</div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white">Landline Number</label>
-          <input
-            type="tel"
-            name="landline"
-            placeholder="Landline Number (11 digits)"
-            required
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            value={landline}
-            onChange={(e) => {
-              const formattedLandline = formatLandline(e.target.value);
-              setLandline(formattedLandline);
-            }}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+<div className="flex flex-wrap gap-4 items-start">
+  <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Facebook <span className="text-red-500 font-bold">*</span></label>
           <input
             type="url"
@@ -239,9 +243,8 @@ export default function StudentForm({
             required
           />
         </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Date of Birth <span className="text-red-500 font-bold">*</span></label>
           <input
             type="date"
@@ -251,9 +254,8 @@ export default function StudentForm({
             // required
           />
         </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Place of Birth <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
@@ -264,9 +266,11 @@ export default function StudentForm({
             required
           />
         </div>
+    </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+    <div className="flex flex-wrap gap-4 items-start">
+    <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Nationality <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
@@ -277,9 +281,8 @@ export default function StudentForm({
             required
           />
         </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Religion <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
@@ -291,8 +294,8 @@ export default function StudentForm({
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Sex <span className="text-red-500 font-bold">*</span></label>
           <select
             value={sex}
@@ -306,9 +309,11 @@ export default function StudentForm({
             <option value="Other">Other</option>
           </select>
         </div>
+    </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+    <div className="flex flex-wrap gap-4 items-start">
+    <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Fathers Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
@@ -320,8 +325,8 @@ export default function StudentForm({
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Mothers Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
@@ -333,8 +338,8 @@ export default function StudentForm({
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Guardians Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
@@ -345,9 +350,11 @@ export default function StudentForm({
             required
           />
         </div>
+    </div>
 
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+    <div className="flex flex-wrap gap-4 items-start">
+    <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Guardians Occupation <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
@@ -358,49 +365,18 @@ export default function StudentForm({
             required
           />
         </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
-          >Registration Date</label>
-          <input
-            type="date"
-            value={registrationDate}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setRegistrationDate(ev.target.value)}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
-          >LRN <span className="text-red-500 font-bold">*</span></label>
-          <input
-            type="number"
-            placeholder="Enter LRN"
-            value={lrn}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => {
-              const value = ev.target.value.replace(/\D/g, "").slice(0, 12);
-              setLrn(value);
-            }}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
-          >Year Level <span className="text-red-500 font-bold">*</span></label>
-          <input
-            type="number"
-            placeholder="Enter year level"
-            value={yearLevel}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setYearLevel(ev.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white">
+    </div>
+    <div className="mt-8 pt-4">
+  <hr className="border-t border-gray-300 dark:border-gray-600 mb-4" />
+  <div className="flex justify-center items-center">
+    <label className="block text-gray-700 dark:text-white font-bold mb-2 text-2xl">
+      Academic Information
+    </label>
+  </div>
+</div>
+    <div className="flex flex-wrap gap-4 items-start">
+    <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white">
             School Year <span className="text-red-500 font-bold">*</span>
           </label>
           <input
@@ -425,19 +401,32 @@ export default function StudentForm({
             required
           />
         </div>
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
+          >Year Level <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="number"
+            placeholder="Enter year level"
+            value={yearLevel}
+            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+            onChange={(ev) => setYearLevel(ev.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Education Level</label>
           <select value={education} onChange={(ev) => setEducation(ev.target.value)} className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700" required>
             <option value="">Select Education Level</option>
             <option value="college">College</option>
           </select>
+        </div>
+    </div>
 
-          <div className="h-2" />
+    <div className="flex flex-wrap gap-4 items-start">
           {education === "college" && (
-          <div className="space-y-2">
-              <label className="text-gray-700 mt-2 pt-2 dark:text-white">Course</label>
+    <div className="space-y-2 w-full sm:w-[30%]">
+              <label className="text-gray-700 font-bold mt-2 pt-2 dark:text-white">Course</label>
               <input
                 type="text"
                 placeholder="Enter Course"
@@ -451,12 +440,8 @@ export default function StudentForm({
               />
             </div>
           )}
-          </div>
-        
-
-
-        <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+    <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
           >semester <span className="text-red-500 font-bold">*</span></label>
           <select
             value={semester}
@@ -468,149 +453,178 @@ export default function StudentForm({
             <option value="1st Semester">1st Semester</option>
             <option value="2nd Semester">2nd Semester</option>
           </select>
-        </div>        
-
-      {/* Nursery School */}
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Nursery School Attended <span className="text-red-500 font-bold">*</span></label>
-        <input
-          type="text"
-          value={nurseryState.schoolName}
-          onChange={(e) => setNursery({ ...nurseryState, schoolName: e.target.value })}
+        </div>    
+        
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
+          >LRN <span className="text-red-500 font-bold">*</span></label>
+          <input
+            type="number"
+            placeholder="Enter LRN"
+            value={lrn}
             className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white">
-          Nursery Year Attended <span className="text-red-500 font-bold">*</span>
-        </label>
-        <input
-          type="text"
-          value={nurseryState.yearAttended}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
-            let formatted = raw;
-            if (raw.length > 4) {
-              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
-            }
-            setNursery({ ...nurseryState, yearAttended: formatted });
-            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
-              toast.error("Please use the format YYYY-YYYY");
-            }
-          }}
-          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-          required
-        />
-      </div>
-
-
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Elementary School Attended <span className="text-red-500 font-bold">*</span></label>
-        <input
-          type="text"
-          value={elementaryState.schoolName}
-          onChange={(e) => setElementary({ ...elementaryState, schoolName: e.target.value })}
+            onChange={(ev) => {
+              const value = ev.target.value.replace(/\D/g, "").slice(0, 12);
+              setLrn(value);
+            }}
+            required
+          />
+        </div>
+        
+        <div className="space-y-2 w-full sm:w-[30%]">
+          <label className="text-gray-700 font-bold dark:text-white"
+          >Registration Date</label>
+          <input
+            type="date"
+            value={registrationDate}
             className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white">
-          Elementary Year Attended <span className="text-red-500 font-bold">*</span>
-        </label>
-        <input
-          type="text"
-          value={elementaryState.yearAttended}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
-            let formatted = raw;
-            if (raw.length > 4) {
-              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
-            }
-            setElementary({ ...elementaryState, yearAttended: formatted });
-            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
-              toast.error("Please use the format YYYY-YYYY");
-            }
-          }}
-          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-          required
-        />
-      </div>
+            onChange={(ev) => setRegistrationDate(ev.target.value)}
+          />
+        </div>
+    </div>     
 
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Junior High School Attended <span className="text-red-500 font-bold">*</span></label>
-        <input
-          type="text"
-          value={juniorHighState.schoolName}
-          onChange={(e) => setJuniorHigh({ ...juniorHighState, schoolName: e.target.value })}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white">Junior High Year Attended <span className="text-red-500 font-bold">*</span></label>
-        <input
-          type="text"
-          value={juniorHighState.yearAttended}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
-            let formatted = raw;
-            if (raw.length > 4) {
-              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
-            }
-            setJuniorHigh({
-              ...juniorHighState,
-              yearAttended: formatted,
-            });
-            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
-              toast.error("Please use the format YYYY-YYYY");
-            }
-          }}
-          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white"
-        >Senior High School Attended <span className="text-red-500 font-bold">*</span></label>
-        <input
-          type="text"
-          value={seniorHighState.schoolName}
-          onChange={(e) => setSeniorHigh({ ...seniorHighState, schoolName: e.target.value })}
-           className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="text-gray-700 dark:text-white">
-          Senior High Year Attended <span className="text-red-500 font-bold">*</span>
-        </label>
-        <input
-          type="text"
-          value={seniorHighState.yearAttended}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/\D/g, "").slice(0, 8); // only digits, max 8
-            let formatted = raw;
-            if (raw.length > 4) {
-              formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
-            }
+    <div className="flex flex-wrap gap-4">
+  {/* Nursery School Name */}
+  <div className="space-y-2 w-full sm:w-[23%]">
+    <label className="text-gray-700 font-bold dark:text-white">Nursery School Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={nurseryState.schoolName}
+      onChange={(e) => setNursery({ ...nurseryState, schoolName: e.target.value })}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 capitalize"
+    />
+  </div>
 
-            setSeniorHigh({ ...seniorHighState, yearAttended: formatted });
+  {/* Nursery Year */}
+  <div className="space-y-2 w-full sm:w-[23%]">
+    <label className="text-gray-700 font-bold dark:text-white">Nursery Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={nurseryState.yearAttended}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/\D/g, "").slice(0, 8);
+        let formatted = raw;
+        if (raw.length > 4) {
+          formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+        }
+        setNursery({ ...nurseryState, yearAttended: formatted });
+        if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+          toast.error("Please use the format YYYY-YYYY");
+        }
+      }}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+    />
+  </div>
 
-            if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
-              toast.error("Please use the format YYYY-YYYY");
-            }
-          }}
-          className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-          required
-        />
-      </div>
+  {/* Elementary School Name */}
+  <div className="space-y-2 w-full sm:w-[23%]">
+    <label className="text-gray-700 font-bold dark:text-white">Elementary School Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={elementaryState.schoolName}
+      onChange={(e) => setElementary({ ...elementaryState, schoolName: e.target.value })}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 capitalize"
+    />
+  </div>
 
-      <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+  {/* Elementary Year */}
+  <div className="space-y-2 w-full sm:w-[20%]">
+    <label className="text-gray-700 font-bold dark:text-white">Elementary Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={elementaryState.yearAttended}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/\D/g, "").slice(0, 8);
+        let formatted = raw;
+        if (raw.length > 4) {
+          formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+        }
+        setElementary({ ...elementaryState, yearAttended: formatted });
+        if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+          toast.error("Please use the format YYYY-YYYY");
+        }
+      }}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+    />
+  </div>
+
+  {/* Junior High School Name */}
+  <div className="space-y-2 w-full sm:w-[23%]">
+    <label className="text-gray-700 font-bold dark:text-white">Junior High School Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={juniorHighState.schoolName}
+      onChange={(e) => setJuniorHigh({ ...juniorHighState, schoolName: e.target.value })}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 capitalize"
+    />
+  </div>
+
+  {/* Junior High Year */}
+  <div className="space-y-2 w-full sm:w-[23%]">
+    <label className="text-gray-700 font-bold dark:text-white">Junior High Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={juniorHighState.yearAttended}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/\D/g, "").slice(0, 8);
+        let formatted = raw;
+        if (raw.length > 4) {
+          formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+        }
+        setJuniorHigh({ ...juniorHighState, yearAttended: formatted });
+        if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+          toast.error("Please use the format YYYY-YYYY");
+        }
+      }}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+    />
+  </div>
+
+  {/* Senior High School Name */}
+  <div className="space-y-2 w-full sm:w-[23%]">
+    <label className="text-gray-700 font-bold dark:text-white">Senior High School Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={seniorHighState.schoolName}
+      onChange={(e) => setSeniorHigh({ ...seniorHighState, schoolName: e.target.value })}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 capitalize"
+    />
+  </div>
+
+  {/* Senior High Year */}
+  <div className="space-y-2 w-full sm:w-[20%]">
+    <label className="text-gray-700 font-bold dark:text-white">Senior High Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <input
+      type="text"
+      value={seniorHighState.yearAttended}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/\D/g, "").slice(0, 8);
+        let formatted = raw;
+        if (raw.length > 4) {
+          formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+        }
+        setSeniorHigh({ ...seniorHighState, yearAttended: formatted });
+        if (formatted.length === 9 && !/^\d{4}-\d{4}$/.test(formatted)) {
+          toast.error("Please use the format YYYY-YYYY");
+        }
+      }}
+      className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
+    />
+  </div>
+</div>
+
+<div className="mt-8 pt-4">
+  <hr className="border-t border-gray-300 dark:border-gray-600 mb-4" />
+  <div className="flex justify-center items-center">
+    <label className="block text-gray-700 dark:text-white font-bold mb-2 text-2xl">
+      Account Information
+    </label>
+  </div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-2">
+          <label className="text-gray-700 font-bold dark:text-white"
           >Email Address <span className="text-red-500">*</span></label>
           <input
             type="email"
@@ -623,7 +637,7 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+          <label className="text-gray-700 font-bold dark:text-white"
           >Password <span className="text-red-500">*</span></label>
           <input
             type="password"
@@ -637,7 +651,7 @@ export default function StudentForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-gray-700 dark:text-white"
+          <label className="text-gray-700 font-bold dark:text-white"
           >Status <span className="text-red-500">*</span></label>
           <select
             value={status}
@@ -652,12 +666,17 @@ export default function StudentForm({
             <option value="missing files">Missing Files</option>
           </select>
         </div>
-
-        <div className="flex justify-start mt-6">
-          <button type="submit" className="btn-primary p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Save
-          </button>
         </div>
+
+        <div className="flex items-center justify-center pt-4 mt-10">
+  <button
+    type="submit"
+    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+  >
+    Save
+  </button>
+</div>
+
         </div>
     </form>
 

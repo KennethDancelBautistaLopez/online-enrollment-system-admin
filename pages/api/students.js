@@ -4,6 +4,7 @@
   import mongoose from "mongoose";
   import {hash} from "bcryptjs";
   import bcrypt from "bcryptjs";
+  import { subjectMapping } from "@/lib/subjectMap";
   async function handler(req, res) {
     console.log("API /students called with method:", req.method);
     await connectToDB();
@@ -70,62 +71,22 @@
           const lastNumber = parseInt(lastStudent._studentId.split("-")[1], 10);
           nextNumber = String(lastNumber + 1).padStart(4, "0");
         }
-        const newStudentNumber = `${currentYear}-${nextNumber}`;
+        const newStudentNumber = `${currentYear}-${nextNumber}`; 
+        const subjects = subjectMapping?.[course]?.[yearLevel]?.[semester]?.map(subj => ({
+          code: subj.code,
+          description: subj.description,
+          units: subj.units || 0
+        })) || [];
         const newStudent = await Student.create({
-          _studentId: newStudentNumber,
-          studentNumber: newStudentNumber,
-          fname,
-          mname,
-          lname,
-          address,
-          mobile,
-          landline,
-          facebook,
-          birthdate,
-          birthplace,
-          nationality,
-          religion,
-          sex,
-          father,
-          mother,
-          guardian,
-          guardianOccupation,
-          registrationDate,
-          lrn,
-          education,
-          course,
-          yearLevel,
-          schoolYear,
-          email,
-          status: "missing files",
-          password: hashedPassword,
-          nursery: {
-            schoolName: nurserySchool,  // Now using the destructured variable
-            yearAttended: nurseryYear   // Now using the destructured variable
-          },
-          elementary: {
-            schoolName: elementarySchool, // Now using the destructured variable
-            yearAttended: elementaryYear  // Now using the destructured variable
-          },
-          juniorHigh: {
-            schoolName: juniorHighSchool, // Now using the destructured variable
-            yearAttended: juniorHighYear  // Now using the destructured variable
-          },
-          seniorHigh: {
-            schoolName: seniorHighSchool, // Now using the destructured variable
-            yearAttended: seniorHighYear  // Now using the destructured variable
-          },
-          semester,
-     
-        });
-    
-        // Generate JWT Token
+          _studentId: newStudentNumber,fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,status: "missing files",password: hashedPassword,
+          nursery: {schoolName: nurserySchool,yearAttended: nurseryYear,},
+          elementary: {schoolName: elementarySchool,yearAttended: elementaryYear,},
+          juniorHigh: {schoolName: juniorHighSchool,yearAttended: juniorHighYear,},
+          seniorHigh: {schoolName: seniorHighSchool,yearAttended: seniorHighYear,},semester,subjects,});
         const token = jwt.sign(
           { id: newStudent._id, email: newStudent.email, role: "student", studentId: newStudent._studentId, studentNumber: newStudent.studentNumber },
           process.env.JWT_SECRET,
-          { expiresIn: "7d" } // Token expires in 7 days
-        );
-    
+          { expiresIn: "7d" });
         return res.status(201).json({ 
           message: "Student added successfully", 
           student: {
@@ -135,21 +96,19 @@
             mname: newStudent.mname,
             lname: newStudent.lname,
             email: newStudent.email,
-          },
-          token, // Returning the token to the client
-        });
-    
+            course: newStudent.course,
+            yearLevel: newStudent.yearLevel,
+            semester: newStudent.semester,
+            schoolYear: newStudent.schoolYear,
+            subjects: newStudent.subjects},
+          token,});
       } catch (error) {
-        return res.status(500).json({ error: "Failed to add student", details: error.message });
-      }
-    }
+        return res.status(500).json({ error: "Failed to add student", details: error.message });}}
     if (method === "PUT") {
       try {
         const { id } = req.query;
         const updatedData = req.body;
-    
         if (!id) return res.status(400).json({ error: "Student ID is required" });
-
         if (updatedData.password) {
           const isHashed = /^\$2[aby]\$[\d]+\$/.test(updatedData.password);
           if (!isHashed) {
@@ -157,33 +116,39 @@
             updatedData.password = await bcrypt.hash(updatedData.password, salt);
           }
         }
+        const student = await Student.findOne({ _studentId: id });
+        if (!student) {
+          return res.status(404).json({ error: "Student not found" });
+        }
+        const courseChanged = updatedData.course && updatedData.course !== student.course;
+        const yearLevelChanged = updatedData.yearLevel && updatedData.yearLevel !== student.yearLevel;
+        const semesterChanged = updatedData.semester && updatedData.semester !== student.semester;
     
+        if (courseChanged || yearLevelChanged || semesterChanged) {
+          const course = updatedData.course || student.course;
+          const yearLevel = updatedData.yearLevel || student.yearLevel;
+          const semester = updatedData.semester || student.semester;
+    
+          const newSubjects = subjectMapping?.[course]?.[yearLevel]?.[semester] || [];
+          updatedData.subjects = newSubjects;
+        }
         const updatedStudent = await Student.findOneAndUpdate(
           { _studentId: id },
           updatedData,
           { new: true, runValidators: true }
         );
-    
-        if (!updatedStudent) {
-          return res.status(404).json({ error: "Student not found" });
-        }
-    
+
         return res.status(200).json(updatedStudent);
       } catch (error) {
         console.error("Error updating student:", error);
-        return res.status(500).json({ error: "Internal server error", details: error.message });
-      }
-    }
-
+        return res.status(500).json({ error: "Internal server error", details: error.message });}}
 if (method === "DELETE") {
   if (req.query?.id) {
     const deletedStudent = await Student.findOneAndDelete({
-      $or: [{ _studentId: req.query.id }, { _id: req.query.id }],
-    });
+      $or: [{ _studentId: req.query.id }, { _id: req.query.id }],});
     if (!deletedStudent) return res.status(404).json({ error: "Student not found" });
-    return res.status(200).json(deletedStudent);
-  }
-}
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
-  export default (handler);
+    return res.status(200).json(deletedStudent);}}
+    return res.status(405).json({ error: "Method Not Allowed" });}
+export default (handler);
+
+

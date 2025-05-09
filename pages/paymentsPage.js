@@ -11,8 +11,9 @@ import LoadingSpinner from "@/components/Loading";
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(""); // For search functionality
-  const [initialized, setInitialized] = useState(false); // Prevent duplicate toasts
+  const [searchQuery, setSearchQuery] = useState("");
+  const [initialized, setInitialized] = useState(false);
+  const [showReference, setShowReference] = useState(false);
 
   const router = useRouter();
   const [pdfLinks, setPdfLinks] = useState({});
@@ -112,7 +113,7 @@ export default function PaymentsPage() {
               {session?.user.role === "superAdmin" && (
                 <button
                   onClick={handleDeleteAll}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg border border-red-600 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-600 dark:border-red-500 transition"
+                  className="flex items-center gap-2 px-4 py-2 bg-red-200 hover:bg-red-400 text-red-600 rounded-md text-md font-medium transition-all duration-200 dark:text-red-700 dark:hover:bg-red-600 dark:hover:text-white"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -146,13 +147,13 @@ export default function PaymentsPage() {
                     <th className="border p-1 text-gray-900 dark:text-white">Amount</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Payment</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Full Name</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Education</th>
+                    <th className="border p-1 text-gray-900 dark:text-white">Education</th>
                     <th className="border p-1 text-gray-900 dark:text-white">Course</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Semester</th>  
+                    <th className="border p-1 text-gray-900 dark:text-white">Semester</th>  
                     <th className="border p-1 items-center text-gray-900 dark:text-white">Year Level</th>
                     <th className="border p-1 text-gray-900 dark:text-white">School Year</th>
-                    <th className="border p-7 text-gray-900 dark:text-white">Status</th>
-                    <th className="border p-2 text-gray-900 dark:text-white">Receipt</th>
+                    <th className="border p-1 text-gray-900 dark:text-white">Status</th>
+                    <th className="border p-1 text-gray-900 dark:text-white">Receipt</th>
                     {session?.user.role === "superAdmin" && (
                       <th className="border p-2 text-gray-900 dark:text-white">Actions</th>
                     )}
@@ -170,19 +171,28 @@ export default function PaymentsPage() {
                       <tr key={payment.paymentId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="border p-2">{index + 1}</td>
                         <td className="border p-2">{payment.studentId || "N/A"}</td>
-                        <td className="border p-2">{payment.referenceNumber}</td>
+                        <td className="border p-2"
+                          onClick={() => setShowReference(!showReference)}
+                          title="Click to show reference number"
+                        >
+                          {showReference ? payment.referenceNumber : "Ref. No."}
+                          </td>
                         <td className="border p-2">₱{payment.amount?.toFixed(2)}</td>
                         <td className="border p-2">{payment.examPeriod || "N/A"}</td>
                         <td className="border p-2">{payment.fullName || "N/A"}</td>
                         <td className="border p-2">{payment.education}</td>
                         <td className="border p-2">{payment.course}</td>
                         <td className="border p-2">{payment.semester || "N/A"}</td>
-                        <td className="border p-2">{payment.yearLevel || "N/A"}</td>
+                        <td className="border p-2">
+                          <div className="flex items-center justify-center space-x-4">
+                          {payment.yearLevel || "N/A"}
+                          </div>
+                          </td>
                         <td className="border p-2">{payment.schoolYear || "N/A"}</td>
                         <td className="border p-2">{payment.status || "N/A"}</td>
                         <td className="border p-1">
                           <button
-                            className="btn-primary-filled bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 dark:border-blue-500"
+                            className=" flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-600 text-blue-600 rounded-md text-sm font-medium transition-all duration-200"
                             onClick={() => handleGeneratePDF(payment, payment.studentId)}
                           >
                             Generate PDF
@@ -192,7 +202,7 @@ export default function PaymentsPage() {
                           <td className="border p-2">
                             <div className="flex items-center justify-center space-x-4">
                               <Link
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition"
+                                className="flex items-center gap-2 px-4 py-2 bg-red-200 hover:bg-red-400 text-red-600 rounded-md text-sm font-medium transition-all duration-200 dark:text-red-700 dark:hover:bg-red-600 dark:hover:text-white"
                                 href={`/payments/delete/${payment.paymentId}`}
                               >
                                 <svg

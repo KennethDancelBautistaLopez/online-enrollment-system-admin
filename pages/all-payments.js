@@ -19,7 +19,6 @@ export default function FirstSemester() {
     const fetchPayments = async () => {
       try {
         const response = await axios.get("/api/get-all-payments");
-        console.log("✅ Payments API response:", response.data);
 
         if (response.data.data.length === 0) {
           toast("No payments returned from backend. 😕");
@@ -105,7 +104,7 @@ export default function FirstSemester() {
               <div className="flex justify-end mb-4">
                 <Link
                   href={`/payments/2nd-sem-payments`}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
+                  className="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
                 >
                   Go to Second Semester Payments →
                 </Link>
@@ -174,7 +173,7 @@ export default function FirstSemester() {
                           <td className="border p-2 text-center dark:border-gray-700">
                             <Link
                               href={`/payments/view/1stsem/${student.studentId}/payments`}
-                              className="text-blue-600 hover:underline dark:text-blue-400"
+                              className="text-blue-600 hover:underline dark:text-blue-400 font-semibold dark:text-blue-400"
                             >
                               View
                             </Link>

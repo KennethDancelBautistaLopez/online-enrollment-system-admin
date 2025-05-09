@@ -6,24 +6,19 @@ import { toast } from "react-hot-toast";
 export default function EventForm({ _id, title, description, date, location, eventType, organizer }) {
   const [titleState, setTitle] = useState(title || "");
   const [descriptionState, setDescription] = useState(description || "");
-  const [dateState, setDate] = useState(date || "");
+  const [dateState, setDate] = useState(date ? new Date(date).toISOString().split("T")[0] : "");
   const [locationState, setLocation] = useState(location || "");
   const [eventTypeState, setEventType] = useState(eventType || "");
   const [organizerState, setOrganizer] = useState(organizer || "");
   const router = useRouter();
 
   useEffect(() => {
-    console.log("Editing event:", { _id, title, description,  date, location, eventType, organizer });
   }, [ _id, title, description, date, location, eventType, organizer ]);
 
   async function saveEvent(ev) {
     ev.preventDefault();
     
-    // Format the date to 'YYYY-MM-DD' string
-    const eventDate = new Date(dateState).toISOString().split("T")[0];  // Converts to "YYYY-MM-DD"
-    
-    // Log the data to inspect the payload
-    console.log("Event Data:", { titleState, descriptionState, date: eventDate, locationState, eventTypeState, organizerState });
+    const eventDate = new Date(dateState).toISOString().split("T")[0];
   
     const data = {
       title: titleState,
@@ -85,8 +80,7 @@ export default function EventForm({ _id, title, description, date, location, eve
           value={descriptionState}
           onChange={(ev) => setDescription(ev.target.value)}
           required
-          className="w-full p-3 border rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400
-                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
+          className="w-full p-3 border rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
         />
       </div>
   
@@ -149,6 +143,7 @@ export default function EventForm({ _id, title, description, date, location, eve
           <option value="Seminar">Seminar</option>
           <option value="Workshop">Workshop</option>
           <option value="Competition">Competition</option>
+          <option value="Cememony">Cememony</option>
         </select>
       </div>
   

@@ -39,9 +39,9 @@ export default function SecondSEMStudentPaymentsView() {
           <LoadingSpinner />
         ) : (
           <>
-            <Link href="/all-payments">
-              <span className="text-blue-600 hover:underline mb-4 block dark:text-blue-400">
-                ← Back to All Payments
+            <Link href="/payments/2nd-sem-payments">
+              <span className="text-blue-600 hover:underline mb-4 block dark:text-blue-400 cursor-pointer">
+                ← Back to 2nd Semester Payments
               </span>
             </Link>
 

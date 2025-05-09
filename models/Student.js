@@ -1,22 +1,16 @@
+// models/Student.js
 import mongoose from "mongoose";
 
-const subjectSchema = new mongoose.Schema({
-  subjectCode: String,
-  subjectDescription: String,
-  day: String,
-  time: String,
-  teacher: String,
-  unit: Number,
-  mode: String,
-  room: String,
-  // grade: String,
-}, { _id: false });
-
-// Education history schema
 const educationHistorySchema = new mongoose.Schema({
   schoolName: { type: String, default: "" },
   yearAttended: { type: String, default: "" },
 });
+
+const enrolledSubjectSchema = new mongoose.Schema({
+  code: { type: String, required: true },
+  description: { type: String, required: true },
+  units: { type: Number, required: true },
+}, { _id: false });
 
 const StudentSchema = new mongoose.Schema({
   _studentId: { type: String, unique: true, required: true },
@@ -37,10 +31,10 @@ const StudentSchema = new mongoose.Schema({
   guardian: { type: String },
   guardianOccupation: { type: String },
   registrationDate: { type: Date, default: Date.now },
-  lrn: { type: String, unique: true },
+  lrn: { type: String, },
   education: { type: String, required: true },
   course: { type: String, required: true },
-  yearLevel: { type: String, required: true },
+  yearLevel: { type: Number, required: true },
   semester: { type: String, required: true },
   schoolYear: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -74,10 +68,8 @@ const StudentSchema = new mongoose.Schema({
     ref: "Payment"
   }],
 
-  subjectsBySemester: {
-    type: Map,
-    of: [subjectSchema]
-  }
+  subjects: { type: [enrolledSubjectSchema], default: [] },
+
 }, { timestamps: true });
 
 export default mongoose.models.Student || mongoose.model("Student", StudentSchema);

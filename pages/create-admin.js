@@ -148,13 +148,24 @@ export default function CreateAdmin() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-all disabled:bg-gray-400"
+                    className="w-full p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-all disabled:bg-gray-400 flex items-center justify-center gap-2"
                     disabled={loading}
                   >
                     {loading ? (
-                      <div className="animate-spin w-5 h-5 border-4 border-white border-t-transparent rounded-full mx-auto" />
+                      <div className="animate-spin w-5 h-5 border-4 border-white border-t-transparent rounded-full" />
                     ) : (
-                      "Create Admin"
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 -960 960 960"
+                          fill="currentColor"
+                          width="20"
+                          height="20"
+                        >
+                          <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+                        </svg>
+                        Create Admin
+                      </>
                     )}
                   </button>
                 </form>
@@ -178,7 +189,7 @@ export default function CreateAdmin() {
                         </div>
                         <button
                           onClick={() => handleDeleteAdmin(admin._id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-md text-sm font-medium transition-all duration-200"
+                          className="flex items-center gap-2 px-4 py-2 bg-red-200 hover:bg-red-400 text-red-600 rounded-md text-sm font-medium transition-all duration-200 dark:text-red-700 dark:hover:bg-red-600 dark:hover:text-white"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

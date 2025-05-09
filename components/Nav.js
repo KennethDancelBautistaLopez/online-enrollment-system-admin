@@ -81,13 +81,13 @@ export default function Nav({show}) {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" strokeWidth={1.5}  className={pathname.includes('/sections') ? activeIcon : inactiveIcon}><path fillRule="evenodd" d="M320-280q17 0 28.5-11.5T360-320q0-17-11.5-28.5T320-360q-17 0-28.5 11.5T280-320q0 17 11.5 28.5T320-280Zm0-160q17 0 28.5-11.5T360-480q0-17-11.5-28.5T320-520q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440Zm0-160q17 0 28.5-11.5T360-640q0-17-11.5-28.5T320-680q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Zm120 320h240v-80H440v80Zm0-160h240v-80H440v80Zm0-160h240v-80H440v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" clipRule="evenodd"/></svg>
         Sections
         </Link> */}
-        <Link href="/subjects" className={pathname.includes('/subjects') ? activeLink : inactiveLink}>
+        <Link href="/manage-subjects" className={pathname.includes('/manage-subjects') ? activeLink : inactiveLink}>
           <div className="flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 -960 960 960"
               fill="currentColor"
-              className={pathname.includes('/subjects') ? activeIcon : inactiveIcon}
+              className={pathname.includes('/manage-subjects') ? activeIcon : inactiveIcon}
               width="20"
               height="20"
             >
@@ -96,7 +96,21 @@ export default function Nav({show}) {
             Subjects
           </div>
         </Link>
-
+        <Link href="/sections" className={pathname.includes('/sections') ? activeLink : inactiveLink}>
+        <div className="flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 -960 960 960"
+            fill="currentColor"
+            className={pathname.includes('/sections') ? activeIcon : inactiveIcon}
+            width="20"
+            height="20"
+          >
+            <path d="M270-80q-45 0-77.5-30.5T160-186v-558q0-38 23.5-68t61.5-38l395-78v640l-379 76q-9 2-15 9.5t-6 16.5q0 11 9 18.5t21 7.5h450v-640h80v720H270Zm90-233 200-39v-478l-200 39v478Zm-80 16v-478l-15 3q-11 2-18 9.5t-7 18.5v457q5-2 10.5-3.5T261-293l19-4Zm-40-472v482-482Z"/>
+          </svg>
+          Sections
+        </div>
+      </Link>
         <Link href={'/events'} className={pathname.includes('/events') ? activeLink : inactiveLink}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" strokeWidth={1.5} className={pathname.includes('/events') ? activeIcon : inactiveIcon}>
           <path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A2.75 2.75 0 0 1 18 6.75v8.5A2.75 2.75 0 0 1 15.25 18H4.75A2.75 2.75 0 0 1 2 15.25v-8.5A2.75 2.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" />

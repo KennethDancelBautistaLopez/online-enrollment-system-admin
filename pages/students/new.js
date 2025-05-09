@@ -15,7 +15,7 @@ export default function NewStudent() {
 
   return (
     <Login>
-      <h1 className="text-2xl font-bold mb-4 dark:text-white text-gray-700">New Student</h1>
+      <h1 className="text-3xl font-bold mb-4 dark:text-white text-gray-700">New Student</h1>
       <StudentForm />
     </Login>
   );  

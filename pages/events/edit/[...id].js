@@ -13,12 +13,11 @@ export default function EditEventPage() {
   const { id } = router.query;
 
   useEffect(() => {
-    if (!id) return; // Don't call API if id is not available
+    if (!id) return;
   
-    const eventId = Array.isArray(id) ? id[0] : id; // If id is an array, get the first element
+    const eventId = Array.isArray(id) ? id[0] : id;
     
     axios.get(`/api/events?id=${eventId}`).then((response) => {
-      console.log('Fetched event data:', response.data); // Log the response data to verify
       if (Array.isArray(response.data)) {
         setEventInfo(response.data[0]);
         toast.success("Event details loaded successfully! 🎉");

@@ -1,14 +1,13 @@
 import { connectToDB } from "@/lib/mongoose";
 import Event from "@/models/Event";
-import mongoose from "mongoose"; // Ensure mongoose is imported for ID validation
+import mongoose from "mongoose";
 
 export default async function handler(req, res) {
   await connectToDB();
 
   if (req.method === "GET") {
-    const { id } = req.query; // Get the event ID from the query params
+    const { id } = req.query;
     if (id) {
-      // If an ID is passed, return a single event
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ error: "Invalid event ID" });
       }
@@ -43,6 +42,11 @@ export default async function handler(req, res) {
       const eventDate = new Date(date);
       if (isNaN(eventDate.getTime())) {
         return res.status(400).json({ error: "Invalid date format" });
+      }
+
+      const existingEvent = await Event.findOne({ title, date, location, eventType, organizer });
+      if (existingEvent) {
+        return res.status(409).json({ error: "Event already exists" });
       }
 
       const newEvent = new Event({ title, description, date, location, eventType, organizer });

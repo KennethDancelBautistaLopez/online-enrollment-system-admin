@@ -43,7 +43,7 @@ export async function generatePDFfile(student) {
       doc.setFontSize(11);
       doc.text(`${label}:`, x1, y);
       doc.setFont("helvetica", "normal");
-      doc.text(value || "N/A", x2, y);
+      doc.text(String(value || "N/A"), x2, y); 
     };
 
     sectionTitle("Student Information");

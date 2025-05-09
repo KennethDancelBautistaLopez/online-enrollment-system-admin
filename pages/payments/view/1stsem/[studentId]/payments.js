@@ -19,7 +19,6 @@ export default function FirstSEMStudentPaymentsView() {
     const fetchStudentPayments = async () => {
       try {
         const response = await axios.get(`/api/students/${studentId}/payments`);
-        console.log(response.data);
         setStudentData(response.data);
         toast.success("Student payment data loaded! ✅");
       } catch (error) {
@@ -41,7 +40,7 @@ export default function FirstSEMStudentPaymentsView() {
         <>
             <Link href="/all-payments">
           <span className="text-blue-600 hover:underline mb-4 block dark:text-blue-400">
-            ← Back to All Payments
+            ← Back to 1st Semester Payments
           </span>
         </Link>
   
@@ -53,7 +52,6 @@ export default function FirstSEMStudentPaymentsView() {
             <p className="text-gray-500 text-lg dark:text-gray-300 mb-6">
               Student ID: {studentId}
             </p>
-            {/* ... render the table */}
           </>
         ) : (
           <p className="text-gray-500 dark:text-gray-400 text-center">No student data available.</p>

@@ -19,7 +19,6 @@ export default function SecondSemester() {
     const fetchPayments = async () => {
       try {
         const response = await axios.get("/api/get-all-payments");
-        console.log("✅ Payments API response:", response.data);
 
         if (response.data.data.length === 0) {
           toast("No payments returned from backend. 😕");

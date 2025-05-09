@@ -10,8 +10,18 @@ export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
-  const [searchQuery, setSearchQuery] = useState(""); // For search functionality
-
+  const [showDescription, setShowDescription] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+  
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
   useEffect(() => {
     if (!session) return;
 
@@ -111,15 +121,37 @@ export default function EventsPage() {
                       <tr key={event._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{index + 1}</td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.title}</td>
-                        <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.description}</td>
+                        <td
+                          className="border p-2 dark:border-gray-700 dark:text-gray-200"
+                          onClick={() => {
+                            if (isMobile) setShowDescription(!showDescription);
+                          }}
+                          title={isMobile ? "Tap to toggle description" : ""}
+                        >
+                          {isMobile ? (
+                            showDescription ? (
+                              <div className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal">
+                                {event.description}
+                              </div>
+                            ) : (
+                              "Tap to show description"
+                            )
+                          ) : (
+                            event.description
+                          )}
+                        </td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{formattedDate}</td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.location}</td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.eventType}</td>
-                        <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.organizer}</td>
-                        <td className="border p-2 flex justify-center space-x-2 dark:border-gray-700">
+                        <td className="border p-2 dark:border-gray-700 dark:text-gray-200">
+                          <div className="flex justify-center gap-2">
+                          {event.organizer}
+                          </div></td>
+                        <td className="border p-2 text-center align-middle dark:border-gray-700">
+                          <div className="flex justify-center gap-2">
                         <Link
                           href={`/events/edit/${event._id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium rounded-md transition"
+                          className="flex items-center gap-2 px-4 py-2 bg-yellow-200 hover:bg-yellow-400 text-yellow-700 rounded-md text-sm font-medium transition-all duration-200 dark:text-yellow-700 dark:hover:bg-yellow-600 dark:hover:text-white"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +165,7 @@ export default function EventsPage() {
                         </Link>
                         <Link
                           href={`/events/delete/${event._id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition"
+                          className="flex items-center gap-2 px-4 py-2 bg-red-200 hover:bg-red-400 text-red-600 rounded-md text-sm font-medium transition-all duration-200 dark:text-red-700 dark:hover:bg-red-600 dark:hover:text-white"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -145,6 +177,7 @@ export default function EventsPage() {
                           </svg>
                           Delete
                         </Link>
+                          </div>
                         </td>
                       </tr>
                     );
