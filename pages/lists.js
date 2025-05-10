@@ -231,7 +231,7 @@ export default function Students({ initialStudents }) {
                       </select>
                     </td>
                     <td className="border p-2 text-center dark:border-gray-700 text-gray-100">
-                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-black dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={student.schoolYear}
                       onChange={(e) => updateStudentInfo(student._studentId, { schoolYear: e.target.value })}>
                         <option value="2023-2024">2023-2024</option>
@@ -244,7 +244,7 @@ export default function Students({ initialStudents }) {
                       </select>
                     </td>
                     <td className="border p-2 text-center dark:border-gray-700 text-gray-100">
-                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 text-black dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={student.semester}
                       onChange={(e) => updateStudentInfo(student._studentId, { semester: e.target.value })}>
                         <option value="1st Semester">1st Semester</option>
