@@ -2,19 +2,9 @@
   import Student from "@/models/Student";
   import jwt from "jsonwebtoken";
   import mongoose from "mongoose";
-  import nodemailer from "nodemailer";
-  import Section from "@/models/Section";
   import {hash} from "bcryptjs";
   import bcrypt from "bcryptjs";
   import Curriculum from "@/models/Subject";
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-  });
   async function handler(req, res) {
     console.log("API /students called with method:", req.method);
     await connectToDB();
