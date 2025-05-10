@@ -69,6 +69,8 @@ const StudentSchema = new mongoose.Schema({
   }],
 
   subjects: { type: [enrolledSubjectSchema], default: [] },
+  verified: { type: Boolean, default: false },
+  
 
 }, { timestamps: true });
 

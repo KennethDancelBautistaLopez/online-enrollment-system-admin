@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import Login from "./Login";
@@ -19,28 +19,41 @@ export default function SectionManager() {
   const [sectionIdToUpdate, setSectionIdToUpdate] = useState("");
   const [sectionToDelete, setSectionToDelete] = useState(null);
 
+  const fetchFilteredStudents = useCallback(async () => {
+    try {
+      const res = await axios.get("/api/students/list", {
+        params: {
+          course: sectionData.course,
+          yearLevel: sectionData.yearLevel,
+          semester: sectionData.semester,
+        },
+      });
+      setAllStudents(res.data.data);
+    } catch (err) {
+      toast.error("Failed to load filtered students");
+      console.error(err);
+    }
+  }, [sectionData.course, sectionData.yearLevel, sectionData.semester]);
+
+  
   useEffect(() => {
     fetchSections();
-    fetchAllStudents(); // ✅ Fetch students
   }, []);
 
-  const fetchSections = async () => {
+  useEffect(() => {
+    if (sectionData.course && sectionData.yearLevel && sectionData.semester) {
+      fetchFilteredStudents();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchFilteredStudents]);
+
+const fetchSections = async () => {
     try {
       const res = await axios.get("/api/sections");
       setSections(res.data.data);
     } catch (err) {
       toast.error("Error fetching sections!");
       console.error("Error fetching sections:", err);
-    }
-  };
-
-  const fetchAllStudents = async () => {
-    try {
-      const res = await axios.get("/api/students/list"); // Adjust path if renamed
-      setAllStudents(res.data.data);
-    } catch (err) {
-      toast.error("Failed to load students");
-      console.error(err);
     }
   };
 

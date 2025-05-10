@@ -486,7 +486,7 @@ export default function StudentForm({
     <div className="flex flex-wrap gap-4">
   {/* Nursery School Name */}
   <div className="space-y-2 w-full sm:w-[23%]">
-    <label className="text-gray-700 font-bold dark:text-white">Nursery School Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Nursery School Attended</label>
     <input
       type="text"
       value={nurseryState.schoolName}
@@ -497,7 +497,7 @@ export default function StudentForm({
 
   {/* Nursery Year */}
   <div className="space-y-2 w-full sm:w-[23%]">
-    <label className="text-gray-700 font-bold dark:text-white">Nursery Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Nursery Year Attended</label>
     <input
       type="text"
       value={nurseryState.yearAttended}
@@ -518,7 +518,7 @@ export default function StudentForm({
 
   {/* Elementary School Name */}
   <div className="space-y-2 w-full sm:w-[23%]">
-    <label className="text-gray-700 font-bold dark:text-white">Elementary School Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Elementary School Attended</label>
     <input
       type="text"
       value={elementaryState.schoolName}
@@ -529,7 +529,7 @@ export default function StudentForm({
 
   {/* Elementary Year */}
   <div className="space-y-2 w-full sm:w-[20%]">
-    <label className="text-gray-700 font-bold dark:text-white">Elementary Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Elementary Year Attended</label>
     <input
       type="text"
       value={elementaryState.yearAttended}
@@ -550,7 +550,7 @@ export default function StudentForm({
 
   {/* Junior High School Name */}
   <div className="space-y-2 w-full sm:w-[23%]">
-    <label className="text-gray-700 font-bold dark:text-white">Junior High School Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Junior High School Attended</label>
     <input
       type="text"
       value={juniorHighState.schoolName}
@@ -561,7 +561,7 @@ export default function StudentForm({
 
   {/* Junior High Year */}
   <div className="space-y-2 w-full sm:w-[23%]">
-    <label className="text-gray-700 font-bold dark:text-white">Junior High Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Junior High Year Attended</label>
     <input
       type="text"
       value={juniorHighState.yearAttended}
@@ -582,7 +582,7 @@ export default function StudentForm({
 
   {/* Senior High School Name */}
   <div className="space-y-2 w-full sm:w-[23%]">
-    <label className="text-gray-700 font-bold dark:text-white">Senior High School Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Senior High School Attended</label>
     <input
       type="text"
       value={seniorHighState.schoolName}
@@ -593,7 +593,7 @@ export default function StudentForm({
 
   {/* Senior High Year */}
   <div className="space-y-2 w-full sm:w-[20%]">
-    <label className="text-gray-700 font-bold dark:text-white">Senior High Year Attended <span className="text-red-500 font-bold">*</span></label>
+    <label className="text-gray-700 font-bold dark:text-white">Senior High Year Attended</label>
     <input
       type="text"
       value={seniorHighState.yearAttended}

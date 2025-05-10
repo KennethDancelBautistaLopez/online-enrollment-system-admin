@@ -24,6 +24,7 @@ export default async function handler(req, res) {
     if (!code || !description ) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+    
 
     try {
       const student = await Student.findOne({ _studentId: studentId });

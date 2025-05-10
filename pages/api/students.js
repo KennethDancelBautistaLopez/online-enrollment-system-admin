@@ -2,9 +2,19 @@
   import Student from "@/models/Student";
   import jwt from "jsonwebtoken";
   import mongoose from "mongoose";
+  import nodemailer from "nodemailer";
+  import Section from "@/models/Section";
   import {hash} from "bcryptjs";
   import bcrypt from "bcryptjs";
-  import { subjectMapping } from "@/lib/subjectMap";
+  import Curriculum from "@/models/Subject";
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    },
+  });
   async function handler(req, res) {
     console.log("API /students called with method:", req.method);
     await connectToDB();
@@ -72,10 +82,15 @@
           nextNumber = String(lastNumber + 1).padStart(4, "0");
         }
         const newStudentNumber = `${currentYear}-${nextNumber}`; 
-        const subjects = subjectMapping?.[course]?.[yearLevel]?.[semester]?.map(subj => ({
+        const curriculum = await Curriculum.findOne({
+          course,
+          yearLevel: String(yearLevel),
+          semester,
+        });
+        const subjects = curriculum?.subjects?.map(subj => ({
           code: subj.code,
           description: subj.description,
-          units: subj.units || 0
+          units: subj.units,
         })) || [];
         const newStudent = await Student.create({
           _studentId: newStudentNumber,fname,mname,lname,address,mobile,landline,facebook,birthdate,birthplace,nationality,religion,sex,father,mother,guardian,guardianOccupation,registrationDate,lrn,education,course,yearLevel,schoolYear,email,status: "missing files",password: hashedPassword,
@@ -87,21 +102,24 @@
           { id: newStudent._id, email: newStudent.email, role: "student", studentId: newStudent._studentId, studentNumber: newStudent.studentNumber },
           process.env.JWT_SECRET,
           { expiresIn: "7d" });
-        return res.status(201).json({ 
-          message: "Student added successfully", 
-          student: {
-            _studentId: newStudent._studentId,
-            studentNumber: newStudent.studentNumber,
-            fname: newStudent.fname,
-            mname: newStudent.mname,
-            lname: newStudent.lname,
-            email: newStudent.email,
-            course: newStudent.course,
-            yearLevel: newStudent.yearLevel,
-            semester: newStudent.semester,
-            schoolYear: newStudent.schoolYear,
-            subjects: newStudent.subjects},
-          token,});
+
+          return res.status(201).json({ 
+            message: "Student added successfully", 
+            token, 
+            student: {
+              _studentId: newStudent._studentId,
+              studentNumber: newStudent.studentNumber,
+              fname: newStudent.fname,
+              mname: newStudent.mname,
+              lname: newStudent.lname,
+              email: newStudent.email,
+              course: newStudent.course,
+              yearLevel: newStudent.yearLevel,
+              semester: newStudent.semester,
+              schoolYear: newStudent.schoolYear,
+              subjects: newStudent.subjects
+            },
+          });
       } catch (error) {
         return res.status(500).json({ error: "Failed to add student", details: error.message });}}
     if (method === "PUT") {
@@ -120,6 +138,7 @@
         if (!student) {
           return res.status(404).json({ error: "Student not found" });
         }
+
         const courseChanged = updatedData.course && updatedData.course !== student.course;
         const yearLevelChanged = updatedData.yearLevel && updatedData.yearLevel !== student.yearLevel;
         const semesterChanged = updatedData.semester && updatedData.semester !== student.semester;
@@ -129,9 +148,17 @@
           const yearLevel = updatedData.yearLevel || student.yearLevel;
           const semester = updatedData.semester || student.semester;
     
-          const newSubjects = subjectMapping?.[course]?.[yearLevel]?.[semester] || [];
-          updatedData.subjects = newSubjects;
+          const curriculum = await Curriculum.findOne({
+            course,
+            yearLevel: String(yearLevel),
+            semester,
+          });
+  
+          updatedData.subjects = curriculum?.subjects || [];
         }
+
+        
+
         const updatedStudent = await Student.findOneAndUpdate(
           { _studentId: id },
           updatedData,
