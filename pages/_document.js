@@ -5,7 +5,7 @@ export default function Document() {
     <Html lang="en">
       <Head>
         {/* Link to the favicon */}
-        <link rel="icon" href="/SCC icon.webp" />
+        <link rel="icon" href="/sccicon.webp" />
       </Head>
       <body>
         <Main />
