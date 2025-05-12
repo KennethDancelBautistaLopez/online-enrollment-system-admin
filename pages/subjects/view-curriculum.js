@@ -58,7 +58,7 @@ export default function ManageCurriculum() {
   }, [session]);
 
   const handleDeleteSubject = async () => {
-  const { subjectId, curriculumId, code } = confirmDelete;
+  const { subjectId, curriculumId } = confirmDelete;
   console.log('Deleting subject:', subjectId, curriculumId);
 
   try {
