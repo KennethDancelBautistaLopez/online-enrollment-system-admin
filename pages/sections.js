@@ -30,7 +30,8 @@ export default function SectionManager() {
       });
       setAllStudents(res.data.data);
     } catch (err) {
-      toast.error("Failed to load filtered students");
+      const errorMessage = err.response?.data?.message || "Failed to load filtered students";
+      toast.error(errorMessage);
       console.error(err);
     }
   }, [sectionData.course, sectionData.yearLevel, sectionData.semester]);
@@ -52,7 +53,8 @@ const fetchSections = async () => {
       const res = await axios.get("/api/sections");
       setSections(res.data.data);
     } catch (err) {
-      toast.error("Error fetching sections!");
+      const errorMessage = err.response?.data?.message || "Error fetching sections!";
+      toast.error(errorMessage);
       console.error("Error fetching sections:", err);
     }
   };
@@ -105,7 +107,8 @@ const fetchSections = async () => {
       toast.success("Section created successfully!");
       setSectionIdToUpdate(res.data.data._id);
     } catch (err) {
-      toast.error("Error creating section!");
+      const errorMessage = err.response?.data?.message || "Error adding students!";
+      toast.error(errorMessage);
       console.error(err);
     }
   };
@@ -119,7 +122,8 @@ const fetchSections = async () => {
 
       toast.success("Students added to section successfully!");
     } catch (err) {
-      toast.error("Error adding students!");
+      const errorMessage = err.response?.data?.message || "Error adding students!";
+      toast.error(errorMessage);
       console.error(err);
     }
   };
@@ -133,7 +137,8 @@ const fetchSections = async () => {
       toast.success("Section updated successfully!");
       fetchSections(); // Refresh
     } catch (err) {
-      toast.error("Error updating section!");
+      const errorMessage = err.response?.data?.message || "Error updating section!";
+      toast.error(errorMessage);
       console.error(err);
     }
   };
@@ -171,7 +176,8 @@ const fetchSections = async () => {
         fetchSections(); // Refresh the list
         toast.success("Section deleted successfully");
       } else {
-        toast.error("Failed to delete section.");
+        const errorMessage = (await res.json()).message || "Failed to delete section.";
+        toast.error(errorMessage)
       }
     } catch (err) {
       console.error("Error deleting section:", err);

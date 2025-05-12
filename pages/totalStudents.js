@@ -17,14 +17,22 @@ const STATUS_COLORS = {
   "enrolled": "#4ade80",       // green-400
   "graduated": "#f87171",      // red-400
   "dropped": "#facc15",        // yellow-300
-  "missing files": "#60a5fa",// blue-400
-  "unknown": "#9ca3af"         // gray-400 fallback
+  "missing files": "#60a5fa",  // blue-400
+  "unknown": "#9ca3af",        // gray-400 fallback
+};
+
+const STUDENT_TYPE_COLORS = {
+  "new": "#34d399",         // green-400
+  "old": "#60a5fa",         // blue-400
+  "irregular": "#fbbf24",   // yellow-400
+  "unknown": "#9ca3af",     // gray-400 fallback
 };
 
 export default function StudentStatusPieChart() {
   const [totalStudents, setTotalStudents] = useState(0);
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
+  const [studentTypeChartData, setStudentTypeChartData] = useState([]);
   const [initialized, setInitialized] = useState(false);
 
   const { data: session } = useSession();
@@ -40,6 +48,7 @@ export default function StudentStatusPieChart() {
         if (!Array.isArray(students) || students.length === 0) {
           console.warn("⚠️ No students found or invalid format.");
           setChartData([]);
+          setStudentTypeChartData([]);
           setTotalStudents(0);
           toast.error("No students found. ❌");
           return;
@@ -54,15 +63,31 @@ export default function StudentStatusPieChart() {
           return acc;
         }, {});
 
-        const formattedData = Object.entries(statusCounts).map(
+        const studentTypeCounts = students.reduce((acc, student) => {
+          const rawType = student.studentType || "Unknown";
+          const type = rawType.toLowerCase().trim();
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {});
+
+        const formattedStatusData = Object.entries(statusCounts).map(
           ([status, count]) => ({
             name: status,
             value: count,
-            color: STATUS_COLORS[status] || "#9ca3af", // fallback to gray-400 if not found
+            color: STATUS_COLORS[status] || "#9ca3af",
           })
         );
 
-        setChartData(formattedData);
+        const formattedTypeData = Object.entries(studentTypeCounts).map(
+          ([type, count]) => ({
+            name: type,
+            value: count,
+            color: STUDENT_TYPE_COLORS[type] || "#9ca3af",
+          })
+        );
+
+        setChartData(formattedStatusData);
+        setStudentTypeChartData(formattedTypeData);
 
         if (!initialized) {
           toast.success("Students loaded successfully! ✅");
@@ -87,23 +112,27 @@ export default function StudentStatusPieChart() {
   }
 
   return (
-    <Login>
-      <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 text-center">
-          📊 Student Status Distribution
-        </h1>
-        {loading ? (
-          <LoadingSpinner />
-        ) :
-        ( 
-          <>
-          <div className="max-w-3xl mx-auto bg-white border border-gray-200 dark:bg-gray-900 p-8 rounded-2xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-6 text-gray-600 dark:text-blue-400 text-center">
-            Total Students:{" "}
-            <span className="text-gray-900 dark:text-white">{totalStudents}</span>
-          </h2>
-  
-          <div className="flex flex-col items-center">
+  <Login>
+    <div className="space-y-8 px-4 sm:px-6 md:px-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 text-center">
+        📊 Student Status & Type Distribution
+      </h1>
+
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-600 dark:text-blue-400 text-center">
+        Total Students:{" "}
+        <span className="text-gray-900 dark:text-white">{totalStudents}</span>
+      </h2>
+
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {/* Student Status Chart */}
+          <div className="bg-white border border-gray-200 dark:bg-gray-900 p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-600 dark:text-blue-400 text-center">
+              Student Status Distribution
+            </h2>
+
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -112,15 +141,10 @@ export default function StudentStatusPieChart() {
                   cy="50%"
                   innerRadius={60}
                   outerRadius={110}
-                  fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
                   labelLine={false}
                   label={({ name, value }) => `${name}: ${value}`}
-                  isAnimationActive={true}
-                  animationBegin={0}
-                  animationDuration={1000}
-                  animationEasing="ease-out"
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -128,26 +152,65 @@ export default function StudentStatusPieChart() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1f2935', // Tailwind's gray-800
-                    color: '#f9fafb', // Tailwind's gray-50
-                    border: 'none',
+                    backgroundColor: "#f9fafb",
+                    color: "#1f2937",
+                    border: "1px solid #d1d5db",
                   }}
                 />
-                <Legend
-                  wrapperStyle={{
-                    color: 'inherit',
-                  }}
-                />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
-  
-            {/* Status Legend with Fade In */}
-            <div className="mt-6 grid grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
               {chartData.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-2 opacity-0 animate-fadeIn"
+                <div key={index} className="flex items-center space-x-2">
+                  <span
+                    className="inline-block w-4 h-4 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  ></span>
+                  <span>{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Student Type Chart */}
+          <div className="bg-white border border-gray-200 dark:bg-gray-900 p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-600 dark:text-blue-400 text-center">
+              Student Type Distribution
+            </h2>
+
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={studentTypeChartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={110}
+                  paddingAngle={5}
+                  dataKey="value"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
                 >
+                  {studentTypeChartData.map((entry, index) => (
+                    <Cell key={`type-cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#f9fafb",
+                    color: "#1f2937",
+                    border: "1px solid #d1d5db",
+                  }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-700 dark:text-gray-300">
+              {studentTypeChartData.map((item, index) => (
+                <div key={index} className="flex items-center space-x-2">
                   <span
                     className="inline-block w-4 h-4 rounded-full"
                     style={{ backgroundColor: item.color }}
@@ -158,10 +221,8 @@ export default function StudentStatusPieChart() {
             </div>
           </div>
         </div>
-        </>
-        )}
-
-      </div>
-    </Login>
+      )}
+    </div>
+  </Login>
   );
-}  
+};

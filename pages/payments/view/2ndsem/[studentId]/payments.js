@@ -22,8 +22,8 @@ export default function SecondSEMStudentPaymentsView() {
         setStudentData(response.data);
         toast.success("Student payment data loaded! ✅");
       } catch (error) {
-        console.error("Error fetching student data:", error);
-        toast.error("Failed to load student data.");
+        const errorMessage = error.response?.data?.message || error.message || "Failed to load student data.";
+        toast.error(`Error: ${errorMessage}`);
       } finally {
         setLoading(false);
       }

@@ -108,7 +108,7 @@ export async function generatePDFfile(student) {
     y += 7;
 
     addField("Course", student.course);
-    addField("Student No.", student._studentId, 110, 135);
+    addField("Student Type", student.studentType, 110, 137);
     y += 10;
 
     sectionTitle("Enrollment Contract");

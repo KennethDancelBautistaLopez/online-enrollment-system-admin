@@ -56,8 +56,11 @@ export default function SecondSemester() {
         toast.success("Second Semester Payments loaded! ✅");
         setInitialized(true);
       } catch (error) {
-        console.error("❌ Error fetching payments:", error);
-        toast.error("Failed to load payments.");
+        if (error.response && error.response.data && error.response.data.message) {
+          toast.error("Failed to load payments: " + error.response.data.message);
+        } else {
+          toast.error("Failed to load payments." + error);
+        }
       } finally {
         setLoading(false);
       }
@@ -87,7 +90,7 @@ export default function SecondSemester() {
   ];
 
   const filteredStudents = groupedPayments.filter((student) =>
-    `${student.studentId} ${student.fullName}`.toLowerCase().includes(searchQuery.toLowerCase())
+    `${student.studentId} ${student.fullName} ${student.course}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

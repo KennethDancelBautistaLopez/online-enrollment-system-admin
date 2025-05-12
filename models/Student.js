@@ -28,7 +28,7 @@ const StudentSchema = new mongoose.Schema({
   sex: { type: String, enum: ["Male", "Female", "Other"], required: true },
   father: { type: String },
   mother: { type: String },
-  guardian: { type: String },
+  guardian: { type: String, },
   guardianOccupation: { type: String },
   registrationDate: { type: Date, default: Date.now },
   lrn: { type: String, },
@@ -47,9 +47,13 @@ const StudentSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["enrolled", "graduated", "dropped", "missing files"],
+    enum: ["enrolled", "missing files"],
     default: "missing files",
   },
+  studentType: {
+    type: String,
+    enum: ["new", "irregular", "old", "transferee"],
+    default: "new",},
 
   files: [{
     filename: { type: String, required: true, index: true },
@@ -70,7 +74,6 @@ const StudentSchema = new mongoose.Schema({
 
   subjects: { type: [enrolledSubjectSchema], default: [] },
   verified: { type: Boolean, default: false },
-  
 
 }, { timestamps: true });
 

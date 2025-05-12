@@ -20,10 +20,12 @@ export default function DeletePaymentPage() {
       .get(`/api/payments?id=${id}`)
       .then((response) => {
         setPaymentInfo(response.data.data);
+        toast.success("Payment details loaded successfully! ✅");
       })
       .catch((error) => {
-        console.error("❌ Error fetching payment:", error);
-        toast.error("Failed to load payment details. 🚨");
+        const errorMessage = error.response?.data?.message || error.message || "Failed to fetch payment details.";
+        toast.error(`Error loading payment details: ${errorMessage}`);
+        console.error("Error fetching payment details:", error);
       })
       .finally(() => {
         setLoading(false);
@@ -36,15 +38,16 @@ export default function DeletePaymentPage() {
   }
 
   async function deletePayment() {
-    try {
-      await axios.delete(`/api/payments?id=${id}`); // Ensure correct API call
-      toast.success("Payment deleted successfully! ✅");
-      goBack();
-    } catch (error) {
-      console.error("❌ Error deleting payment:", error);
-      toast.error("Failed to delete payment. Please try again. ❌");
-    }
+  try {
+    await axios.delete(`/api/payments?id=${id}`);
+    toast.success("Payment deleted successfully! ✅");
+    goBack();
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || error.message || "Failed to delete payment.";
+    toast.error(`Error deleting payment: ${errorMessage}`);
+    console.error("Error deleting payment:", error);
   }
+}
 
   return (
     <Login>

@@ -14,6 +14,7 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [initialized, setInitialized] = useState(false);
   const [showReference, setShowReference] = useState(false);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
 
   const router = useRouter();
   const [pdfLinks, setPdfLinks] = useState({});
@@ -37,42 +38,28 @@ export default function PaymentsPage() {
       try {
 
         const response = await axios.get("/api/payments");
-            setPayments(response.data.data);
         
-        // Show success toast only once after payments are loaded
+        if (response.data.data.length === 0) {
+          toast("No payments returned from backend. 😕");
+          return;
+        }
+        setPayments(response.data.data);
         if (!initialized && response.data.data.length > 0) {
           toast.success("Payments loaded successfully! ✅");
-          setInitialized(true); // Prevent the toast from showing again
+          setInitialized(true);
         }
       } catch (error) {
-        console.error("Error fetching payments:", error);
-        toast.error("Failed to load payments.");
+        if(error.response&&error.response.data&&error.response.data.message){
+          toast.error( "Failed to load payments: " + error.response.data.message);
+        } else {
+          toast.error("Failed to load payments." + error);
+        }
       }finally {
         setLoading(false);
       }
     };
-    
-
-    fetchPayments(); // Call fetch function to load payments data
-  }, [ session,initialized, router]); // Trigger the effect only when initialized changes
-
-  const handleDeleteAll = async () => {
-    if (!confirm("Are you sure you want to delete all payments? This action is irreversible.")) {
-      return;
-    }
-  
-    try {
-      const response = await axios.delete("/api/payments?deleteAll=true");
-      if (response.data.success) {
-        toast.success("All payments deleted successfully.");
-        setPayments([]); // Clear payments from the UI
-      }
-    } catch (error) {
-      console.error("Error deleting all payments:", error);
-      toast.error("Failed to delete payments.");
-    }
-  };
-  
+    fetchPayments();
+  }, [ session,initialized, router]);
   useEffect(() => {
     if (!session) {
       toast.error("You are not logged in.");
@@ -108,11 +95,53 @@ export default function PaymentsPage() {
             <LoadingSpinner/>
           ) : (
             <>
+            {showDeleteAllModal && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
+                <h1 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+                  Are you sure you want to delete <b>all payments</b>?<br />
+                  This action is <span className="text-red-600 font-bold">irreversible</span>.
+                </h1>
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={() => setShowDeleteAllModal(false)}
+                    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await axios.delete("/api/payments", { params: { deleteAll: true } });
+                        
+                        if (response.data.success) {
+                          toast.success("All payments deleted successfully.");
+                          setPayments([]);
+                        }
+                      } catch (error) {
+                          console.error("Error deleting all payments:", error);
+                          const errorMessage =
+                            error.response?.status === 404
+                              ? "No payments to delete."
+                              : error.response?.data?.error || "Failed to delete payments.";
+                          toast.error(errorMessage);
+                        } finally {
+                        setShowDeleteAllModal(false);
+                      }
+                    }}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
+                  >
+                    Confirm Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
               <div className="flex flex-col md:flex-row md:items-center justify-between items-center gap-2 mb-4">
               <h1 className="text-2xl font-bold mb-3 md:mb-0 text-gray-800 dark:text-white">Payments List</h1>
               {session?.user.role === "superAdmin" && (
                 <button
-                  onClick={handleDeleteAll}
+                  onClick={() => setShowDeleteAllModal(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-red-200 hover:bg-red-400 text-red-600 rounded-md text-md font-medium transition-all duration-200 dark:text-red-700 dark:hover:bg-red-600 dark:hover:text-white"
                 >
                   <svg
@@ -125,6 +154,7 @@ export default function PaymentsPage() {
                   </svg>
                   Delete All Payments
                 </button>
+
               )}
             </div>
       
@@ -147,11 +177,9 @@ export default function PaymentsPage() {
                     <th className="border p-1 text-gray-900 dark:text-white">Amount</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Payment</th>
                     <th className="border p-2 text-gray-900 dark:text-white">Full Name</th>
-                    <th className="border p-1 text-gray-900 dark:text-white">Education</th>
-                    <th className="border p-1 text-gray-900 dark:text-white">Course</th>
                     <th className="border p-1 text-gray-900 dark:text-white">Semester</th>  
                     <th className="border p-1 items-center text-gray-900 dark:text-white">Year Level</th>
-                    <th className="border p-1 text-gray-900 dark:text-white">School Year</th>
+                    <th className="border p-1 text-gray-900 dark:text-white"><div className="flex items-center justify-center">Date</div></th>
                     <th className="border p-1 text-gray-900 dark:text-white">Status</th>
                     <th className="border p-1 text-gray-900 dark:text-white">Receipt</th>
                     {session?.user.role === "superAdmin" && (
@@ -178,17 +206,17 @@ export default function PaymentsPage() {
                           {showReference ? payment.referenceNumber : "Ref. No."}
                           </td>
                         <td className="border p-2">₱{payment.amount?.toFixed(2)}</td>
-                        <td className="border p-2">{payment.examPeriod || "N/A"}</td>
+                        <td className="border p-2">{payment.examPeriod}</td>
                         <td className="border p-2">{payment.fullName || "N/A"}</td>
-                        <td className="border p-2">{payment.education}</td>
-                        <td className="border p-2">{payment.course}</td>
                         <td className="border p-2">{payment.semester || "N/A"}</td>
                         <td className="border p-2">
                           <div className="flex items-center justify-center space-x-4">
                           {payment.yearLevel || "N/A"}
                           </div>
                           </td>
-                        <td className="border p-2">{payment.schoolYear || "N/A"}</td>
+                        <td className="border p-2">{payment.createdAt 
+                            ? new Date(payment.createdAt).toLocaleString("en-US", {
+                                dateStyle: "medium",timeStyle: "short", }) : "N/A"}</td>
                         <td className="border p-2">{payment.status || "N/A"}</td>
                         <td className="border p-1">
                           <button

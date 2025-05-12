@@ -8,6 +8,8 @@ import LoadingSpinner from "@/components/Loading";
 export default function CreateAdmin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [deleteAdminModal, setDeleteAdminModal] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState(null);
   const [role, setRole] = useState("admin");
   const [loading, setLoading] = useState(true);
   const [adminUsers, setAdminUsers] = useState([]);
@@ -15,8 +17,7 @@ export default function CreateAdmin() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (!session || session.user.role !== "superAdmin") {
+    if (!session && session.user.role !== "superAdmin") {
       router.push("/");
       toast.error("You don't have permission to access this page.");
     } else {
@@ -30,6 +31,7 @@ export default function CreateAdmin() {
       const data = await res.json();
       if (res.ok) {
         setAdminUsers(data.admins);
+        toast.success("Admins loaded.");
       } else {
         toast.error(data.message || "Failed to load admins.");
       }
@@ -64,36 +66,36 @@ export default function CreateAdmin() {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error("Failed to create admin.");
+      toast.error("Error creating admin.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteAdmin = async (id) => {
-    if (!confirm("Are you sure you want to delete this admin?")) return;
-  
-    // Get the JWT from localStorage
-    const token = localStorage.getItem("token");
-  
+  const handleDeleteAdmin = async () => {
+    if (!adminToDelete) return;
+
     try {
-      const res = await fetch(`/api/admin/delete?id=${id}`, { // Pass id via query string
+      const res = await fetch(`/api/admin/delete?id=${adminToDelete}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,  // Send the JWT in the Authorization header
         },
       });
-  
+
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message);
         fetchAdmins();
       } else {
-        toast.error(data.message);
+        toast.error("Error deleting admin: " + data.message);
       }
     } catch (error) {
       toast.error("Error deleting admin.");
+    } finally {
+      setLoading(false);
+      setDeleteAdminModal(false);
+      setAdminToDelete(null);
     }
   };
 
@@ -107,6 +109,31 @@ export default function CreateAdmin() {
         ) : (
           <>
             <div className="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-12 w-full max-w-6xl p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+              {/* Delete Admin Modal */}
+              {deleteAdminModal && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+                  <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
+                    <h1 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+                      Are you sure you want to delete admin <b>{adminToDelete?.email || "N/A"}</b>?
+                      This action is <span className="text-red-600 font-bold">irreversible</span>.
+                    </h1>
+                    <div className="flex justify-center gap-4">
+                      <button
+                        onClick={() => setDeleteAdminModal(false)}
+                        className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleDeleteAdmin}
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
+                      >
+                        Confirm Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Left: Create Admin Form */}
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-left text-gray-800 dark:text-white mb-6">
@@ -188,7 +215,10 @@ export default function CreateAdmin() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">{admin.role}</p>
                         </div>
                         <button
-                          onClick={() => handleDeleteAdmin(admin._id)}
+                          onClick={() => {
+                            setAdminToDelete(admin._id);
+                            setDeleteAdminModal(true);
+                          }}
                           className="flex items-center gap-2 px-4 py-2 bg-red-200 hover:bg-red-400 text-red-600 rounded-md text-sm font-medium transition-all duration-200 dark:text-red-700 dark:hover:bg-red-600 dark:hover:text-white"
                         >
                           <svg
@@ -197,7 +227,7 @@ export default function CreateAdmin() {
                             viewBox="0 -960 960 960"
                             fill="currentColor"
                           >
-                            <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                            <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
                           </svg>
                           Delete
                         </button>

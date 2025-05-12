@@ -24,7 +24,7 @@ const SectionSchema = new mongoose.Schema({
   semester: { type: String, required: true },
   schoolYear: { type: String, required: true },
   subjects: [SubjectSchema],
-  students: [{ type: String }]
+  students: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }]
 }, {
   timestamps: true
 });

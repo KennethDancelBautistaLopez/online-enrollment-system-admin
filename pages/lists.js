@@ -155,9 +155,8 @@ export default function Students({ initialStudents }) {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  // 🔍 Filter students based on search
   const filteredStudents = students.filter((student) =>
-  `${student.fname} ${student.lname} ${student.email} ${student.status} ${student._studentId}`
+  `${student.fname} ${student.lname} ${student.email} ${student.course} ${student.yearLevel} ${student.section} ${student.semester} ${student.studentType} ${student.schoolYear} ${student.status} ${student._studentId}${student.verified ? true && "verified" : false || "not"}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
@@ -177,7 +176,7 @@ export default function Students({ initialStudents }) {
   
         <input
           type="text"
-          placeholder="Search by Name, Email or Student Number"
+          placeholder="Search by Name, Student Number, Email, verified or not"
           className="w-full p-3 mb-6 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -197,7 +196,8 @@ export default function Students({ initialStudents }) {
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Files</div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Upload Files </div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Status </div></th>
-                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Download</div></th>
+                <th className="border p-1 text-center dark:border-gray-700">Student Type</th>
+                <th className="border p-1 dark:border-gray-700"><div className="flex items-center justify-center">Download</div></th>
               </tr>
             </thead>
             <tbody>
@@ -213,12 +213,36 @@ export default function Students({ initialStudents }) {
                     <td className="border p-2 text-center dark:border-gray-700">{index + 1}</td>
                     <td className="border p-2 dark:border-gray-700">{student._studentId || "N/A"}</td>
                     <td className="border p-2 dark:border-gray-700">{student.fname} {student.mname} {student.lname}</td>
-                    <td className="border p- dark:border-gray-700 text-center"
+                    <td
+                      className="border p-2 dark:border-gray-700 text-center"
                       onClick={() => setShowEmail(!showEmail)}
                       title="Click to show email"
                     >
-                      {showEmail ? student.email : "Click to show email"}
-                      </td>
+                      {showEmail ? (
+                        <>
+                          <div className="flex items-center justify-center gap-2">
+                            {student.verified ? (
+                            <span
+                              className="ml-2 text-green-600 font-semibold text-sm"
+                              title="Verified Email"
+                            >
+                              ✅ Verified
+                            </span>
+                          ) : (
+                            <span
+                              className="ml-2 text-red-500 font-semibold text-sm"
+                              title="Not Verified"
+                            >
+                              ❌ Not Verified
+                            </span>
+                          )} {student.email}
+                          
+                          </div>
+                        </>
+                      ) : (
+                        "Click to show email"
+                      )}
+                    </td>
                     <td className="border p-2 text-center dark:border-gray-700">
                       <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={student.yearLevel}
@@ -319,17 +343,28 @@ export default function Students({ initialStudents }) {
 
                         <option value="">Select Status</option>
                         <option value="enrolled">Enrolled</option>
-                        <option value="graduated">Graduated</option>
-                        <option value="dropped">Dropped</option>
                         <option value="missing files">Missing Files</option>
                       </select>
                     </td>
                     <td className="border p-4 text-center dark:border-gray-700">
+                    <select
+                      value={student.studentType}
+                      onChange={(e) => updateStudentInfo(student._studentId, { studentType: e.target.value })}
+                      className="bg-white text-gray-900 border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400">
+
+                        <option value="">Select Status</option>
+                        <option value="new">New</option>
+                        <option value="old">Old</option>
+                        <option value="irregular">Irregular</option>
+                        <option value="transferee">transferee</option>
+                      </select>
+                    </td>
+                    <td className="border p-1 text-center dark:border-gray-700">
                       {pdfLinks[student._studentId] ? (
                         <a
                           href={pdfLinks[student._studentId]}
                           download={`${student.fname}_${student.lname}_info.pdf`}
-                          className="inline-flex items-center gap-2 text-sm px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                          className="inline-flex items-center  text-sm px-2 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
                             <path d="M382-320 155-547l57-57 170 170 366-366 57 57-423 423ZM200-160v-80h560v80H200Z"/>
@@ -339,7 +374,7 @@ export default function Students({ initialStudents }) {
                       ) : (
                         <button
                           onClick={() => handleGeneratePDF(student)}
-                          className="inline-flex items-center gap-2 text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                          className="inline-flex items-center  text-sm px-2 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
                             <path d="M360-460h40v-80h40q17 0 28.5-11.5T480-580v-40q0-17-11.5-28.5T440-660h-80v200Zm40-120v-40h40v40h-40Zm120 120h80q17 0 28.5-11.5T640-500v-120q0-17-11.5-28.5T600-660h-80v200Zm40-40v-120h40v120h-40Zm120 40h40v-80h40v-40h-40v-40h40v-40h-80v200ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/>

@@ -19,7 +19,7 @@ export default function Payments() {
 
   useEffect(() => {
     // 1. If the user is not logged in
-    if (!session) {
+    if (!session && session.user.role !== "superAdmin") {
       toast.error("You don't have permission to access this page.");
       return;
     }
@@ -58,8 +58,11 @@ export default function Payments() {
         }
       })
       .catch((error) => {
-        console.error("❌ Failed to fetch payments:", error);
-        toast.error("Failed to fetch payments. 🚨");
+        if (error.response && error.response.data && error.response.data.message) {
+          toast.error("Failed to load payments: " + error.response.data.message);
+        } else {
+          toast.error("Failed to load payments.");
+        }
       }).finally(() => setLoading(false))
   }, [session, initialized, router]);
 

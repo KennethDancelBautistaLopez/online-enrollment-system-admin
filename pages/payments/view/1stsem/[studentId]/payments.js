@@ -22,8 +22,9 @@ export default function FirstSEMStudentPaymentsView() {
         setStudentData(response.data);
         toast.success("Student payment data loaded! ✅");
       } catch (error) {
-        console.error("Error fetching student data:", error);
-        toast.error("Failed to load student data.");
+        const errorMessage = error.response?.data?.message || error.message || "Failed to delete payment.";
+            toast.error(`Error deleting payment: ${errorMessage}`);
+            console.error("Error deleting payment:", error);
       } finally {
         setLoading(false);
       }

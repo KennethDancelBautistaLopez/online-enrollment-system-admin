@@ -13,6 +13,7 @@ export default function Students() {
   const [showPassword, setShowPassword] = useState(false);
   const initialized = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showEmail, setShowEmail] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -47,7 +48,7 @@ export default function Students() {
   if (!session) return <Login />;
 
   const filteredStudents = students.filter((student) =>
-    `${student.fname} ${student.lname} ${student._studentId} ${student.course} ${student.education} ${student.yearLevel} ${student.semester} ${student.schoolYear} ${student.registrationDate} ${student.email}`
+    `${student.fname} ${student.lname} ${student._studentId} ${student.course} ${student.education} ${student.yearLevel} ${student.semester} ${student.schoolYear} ${student.registrationDate} ${student.email} ${student.verified ? true && "verified" : false || "not"}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
@@ -72,7 +73,7 @@ export default function Students() {
             {/* Search Bar */}
             <input
               type="text"
-              placeholder="Search by Name, Student Number or Email"
+              placeholder="Search by Name, Student Number, Email, verified or not"
               className="w-full p-3 mb-6 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -83,21 +84,15 @@ export default function Students() {
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
                     <th className="border p-2 dark:border-gray-700">#</th>
-                    <th className="border p-2 dark:border-gray-700">Student Number</th>
+                    <th className="border p-2 dark:border-gray-700">Student No.</th>
                     <th className="border p-2 dark:border-gray-700">First Name</th>
                     <th className="border p-2 dark:border-gray-700">Middle Name</th>
                     <th className="border p-2 dark:border-gray-700">Last Name</th>
                     <th className="border p-2 dark:border-gray-700">Mobile Number</th>
-                    <th className="border p-2 dark:border-gray-700">Education</th>
-                    {students.some((s) => s.education === "college") && (
-                      <th className="border p-2 dark:border-gray-700">Course</th>
-                    )}
-                    {students.some((s) => s.education === "senior-high") && (
-                      <th className="border p-2 dark:border-gray-700">Strand</th>
-                    )}
+                    <th className="border p-2 dark:border-gray-700">Course</th>
                     <th className="border p-2 dark:border-gray-700">Semester</th>
-                    <th className="border p-2 dark:border-gray-700">Registration Date</th>
-                    <th className="border p-2 dark:border-gray-700">Email</th>
+                    <th className="border  dark:border-gray-700"><div className="flex items-center justify-center text-center">Registration Date</div></th>
+                    <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center text-center">Email</div></th>
                     <th className="border p-2 dark:border-gray-700">Password</th>
                     <th className="border p-2 dark:border-gray-700">Actions</th>
                   </tr>
@@ -116,13 +111,45 @@ export default function Students() {
                         <td className="border p-2 dark:border-gray-700">{student.mname || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.lname || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.mobile || "N/A"}</td>
-                        <td className="border p-2 dark:border-gray-700">{student.education || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.course || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.semester || "N/A"}</td>
-                        <td className="border p-2 dark:border-gray-700">
-                          {new Date(student.registrationDate).toLocaleDateString("en-US")}
+                        <td className="border p-1 dark:border-gray-700">
+                          <div className="text-center">
+                          {student.registrationDate 
+                            ? new Date(student.registrationDate).toLocaleString("en-US", {
+                                dateStyle: "medium",timeStyle: "short", }) : "N/A"}
+                          </div>
                         </td>
-                        <td className="border p-2 dark:border-gray-700">{student.email || "N/A"}</td>
+                        <td
+                      className="border p-2 dark:border-gray-700 text-center"
+                      onClick={() => setShowEmail(!showEmail)}
+                      title="Click to show email"
+                    >
+                      {showEmail ? (
+                        <>
+                          <div className="flex items-center justify-center gap-2">
+                            {student.verified ? (
+                            <span
+                              className="ml-2 text-green-600 font-semibold text-sm"
+                              title="Verified Email"
+                            >
+                              ✅ Verified
+                            </span>
+                          ) : (
+                            <span
+                              className="ml-2 text-red-500 font-semibold text-sm"
+                              title="Not Verified"
+                            >
+                              ❌ Not Verified
+                            </span>
+                          )} {student.email}
+                          
+                          </div>
+                        </>
+                      ) : (
+                        "Click to show email"
+                      )}
+                    </td>
                         <td
                           className="border p-2 dark:border-gray-700 cursor-pointer select-none"
                           onClick={() => setShowPassword(!showPassword)}

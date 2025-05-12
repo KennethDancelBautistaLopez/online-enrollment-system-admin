@@ -4,6 +4,7 @@
   import mongoose from "mongoose";
   import {hash} from "bcryptjs";
   import bcrypt from "bcryptjs";
+  import { sendVerificationEmail } from "@/lib/mailer";
   import Curriculum from "@/models/Subject";
   async function handler(req, res) {
     console.log("API /students called with method:", req.method);
@@ -47,17 +48,23 @@
         const { yearAttended: elementaryYear, schoolName: elementarySchool } = elementary;
         const { yearAttended: juniorHighYear, schoolName: juniorHighSchool } = juniorHigh;
         const { yearAttended: seniorHighYear, schoolName: seniorHighSchool } = seniorHigh;
-        if (!fname || !lname || !address || !mobile || !facebook || !birthdate || !birthplace || !nationality || !religion || !sex || !father || !mother || !guardian || !guardianOccupation || !registrationDate || !education || !yearLevel || !schoolYear || !email || !password || !semester) {
+        if (!fname || !lname || !address || !mobile || !facebook || !birthdate || !birthplace || !nationality || !religion || !sex || !guardian || !guardianOccupation || !registrationDate || !education || !yearLevel || !schoolYear || !email || !password || !semester) {
           return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        // email no space allowed
+        if (email.includes(" ")) {
+          return res.status(400).json({ error: "Email must not contain spaces" });
         }
         const mobileRegex = /^\d{4}-\d{3}-\d{4}$/;
         if (!mobileRegex.test(mobile)) {
-          return res.status(400).json({ error: "Invalid mobile number format. Use XXXX-XXX-XXXX." });
+          return res.status(400).json({ error: "Invalid mobile number format 11 digits" });
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
           return res.status(400).json({ error: "Invalid email format" });
         }
+        
         const existingStudent = await Student.findOne({ email });
         if (existingStudent) {
           return res.status(400).json({ error: "Email already exists" });
@@ -87,11 +94,16 @@
           nursery: {schoolName: nurserySchool,yearAttended: nurseryYear,},
           elementary: {schoolName: elementarySchool,yearAttended: elementaryYear,},
           juniorHigh: {schoolName: juniorHighSchool,yearAttended: juniorHighYear,},
-          seniorHigh: {schoolName: seniorHighSchool,yearAttended: seniorHighYear,},semester,subjects,});
+          seniorHigh: {schoolName: seniorHighSchool,yearAttended: seniorHighYear,},semester,subjects, verified: false,studentType: "new"});
         const token = jwt.sign(
-          { id: newStudent._id, email: newStudent.email, role: "student", studentId: newStudent._studentId, studentNumber: newStudent.studentNumber },
+          { userId: newStudent._id,
+            // email: newStudent.email, role: "student", studentId: newStudent._studentId, studentNumber: newStudent.studentNumber 
+          },
           process.env.JWT_SECRET,
-          { expiresIn: "7d" });
+          { expiresIn: "5m" }
+        );
+
+        await sendVerificationEmail(newStudent.email, token);
 
           return res.status(201).json({ 
             message: "Student added successfully", 

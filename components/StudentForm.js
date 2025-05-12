@@ -21,7 +21,36 @@ function formatLandline(value) {
 
 export default function StudentForm({
   _studentId,
-  fname: existingFname = "",mname: existingMname = "",lname: existingLname = "",address: existingAddress = "",mobile: existingMobile = "",landline: existingLandline = "",facebook: existingFacebook = "",birthdate: existingBirthdate = "",birthplace: existingBirthplace = "",nationality: existingNationality = "",religion: existingReligion = "",sex: existingSex = "",father: existingFather = "",mother: existingMother = "",guardian: existingGuardian = "",guardianOccupation: existingGuardianOccupation = "",registrationDate: existingRegistrationDate = "",lrn: existingLrn = "",education: existingEducation = "",course: existingCourse = "",yearLevel: existingYearLevel = "",schoolYear: existingSchoolYear = "",email: existingEmail = "",password: existingPassword = "",semester: existingSemester = "",nursery = { yearAttended: "", schoolName: "" },elementary = { yearAttended: "", schoolName: "" },juniorHigh = { yearAttended: ""},highSchool = { yearAttended: "", schoolName: "" },seniorHigh = { yearAttended: "", schoolName: "" },status: existingStatus = "",
+  fname: existingFname = "",
+  mname: existingMname = "",
+  lname: existingLname = "",
+  address: existingAddress = "",
+  mobile: existingMobile = "",
+  landline: existingLandline = "",
+  facebook: existingFacebook = "",
+  birthdate: existingBirthdate = "",
+  birthplace: existingBirthplace = "",
+  nationality: existingNationality = "",
+  religion: existingReligion = "",
+  sex: existingSex = "",
+  father: existingFather = "",
+  mother: existingMother = "",
+  guardian: existingGuardian = "",
+  guardianOccupation: existingGuardianOccupation = "",
+  registrationDate: existingRegistrationDate = "",
+  lrn: existingLrn = "",
+  education: existingEducation = "",
+  course: existingCourse = "",
+  yearLevel: existingYearLevel = "",
+  schoolYear: existingSchoolYear = "",
+  email: existingEmail = "",
+  password: existingPassword = "",
+  semester: existingSemester = "",
+  nursery = { yearAttended: "", schoolName: "" },
+  elementary = { yearAttended: "", schoolName: "" },
+  juniorHigh = { yearAttended: "" , schoolName: "" },
+  seniorHigh = { yearAttended: "", schoolName: "" },
+  status: existingStatus = "",
 }) {
   const [fname, setFname] = useState(existingFname);
   const [mname, setMname] = useState(existingMname);
@@ -57,6 +86,8 @@ export default function StudentForm({
   const [seniorHighState, setSeniorHigh] = useState(seniorHigh || { schoolName: "", yearAttended: "" });
   const [goToStudents, setGoToStudents] = useState(false);
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   async function saveStudent(ev) {
     ev.preventDefault();
   
@@ -85,30 +116,32 @@ export default function StudentForm({
       toast.success('Student saved successfully');
     
       if (response.status >= 200 && response.status < 300) {
-        setGoToStudents(true);
-      }
-    } catch (error) {
-      console.error('Error occurred during student save:', error);  // Detailed logging
-      if (error.response) {
-        // Detailed error message from the server
-        console.error('Response from server:', error.response.data);
-        toast.error('Error saving student: ' + error.response.data);
-      } else {
-        // Generic error message
-        toast.error('Error saving student: ' + error.message);
-      }
-    }
+            setGoToStudents(true);
+          }
 
+
+  } catch (error) {
+  console.error('Error occurred during student save:', error);
+
+  if (error.response && error.response.data && error.response.data.error) {
+    // Display the error message directly from the backend
+    toast.error(`Error saving student: ${error.response.data.error}`);
+  } else {
+    // Fallback for unexpected errors
+    toast.error(`Error saving student: ${error.message}`);
   }
-
+} finally {
+  setLoading(false);
+}
+  }
   useEffect(() => {
     if (goToStudents) {
       router.push("/students");
     }
   }, [goToStudents, router]);
 
-  return (
-    <form onSubmit={saveStudent}>
+return (
+<form onSubmit={saveStudent}>
       <div className="space-y-2">
         <div className="flex justify-center items-center gap-4">
           <label className="block text-gray-700 dark:text-white dark:text-white font-bold mb-2 text-2xl">
@@ -219,7 +252,6 @@ export default function StudentForm({
       type="tel"
       name="landline"
       placeholder="Landline Number (11 digits)"
-      required
       className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
       value={landline}
       onChange={(e) => {
@@ -313,34 +345,29 @@ export default function StudentForm({
 
     <div className="flex flex-wrap gap-4 items-start">
     <div className="space-y-2 w-full sm:w-[30%]">
-          <label className="text-gray-700 font-bold dark:text-white"
-          >Fathers Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 font-bold dark:text-white">Fathers Name</label>
           <input
             type="text"
             placeholder="Enter father's name"
             value={father}
             className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setFather(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
-            required
           />
         </div>
 
         <div className="space-y-2 w-full sm:w-[30%]">
-          <label className="text-gray-700 font-bold dark:text-white"
-          >Mothers Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 font-bold dark:text-white">Mothers Name</label>
           <input
             type="text"
             placeholder="Enter mother's name"
             value={mother}
             className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
             onChange={(ev) => setMother(ev.target.value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))}
-            required
           />
         </div>
 
         <div className="space-y-2 w-full sm:w-[30%]">
-          <label className="text-gray-700 font-bold dark:text-white"
-          >Guardians Name <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 font-bold dark:text-white">Guardians Name <span className="text-red-500 font-bold">*</span></label>
           <input
             type="text"
             placeholder="Enter guardian's name"
@@ -404,14 +431,13 @@ export default function StudentForm({
         <div className="space-y-2 w-full sm:w-[30%]">
           <label className="text-gray-700 font-bold dark:text-white"
           >Year Level <span className="text-red-500 font-bold">*</span></label>
-          <input
-            type="number"
-            placeholder="Enter year level"
-            value={yearLevel}
-            className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
-            onChange={(ev) => setYearLevel(ev.target.value)}
-            required
-          />
+          <select value={yearLevel} onChange={(ev) => setYearLevel(ev.target.value)} className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700" required>
+            <option value="">Select Year Level</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
         </div>
         <div className="space-y-2 w-full sm:w-[30%]">
           <label className="text-gray-700 font-bold dark:text-white"
@@ -427,17 +453,28 @@ export default function StudentForm({
           {education === "college" && (
     <div className="space-y-2 w-full sm:w-[30%]">
               <label className="text-gray-700 font-bold mt-2 pt-2 dark:text-white">Course</label>
-              <input
-                type="text"
-                placeholder="Enter Course"
-                value={course}
+              <select
+              value={course}
                 className="w-full p-3 border rounded-lg bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 onChange={(ev) => {
                   const value = ev.target.value.toUpperCase().slice(0, 10);
                   setCourse(value);
                 }}
-                required
-              />
+              >
+              <option value="">Select Course</option>
+              <option value="BSCS">BS Computer Science</option>
+              <option value="BSHM">BS Hospitality Management</option>
+              <option value="BSBA">BS Business Administration</option>
+              <option value="BSTM">BS Tourism Management</option>
+              <option value="BEED">Bachelor of Elementary Education</option>
+              <option value="BSED-MATH">
+                Bachelor of Secondary Education - Math
+              </option>
+              <option value="BSED-ENG">
+                Bachelor of Secondary Education - English
+              </option>
+              <option value="BA-POLSCI">Bachelor of Arts - Political Science</option>
+              </select>
             </div>
           )}
     <div className="space-y-2 w-full sm:w-[30%]">
@@ -456,8 +493,7 @@ export default function StudentForm({
         </div>    
         
         <div className="space-y-2 w-full sm:w-[30%]">
-          <label className="text-gray-700 font-bold dark:text-white"
-          >LRN <span className="text-red-500 font-bold">*</span></label>
+          <label className="text-gray-700 font-bold dark:text-white">LRN</label>
           <input
             type="number"
             placeholder="Enter LRN"
@@ -467,7 +503,6 @@ export default function StudentForm({
               const value = ev.target.value.replace(/\D/g, "").slice(0, 12);
               setLrn(value);
             }}
-            required
           />
         </div>
         
@@ -660,8 +695,6 @@ export default function StudentForm({
             required
           >
             <option value="">Select Status</option>
-            <option value="dropped">Dropped</option>
-            <option value="graduated">Graduated</option>
             <option value="enrolled">Enrolled</option>
             <option value="missing files">Missing Files</option>
           </select>
@@ -673,12 +706,12 @@ export default function StudentForm({
     type="submit"
     className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
   >
-    Save
+    {loading ? "Loading..." : "Submit"}
   </button>
 </div>
 
         </div>
     </form>
 
-  );
+  )
 }

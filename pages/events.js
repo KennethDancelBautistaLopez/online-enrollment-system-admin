@@ -33,7 +33,8 @@ export default function EventsPage() {
       })
       .catch((error) => {
         console.error("❌ Error fetching events:", error);
-        toast.error("Failed to load events. Please try again. 🚨");
+        const errorMessage = error.response?.data?.message || error.message || "Failed to load events. Please try again.";
+        toast.error(`Error: ${errorMessage} 🚨`);
       }).finally(() => {
         setLoading(false);
       })

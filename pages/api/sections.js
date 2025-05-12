@@ -1,6 +1,7 @@
 import Section from '@/models/Section';
 import { connectToDB } from '@/lib/mongoose';
 import Curriculum from '@/models/Subject';
+import Student from '@/models/Student';
 
 export default async function handler(req, res) {
   await connectToDB();
@@ -77,15 +78,22 @@ export default async function handler(req, res) {
           return res.status(500).json({ success: false, message: error.message });
         }
 
-      case 'PUT':
-        try {
-          const { id, updates } = req.body;
-          const updatedSection = await Section.findByIdAndUpdate(id, updates, { new: true }).populate("students");
-          if (!updatedSection) return res.status(404).json({ success: false, message: 'Section not found.' });
-          return res.status(200).json({ success: true, data: updatedSection });
-        } catch (error) {
-          return res.status(500).json({ success: false, message: error.message });
-        }
+        case 'PUT':
+          try {
+            const { id, updates } = req.body;
+
+            if (updates.student) {
+              updates.student = updates.student.map((id) => mongoose.Types.ObjectId(id));
+            }
+
+            const updatedSection = await Section.findByIdAndUpdate(id, updates, { new: true }).populate("students");
+            if (!updatedSection) {
+              return res.status(404).json({ success: false, message: 'Section not found.' });
+            }
+            return res.status(200).json({ success: true, data: updatedSection });
+          } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+          }
 
         case 'DELETE':
           try {

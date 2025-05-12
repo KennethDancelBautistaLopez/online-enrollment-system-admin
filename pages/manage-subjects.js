@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
 export default function ManageSubjects() {
-  
   const [studentId, setStudentId] = useState('');
   const [student, setStudent] = useState(null);
   const [newSubject, setNewSubject] = useState({
@@ -25,7 +24,7 @@ export default function ManageSubjects() {
   }); 
   const { data: session } = useSession(); 
 
-  if (!session || session.user.role !== 'superAdmin' && session.user.role !== 'admin') {
+  if (!session) {
     toast.error('You do not have permission to access this page.');
     return <Login />;
   }
@@ -49,61 +48,66 @@ export default function ManageSubjects() {
       subjects: form.subjects.filter((_, i) => i !== index),
     });
   };
-  const handleSubmit = async () => {
-    const { course, yearLevel, semester, subjects } = form;
-    if (
-      !course ||
-      !yearLevel ||
-      !semester ||
-      subjects.some((s) => !s.code || !s.description || !s.units)
-    ) {
-      toast.error('Please fill in all fields.');
-      return;
-    }
+const handleSubmit = async () => {
+  const { course, yearLevel, semester, subjects } = form;
 
-    setLoading(true);
-    try {
-      await axios.post('/api/subject-mappings', {
-      code: `${course}-${yearLevel}-${semester}`, // Or any unique identifier
-      description: `${course} Year ${yearLevel} ${semester}`,
+  if (
+    !course ||
+    !yearLevel ||
+    !semester ||
+    subjects.some((s) => !s.code || !s.description || !s.units)
+  ) {
+    toast.error('Please fill in all fields.');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    // Submit all subjects in the 'subjects' array
+    const response = await axios.post('/api/subject-mappings', {
       course,
-      yearLevel,
+      yearLevel: Number(yearLevel), // Ensure it's treated as a number
       semester,
-      subjects: subjects.map((s) => ({ ...s, units: parseInt(s.units) })),
+      subjects, // Pass the array of subjects instead of just a single subject
     });
-      toast.success('Curriculum saved successfully!');
+
+    if (response.data.success) {
+      toast.success('Subjects added successfully!');
       setForm({
         course: '',
         yearLevel: '',
         semester: '',
-        subjects: [{ code: '', description: '', units: '' }],
+        subjects: [{ code: '', description: '', units: '' }], // Reset form to default state
       });
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Submission failed.');
-    } finally {
-      setLoading(false);
     }
-  };
-  const fetchStudent = async () => {
-    if (!studentId) {
-      toast.error('Student ID cannot be empty');
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await axios.get(`/api/subjects?id=${studentId}`);
-      if (res.data.error) {
-        toast.error(res.data.error);
-      } else {
-        setStudent(res.data);
-      }
-    } catch {
-      toast.error('Error fetching student data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    const errorMessage = err.response?.data?.error || 'Submission failed.';
+    toast.error(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
+
+ const fetchStudent = async () => {
+  if (!studentId) {
+    toast.error('Please enter a student ID');
+    return;
+  }
+  setLoading(true);
+  setError(null);
+  try {
+    const res = await axios.get(`/api/subjects?id=${studentId}`);
+    setStudent(res.data);
+  } catch (err) {
+    console.error(err);
+    const errorMsg =
+      err.response?.data?.error || 'An unexpected error occurred';
+    setError(errorMsg);
+    toast.error(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const addSubject = async () => {
     if (!newSubject.code || !newSubject.description || !newSubject.units) {
@@ -141,14 +145,14 @@ export default function ManageSubjects() {
   return (
   <Login>
     <Toaster position="top-right" />
-    <div className="p-8 max-w-6xl mx-auto bg-gray-50 dark:bg-gray-900 rounded-lg shadow-xl transition-transform transform hover:scale-105">
+    <div className="p-8 max-w-6xl mx-auto bg-gray-50 dark:bg-gray-900 rounded-lg shadow-xl hover:shadow-2xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Left side - Create Subject */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="mb-6 flex justify-between pt-4">
-          <h2 className="text-2xl font-semibold mb-8 text-gray-900 dark:text-white text-center">Add Curriculum</h2>
+          <h2 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white text-center">Add Curriculum</h2>
           <div>
-            <Link href="/subjects/view-curriculum" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Curriculum</Link>
+            <Link href="/subjects/view-curriculum" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 transition-transform hover:scale-105 duration-300 shadow-md px-4 rounded">View Curriculum</Link>
           </div>
           </div>
           <div className="grid gap-6 mb-6">
@@ -156,7 +160,7 @@ export default function ManageSubjects() {
               <select
                 value={form.course}
                 onChange={(e) => setForm({ ...form, course: e.target.value.toUpperCase() })}
-                className="border px-4 py-3 w-full rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border px-4 py-3 w-full rounded-lg dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select Course</option>
                 <option value="BSCS">BSCS</option>
@@ -171,7 +175,7 @@ export default function ManageSubjects() {
               <select
                 value={form.yearLevel}
                 onChange={(e) => setForm({ ...form, yearLevel: e.target.value })}
-                className="border px-4 py-3 w-full rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border px-4 py-3 w-full rounded-lg dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select Year Level</option>
                 <option value="1">1st Year</option>
@@ -180,68 +184,79 @@ export default function ManageSubjects() {
                 <option value="4">4th Year</option>
               </select>
             </div>
-            <input
-              type="text"
-              placeholder="Semester (e.g., 1st)"
+            <select
               value={form.semester}
               onChange={(e) => setForm({ ...form, semester: e.target.value })}
-              className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+              className="border hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-3 w-full rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Semester</option>
+              <option value="1st Semester">1st Semester</option>
+              <option value="2nd Semester">2nd Semester</option>
+            </select>
           </div>
 
           {form.subjects.map((subject, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center mb-4">
+            <div key={index} className="mb-6">
+              <div className="mb-2 flex justify-center items-center">
+              <label className="text-gray-900 dark:text-white block text-lg font-bold mb-2 dark:text-white">Subject {index + 1}
+              </label></div>
               <input
                 type="text"
                 placeholder="Code"
                 value={subject.code}
                 onChange={(e) => handleSubjectChange(index, 'code', e.target.value)}
-                className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white placeholder:text-gray-500  focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="text"
                 placeholder="Description"
                 value={subject.description}
                 onChange={(e) => handleSubjectChange(index, 'description', e.target.value)}
-                className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border px-4 hover:bg-gray-200 dark:hover:bg-gray-700 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="number"
                 placeholder="Units"
                 value={subject.units}
                 onChange={(e) => handleSubjectChange(index, 'units', e.target.value)}
-                className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none placeholder:text-gray-500  focus:ring-2 focus:ring-blue-500"
               />
+              <div className="flex justify-end items-end">
               {form.subjects.length > 1 && (
                 <button
                   onClick={() => removeSubjectField(index)}
-                  className="text-red-600 hover:text-red-700 text-sm mt-2 md:col-span-3"
+                  className="text-red-600 hover:scale-105 border-b-2 border-red-600 hover:text-red-600 text-lg mt-1 md:col-span-3"
                 >
                   Remove
                 </button>
               )}
+              </div>
             </div>
           ))}
-
-          <button
-            onClick={addSubjectField}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm transition-transform hover:scale-105 w-full mt-4"
-          >
-            Add Another Subject
-          </button>
-
-          <button
-            onClick={handleSubmit}
-            className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-transform hover:scale-105 disabled:opacity-50 w-full"
-            disabled={loading}
-          >
-            {loading ? 'Submitting...' : 'Save Curriculum'}
-          </button>
+          <div className="grid grid-cols-2 gap-4 justify-center items-center mt-4">
+            <div className="col-span-1 flex justify-center">
+              <button
+                onClick={addSubjectField}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-sm transition-transform hover:scale-105 w-full"
+              >
+                Add Another Subject
+              </button>
+            </div>
+            <div className="col-span-1 flex justify-center">
+              <button
+                onClick={handleSubmit}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-transform hover:scale-105 disabled:opacity-50 w-full"
+                disabled={loading}
+              >
+                {loading ? 'Submitting...' : 'Save Curriculum'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Right side - Search for Student */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white text-center">Search for Student</h2>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white text-center">Search for Student</h2>
 
           <div className="flex gap-4 mb-6">
             <input
@@ -269,12 +284,16 @@ export default function ManageSubjects() {
               )}
               {loading ? 'Loading...' : 'Search'}
             </button>
+              
+          </div>
+          <div className="mb-6 w-full flex justify-center">
+            {error && <p className="text-red-500 mt-2">{error}</p>}
           </div>
 
           {student && (
             <>
               <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white text-center">
-                Subjects for {student.fname} {student.lname}
+                Subjects for {student.fname} {student.lname} - {student.studentType}
               </h3>
 
               <ul className="mb-6 space-y-4">
@@ -338,7 +357,7 @@ export default function ManageSubjects() {
               </div>
 
               {confirmDelete.open && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
                   <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
                       Are you sure you want to delete subject <b>{confirmDelete.code}</b>?

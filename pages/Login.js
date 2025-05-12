@@ -29,14 +29,21 @@ export default function Login({ children }) {
       });
 
       if (result.error) {
+      if (result.error.includes("Invalid")) {
         throw new Error("Invalid email or password.");
+      } else if (result.error.includes("Network")) {
+        throw new Error("Network error. Please check your connection.");
+      } else {
+        throw new Error(result.error);
       }
+    }
 
       toast.success("Login successful! ✅"); // Success toast   
       router.push(result.url || "/"); // Redirect on success
     } catch (err) {
-      setError(err.message || "Login failed. Please try again.");
-      toast.error("Login failed! 🚨"); // Error toast
+    console.error("Login failed:", err.message);
+    setError(err.message);
+    toast.error(`Login failed: ${err.message} 🚨`);
     } finally {
       setLoading(false);
     }
@@ -45,37 +52,39 @@ export default function Login({ children }) {
   if (!session) {
     return (
       <BackgroundWrapper>
-        <div className="bg-white bg-opacity-50 p-6 rounded-lg shadow-md text-center w-80">
-        <div className="flex justify-center mb-2"> <Logo /></div>
-          <h2 className="text-xl font-semibold mb-2">Admin Login</h2>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="bg-white bg-opacity-100 p-6 rounded-lg shadow-md text-center w-80">
+        <div className="flex justify-center text-black mb-2"> <Logo /></div>
+          <h2 className="text-xl text-black font-bold mb-2">Admin Login</h2>
           {error && <p className="text-red-500 rounded-lg bg-white text-l mb-2">{error}</p>}
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={`bg-gray-100 p-2 px-4 rounded-lg mb-2 w-full ${error ? 'border-3 border-red-500' : ''}`}
+            className={`bg-gray-100 focus:bg-gray-200 hover:bg-gray-200 p-2 px-4 rounded-lg mb-2 w-full ${error ? 'border-3 border-red-500' : ''}`}
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={`bg-gray-100 p-2 px-4 rounded-lg mb-2 w-full ${error ? 'border-3 border-red-500' : ''}`}
+            className={`bg-gray-100 focus:bg-gray-200 hover:bg-gray-200 p-2 px-4 rounded-lg mb-2 w-full ${error ? 'border-3 border-red-500' : ''}`}
           />
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="bg-blue-600 text-white p-2 px-4 rounded-lg w-full flex justify-center items-center" 
+            className="bg-blue-600 hover:bg-blue-700 text-white p-2 px-4 rounded-lg w-full flex justify-center items-center" 
           >
             {loading ? <LoginSpinner size="w-6 h-6" color="border-blue-200" /> : "Login"}
           </button>
           
           <footer className="text-black text-xs text-center mt-6 opacity-80">
-            <b>&copy; {new Date().getFullYear()} St. Clare College. All rights reserved.<br />
+            <b>
             Developed by the BSCS College Student In 4-D • For administrative use only.</b>
           </footer>
         </div>
+      </div>
         
       </BackgroundWrapper>
     );

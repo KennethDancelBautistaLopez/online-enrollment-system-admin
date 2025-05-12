@@ -68,8 +68,12 @@ export default function Home() {
         }
   
         hasCheckedConflicts.current = true;
+  
+        toast.success("Events loaded successfully! ✅");
       } catch (err) {
-        toast.error(`Error: ${err.message}`);
+        console.error("❌ Error fetching events:", err);
+        const errorMessage = err.response?.data?.message || err.message || "Failed to load events.";
+        toast.error(`Error: ${errorMessage} 🚨`);
       } finally {
         setEventsLoading(false);
       }
@@ -115,7 +119,8 @@ export default function Home() {
       })
       .catch((error) => {
         console.error("❌ Failed to fetch payments:", error);
-        toast.error("Failed to fetch payments. 🚨");
+        const errorMessage = error.response?.data?.message || error.message || "Failed to fetch payments.";
+        toast.error(`Error: ${errorMessage} 🚨`);
       })
       .finally(() => {
         setPaymentLoading(false);
