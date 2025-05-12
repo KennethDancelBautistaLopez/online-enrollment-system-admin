@@ -17,10 +17,10 @@ const courseDescriptions = {
   "BSTM": "Bachelor of Science in Tourism Management",
 };
 const year = {
-  "1": "First Year",
-  "2": "Second Year",
-  "3": "Third Year",
-  "4": "Fourth Year",
+  "1": "1st Year",
+  "2": "2nd Year",
+  "3": "3rd Year",
+  "4": "4th Year",
 }
 
 export default function ManageCurriculum() {

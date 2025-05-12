@@ -5,7 +5,7 @@ export default function Logo() {
   return (
     <Link href={'/'} className="flex gap-1 items-center ">
       <Image
-        src="/scc-icon.webp" 
+        src="/sccicon.webp" 
         alt="Admin Logo"
         width={40}
         height={40}
