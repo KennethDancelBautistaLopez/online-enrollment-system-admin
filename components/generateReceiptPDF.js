@@ -26,10 +26,11 @@ export function generateReceiptPDF(payment) {
     // Header
     doc.addImage(logoBase64, "PNG", 10, 5, 30, 30);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
+    doc.setFontSize(20);
     doc.text("ST. CLARE COLLEGE OF CALOOCAN", 105, 15, null, null, "center");
     doc.setFontSize(16);
     doc.text("OFFICIAL PAYMENT RECEIPT", 105, 25, null, null, "center");
+    doc.line(10, 32, 200, 32);
 
     let y = 40;
 
@@ -37,20 +38,21 @@ export function generateReceiptPDF(payment) {
       doc.setFont("helvetica", "bold");
       doc.text(`${label}:`, 15, y);
       doc.setFont("helvetica", "normal");
-      doc.text(value || "N/A", 55, y);
+      doc.text(value || "N/A", 70, y);
       y += 8;
     };
 
-    addField("Receipt Number", payment.receipt || "N/A");
+    // Payment Details
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Payment Details", 15, y);
+    y += 8;
     addField("Date", formatDate(payment.createdAt || new Date()));
-    addField("Payment ID", payment.paymentId || "N/A");
     addField("Reference Number", payment.referenceNumber || "N/A");
     addField("Description", payment.description || "N/A");
     addField("Amount Paid", `₱${payment.amount?.toFixed(2) || "0.00"}`);
 
-    y += 5;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
+    y += 10;
     doc.text("Student Information", 15, y);
     y += 8;
 
@@ -65,11 +67,9 @@ export function generateReceiptPDF(payment) {
 
     y += 15;
     doc.setFont("helvetica", "italic");
-    doc.text(
-      "This is a system-generated receipt. Please keep this for your records.",
-      15,
-      y
-    );
+    doc.text("This is a system-generated receipt. Please keep this for your records.", 15, y);
+    y += 8;
+    doc.text("Signature: _______________________________", 15, y);
 
     doc.save(`Receipt_${payment.fullName.replace(/\s+/g, "_")}.pdf`);
   };

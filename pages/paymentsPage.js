@@ -26,9 +26,8 @@ export default function PaymentsPage() {
       return;
     }
 
-    // Check if user is not superAdmin, then redirect to home or other page
-    if (session.user.role !== "superAdmin" && session.user.role !== "admin") {
-      router.push("/"); // Redirect to home if not superAdmin
+    if (session.user.role !== "superAdmin") {
+      router.push("/"); // Redirect to home if not admin
       toast.error("You do not have access to this page.");
       return;
     }
@@ -66,7 +65,7 @@ export default function PaymentsPage() {
     }
   }, [session]); // Trigger error toast only when session is null
 
-  if (!session || session.user.role !== "superAdmin" && session.user.role !== "admin") {
+  if (!session || session.user.role !== "superAdmin") {
     return <Login />; // Or redirect to login if not logged in or not superAdmin
   }
 

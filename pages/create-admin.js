@@ -17,9 +17,15 @@ export default function CreateAdmin() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (!session && session.user.role !== "superAdmin") {
-      router.push("/");
-      toast.error("You don't have permission to access this page.");
+
+      if (!session) {
+      return;
+    }
+
+    // Check if user is not superAdmin, then redirect to home or other page
+    if (session.user.role !== "superAdmin") {
+      router.push("/"); // Redirect to home if not superAdmin
+      toast.error("You do not have access to this page.");
     } else {
       fetchAdmins();
     }
@@ -98,8 +104,6 @@ export default function CreateAdmin() {
       setAdminToDelete(null);
     }
   };
-
-  if (status === "loading") return <div className="p-4">Loading...</div>;
 
   return (
     <Login>
