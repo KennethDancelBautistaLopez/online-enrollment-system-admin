@@ -33,7 +33,7 @@ export default function ManageCurriculum() {
 
   useEffect(() => {
     if (!session) {
-      toast.error('You do not have permission to access this page.');
+      <Login />
       return;
     }
 

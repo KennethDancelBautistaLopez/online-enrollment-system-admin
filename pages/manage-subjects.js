@@ -4,6 +4,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import Login from './Login';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import LoadingSpinner from '@/components/Loading';
 
 export default function ManageSubjects() {
   const [studentId, setStudentId] = useState('');
@@ -22,11 +24,26 @@ export default function ManageSubjects() {
     semester: '',
     subjects: [{ code: '', description: '', units: '' }],
   }); 
-  const { data: session } = useSession(); 
+  const { data: session, status } = useSession(); 
 
+  const router = useRouter();
+
+ if (status === 'loading') {
+    return <LoadingSpinner />;
+  }
+
+  // If not logged in
   if (!session) {
-    toast.error('You do not have permission to access this page.');
     return <Login />;
+  }
+
+  // If logged in but not authorized
+  const allowedRoles = ['superAdmin', 'registrar', 'admin'];
+  if (!allowedRoles.includes(session.user.role)) {
+    if (typeof window !== "undefined") {
+      router.push('/'); // Redirect to home or another page
+    }
+    return null;
   }
 
   const handleSubjectChange = (index, field, value) => {
@@ -145,13 +162,12 @@ const handleSubmit = async () => {
   return (
   <Login>
     <Toaster position="top-right" />
-    <div className="p-8 max-w-6xl mx-auto bg-gray-50 dark:bg-gray-900 rounded-lg shadow-xl hover:shadow-2xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Left side - Create Subject */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        {(session.user.role === 'admin' || session.user.role === 'superAdmin')&&(<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="mb-6 flex justify-between pt-4">
           <h2 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white text-center">Add Curriculum</h2>
-          <div>
+          <div> 
             <Link href="/subjects/view-curriculum" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 transition-transform hover:scale-105 duration-300 shadow-md px-4 rounded">View Curriculum</Link>
           </div>
           </div>
@@ -252,10 +268,12 @@ const handleSubmit = async () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>)}
+        
 
         {/* Right side - Search for Student */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <div className={`${!(session.user.role === 'admin' || session.user.role === 'superAdmin') ? 'flex justify-center' : ''}`}>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-xl">
           <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white text-center">Search for Student</h2>
 
           <div className="flex gap-4 mb-6">

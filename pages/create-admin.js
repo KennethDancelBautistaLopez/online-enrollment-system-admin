@@ -24,8 +24,7 @@ export default function CreateAdmin() {
 
     // Check if user is not superAdmin, then redirect to home or other page
     if (session.user.role !== "superAdmin") {
-      router.push("/"); // Redirect to home if not superAdmin
-      toast.error("You do not have access to this page.");
+      router.push("/");
     } else {
       fetchAdmins();
     }
@@ -37,7 +36,6 @@ export default function CreateAdmin() {
       const data = await res.json();
       if (res.ok) {
         setAdminUsers(data.admins);
-        toast.success("Admins loaded.");
       } else {
         toast.error(data.message || "Failed to load admins.");
       }
@@ -170,12 +168,14 @@ export default function CreateAdmin() {
                     <select
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
-                      className="w-full p-4 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 transition-all"
+                      className=" w-full p-4 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                       required
                     >
                       <option value="admin">Admin</option>
                       <option value="superAdmin">Super Admin</option>
-                    </select>
+                      <option value="registrar">Registrar</option>
+                      <option value="accountant">Accountant</option>
+                    </select> 
                   </div>
                   <button
                     type="submit"

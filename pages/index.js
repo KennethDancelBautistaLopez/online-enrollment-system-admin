@@ -15,6 +15,7 @@ export default function Home() {
   const [paymentLoading, setPaymentLoading] = useState(true);
   const [totalIncome, setTotalIncome] = useState(0);
   const [chartData, setChartData] = useState([]);
+  const [showEvents, setShowEvents] = useState(false);
   const initialized = useRef(false);
   const hasShownWelcome = useRef(false); // flag to prevent multiple toasts
   const hasCheckedConflicts = useRef(false);
@@ -34,6 +35,7 @@ export default function Home() {
         const res = await fetch("/api/events");
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load events");
+        
   
         setEvents(data);
   
@@ -68,8 +70,6 @@ export default function Home() {
         }
   
         hasCheckedConflicts.current = true;
-  
-        toast.success("Events loaded successfully! ✅");
       } catch (err) {
         console.error("❌ Error fetching events:", err);
         const errorMessage = err.response?.data?.message || err.message || "Failed to load events.";
@@ -113,7 +113,6 @@ export default function Home() {
         );
 
         if (!initialized.current) {
-          toast.success("Payments loaded successfully! ✅");
           initialized.current = true;
         }
       })
@@ -131,6 +130,23 @@ export default function Home() {
     return <Login />;
   }
 
+const formatRole = (role) => {
+  switch(role) {
+    case 'superAdmin':
+      return 'Super Admin';
+    case 'admin':
+      return 'Administrator';
+    case 'user':
+      return 'Student';
+    case 'registrar':
+      return 'Registrar';
+    case 'accountant':
+      return 'Accountant';
+    default:
+      return 'Unknown Role';
+  }
+};
+
   return (
     <Login>
       <div className="p-4 sm:p-8 dark:bg-gray-900 dark:text-white">
@@ -140,6 +156,7 @@ export default function Home() {
             Hello, <span className="text-black dark:text-white">{session?.user?.email}</span>
           </h2>
           <div className="flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-lg shadow dark:bg-gray-700 dark:text-blue-200">
+            <span className="mr-2">{formatRole(session?.user?.role)}:</span>
             <span>{session?.user?.email}</span>
           </div>
         </div>
@@ -159,7 +176,14 @@ export default function Home() {
                 className="bg-blue-100 p-4 rounded-lg shadow-md dark:bg-gray-700 dark:text-white"
               >
                 <h4 className="text-lg font-semibold mb-2">{event.title}</h4>
-                <p className="text-gray-700 dark:text-gray-400">{event.description}</p>
+                <div className="mb-2 ">
+                <p className="text-gray-700 p-2 dark:border-gray-600  border-2 rounded-md border-blue-900  cursor-pointer dark:text-gray-300 dark:text-gray-400"
+                onClick={() => setShowEvents(!showEvents)} 
+                title="Click to show details"
+                >
+                  {showEvents ? event.description : "Click to show details"}
+                  </p>
+                  </div>
                 <div className="text-sm text-gray-600 space-y-1 dark:text-gray-400">
                   <p>📍 <span className="font-medium">{event.location}</span></p>
                   <p>📅 <span className="font-medium">{new Date(event.date).toLocaleDateString("en-US", {
@@ -172,8 +196,7 @@ export default function Home() {
               </div>
             ))}
 
-            {/* Show "Go to Events" Button if more than 3 */}
-            {events.length > 3 && (
+            {(session?.user?.role === "superAdmin" || session?.user?.role === "admin") && (
               <div className="col-span-full mt-4">
                 <button
                   onClick={() => window.location.href = "/events"}
@@ -195,8 +218,10 @@ export default function Home() {
         )}
       </div>
 
-          
-      <div className="space-y-8">
+      <totalStudents />
+
+      {session?.user?.role === "superAdmin"  && (
+            <div className="space-y-8">
         <div className="bg-white p-6 rounded-xl shadow-lg mb-8 dark:bg-gray-800 dark:text-white">
           <h2 className="text-xl font-semibold mb-4 text-green-600 dark:text-green-300">
             Total Payments: ₱{totalIncome}
@@ -248,6 +273,8 @@ export default function Home() {
           )}
         </div>
       </div>
+      )}
+  
 
       </div>
     </Login>

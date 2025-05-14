@@ -72,7 +72,7 @@ export default NextAuth({
           }
 
           // 🔐 Only allow admin or super admin users to log in
-          if (user.role !== "admin" && user.role !== "superAdmin") {
+          if (user.role !== "admin" && user.role !== "superAdmin" && user.role !== "registrar" && user.role !== "accountant") {
             throw new Error("Access Denied! Admins only.");
           }
 

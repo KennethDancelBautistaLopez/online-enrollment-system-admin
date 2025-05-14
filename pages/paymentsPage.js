@@ -14,7 +14,7 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [initialized, setInitialized] = useState(false);
   const [showReference, setShowReference] = useState(false);
-  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  // const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
 
   const router = useRouter();
   const [pdfLinks, setPdfLinks] = useState({});
@@ -26,9 +26,8 @@ export default function PaymentsPage() {
       return;
     }
 
-    if (session.user.role !== "superAdmin") {
-      router.push("/"); // Redirect to home if not admin
-      toast.error("You do not have access to this page.");
+    if (session.user.role !== "superAdmin" && session.user.role !== "admin" && session.user.role !== "accountant") {
+      router.push("/");
       return;
     }
 
@@ -44,7 +43,6 @@ export default function PaymentsPage() {
         }
         setPayments(response.data.data);
         if (!initialized && response.data.data.length > 0) {
-          toast.success("Payments loaded successfully! ✅");
           setInitialized(true);
         }
       } catch (error) {
@@ -65,7 +63,7 @@ export default function PaymentsPage() {
     }
   }, [session]); // Trigger error toast only when session is null
 
-  if (!session || session.user.role !== "superAdmin") {
+  if (!session || session.user.role !== "superAdmin" && session.user.role !== "admin" && session.user.role !== "cashier") {
     return <Login />; // Or redirect to login if not logged in or not superAdmin
   }
 
@@ -94,7 +92,7 @@ export default function PaymentsPage() {
             <LoadingSpinner/>
           ) : (
             <>
-            {showDeleteAllModal && (
+            {/* {showDeleteAllModal && (
             <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
                 <h1 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
@@ -135,10 +133,10 @@ export default function PaymentsPage() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
               <div className="flex flex-col md:flex-row md:items-center justify-between items-center gap-2 mb-4">
               <h1 className="text-2xl font-bold mb-3 md:mb-0 text-gray-800 dark:text-white">Payments List</h1>
-              {session?.user.role === "superAdmin" && (
+              {/* {session?.user.role === "superAdmin" && (
                 <button
                   onClick={() => setShowDeleteAllModal(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-red-200 hover:bg-red-400 text-red-600 rounded-md text-md font-medium transition-all duration-200 dark:text-red-700 dark:hover:bg-red-600 dark:hover:text-white"
@@ -154,7 +152,7 @@ export default function PaymentsPage() {
                   Delete All Payments
                 </button>
 
-              )}
+              )} */}
             </div>
       
             {/* Search Bar */}
@@ -181,9 +179,9 @@ export default function PaymentsPage() {
                     <th className="border p-1 text-gray-900 dark:text-white"><div className="flex items-center justify-center">Date</div></th>
                     <th className="border p-1 text-gray-900 dark:text-white">Status</th>
                     <th className="border p-1 text-gray-900 dark:text-white">Receipt</th>
-                    {session?.user.role === "superAdmin" && (
+                    {/* {session?.user.role === "superAdmin" && (
                       <th className="border p-2 text-gray-900 dark:text-white">Actions</th>
-                    )}
+                    )} */}
                   </tr>
                 </thead>
                 <tbody>
@@ -225,7 +223,7 @@ export default function PaymentsPage() {
                             Generate PDF
                           </button>
                         </td>
-                        {session?.user.role === "superAdmin" && (
+                        {/* {session?.user.role === "superAdmin" && (
                           <td className="border p-2">
                             <div className="flex items-center justify-center space-x-4">
                               <Link
@@ -244,7 +242,7 @@ export default function PaymentsPage() {
                               </Link>
                             </div>
                           </td>
-                        )}
+                        )} */}
                       </tr>
                     ))
                   )}

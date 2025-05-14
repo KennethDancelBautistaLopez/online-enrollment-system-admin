@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import Login from "./Login";
+import {useRouter} from "next/router";
+import { useSession } from "next-auth/react";
 
 export default function SectionManager() {
   const [sectionData, setSectionData] = useState({
@@ -13,42 +15,28 @@ export default function SectionManager() {
     subjects: [],
   });
 
-  const [studentsToAdd, setStudentsToAdd] = useState([]);
+  // const [studentsToAdd, setStudentsToAdd] = useState([]);
   const [allStudents, setAllStudents] = useState([]); // ✅ New state for all students
   const [sections, setSections] = useState([]);
   const [sectionIdToUpdate, setSectionIdToUpdate] = useState("");
   const [sectionToDelete, setSectionToDelete] = useState(null);
 
-  const fetchFilteredStudents = useCallback(async () => {
-    try {
-      const res = await axios.get("/api/students/list", {
-        params: {
-          course: sectionData.course,
-          yearLevel: sectionData.yearLevel,
-          semester: sectionData.semester,
-        },
-      });
-      setAllStudents(res.data.data);
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || "Failed to load filtered students";
-      toast.error(errorMessage);
-      console.error(err);
-    }
-  }, [sectionData.course, sectionData.yearLevel, sectionData.semester]);
+  const router = useRouter();
+
+  const { data: session } = useSession();
+
 
   
-  useEffect(() => {
+useEffect(() => {
+  if (!session) return;
+  if (!["superAdmin", "admin", "registrar"].includes(session.user.role)) {
+    router.push("/");
+  } else {
     fetchSections();
-  }, []);
+  }
+}, [session, router]);
 
-  useEffect(() => {
-    if (sectionData.course && sectionData.yearLevel && sectionData.semester) {
-      fetchFilteredStudents();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchFilteredStudents]);
-
-const fetchSections = async () => {
+  const fetchSections = async () => {
     try {
       const res = await axios.get("/api/sections");
       setSections(res.data.data);
@@ -58,6 +46,34 @@ const fetchSections = async () => {
       console.error("Error fetching sections:", err);
     }
   };
+
+  // const fetchFilteredStudents = useCallback(async () => {
+  //   try {
+  //     const res = await axios.get("/api/students/list", {
+  //       params: {
+  //         course: sectionData.course,
+  //         yearLevel: sectionData.yearLevel,
+  //         semester: sectionData.semester,
+  //       },
+  //     });
+  //     setAllStudents(res.data.data);
+  //   } catch (err) {
+  //     const errorMessage = err.response?.data?.message || "Failed to load filtered students";
+  //     toast.error(errorMessage);
+  //     console.error(err);
+  //   }
+  // }, [sectionData.course, sectionData.yearLevel, sectionData.semester]);
+
+  // useEffect(() => {
+  //   if (sectionData.course && sectionData.yearLevel && sectionData.semester) {
+  //     fetchFilteredStudents();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [fetchFilteredStudents]);
+
+    
+
+
 
   const handleSubjectChange = (index, field, value) => {
     const updatedSubjects = [...sectionData.subjects];
@@ -85,11 +101,11 @@ const fetchSections = async () => {
     });
   };
 
-  const deleteSubject = (index) => {
-    const updatedSubjects = [...sectionData.subjects];
-    updatedSubjects.splice(index, 1);
-    setSectionData({ ...sectionData, subjects: updatedSubjects });
-  };
+  // const deleteSubject = (index) => {
+  //   const updatedSubjects = [...sectionData.subjects];
+  //   updatedSubjects.splice(index, 1);
+  //   setSectionData({ ...sectionData, subjects: updatedSubjects });
+  // };
 
   const createSection = async () => {
     if (
@@ -113,20 +129,20 @@ const fetchSections = async () => {
     }
   };
 
-  const addStudentsToSection = async () => {
-    try {
-      await axios.put("/api/sections", {
-        id: sectionIdToUpdate,
-        updates: { students: studentsToAdd },
-      });
+  // const addStudentsToSection = async () => {
+  //   try {
+  //     await axios.put("/api/sections", {
+  //       id: sectionIdToUpdate,
+  //       updates: { students: studentsToAdd },
+  //     });
 
-      toast.success("Students added to section successfully!");
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || "Error adding students!";
-      toast.error(errorMessage);
-      console.error(err);
-    }
-  };
+  //     toast.success("Students added to section successfully!");
+  //   } catch (err) {
+  //     const errorMessage = err.response?.data?.message || "Error adding students!";
+  //     toast.error(errorMessage);
+  //     console.error(err);
+  //   }
+  // };
 
   const updateSection = async () => {
     try {
@@ -153,13 +169,13 @@ const fetchSections = async () => {
       subjects: section.subjects,
     });
     
-    // Preselect existing student IDs
-    const existingStudentIds = section.students.map((student) =>
-      typeof student === "string" ? student : student._id
-    );
-    setStudentsToAdd(existingStudentIds);
+    // // Preselect existing student IDs
+    // const existingStudentIds = section.students.map((student) =>
+    //   typeof student === "string" ? student : student._id
+    // );
+    // setStudentsToAdd(existingStudentIds);
     
-    setSectionIdToUpdate(section._id);
+    // setSectionIdToUpdate(section._id);
   };
 
   const handleDeleteClick = (id) => {
@@ -348,7 +364,8 @@ const fetchSections = async () => {
               {sectionIdToUpdate ? "Update Section" : "Submit Section"}
             </button>
           </div>
-          {/* ✅ STUDENT SELECTION */}
+
+          {/* ✅ STUDENT SELECTION
           {sectionIdToUpdate && (
             <>
               <h3 className="text-lg font-semibold mt-8 mb-2 dark:text-white">Add Students to Section</h3>
@@ -392,7 +409,7 @@ const fetchSections = async () => {
               </button>
 
             </>
-          )}
+          )} */}
         </div>
   
         {/* RIGHT SIDE */}
@@ -453,8 +470,7 @@ const fetchSections = async () => {
                       </svg>
                       Edit Section
                     </button>
-
-                    <button
+                  {(session?.user?.role === "admin" || session?.user?.role === "superAdmin")&&(<button
                       onClick={() => handleDeleteClick(sec._id)}
                       className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm font-medium transition-all duration-200 dark:bg-red-700 dark:hover:bg-red-600"
                     >
@@ -468,7 +484,8 @@ const fetchSections = async () => {
                         <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h160v-40h320v40h160v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-320 440h80v-360h-80v360Zm160 0h80v-360h-80v360Z" />
                       </svg>
                       Delete
-                    </button>
+                    </button>)}
+                    
                   </div>
                 </div>
               ))

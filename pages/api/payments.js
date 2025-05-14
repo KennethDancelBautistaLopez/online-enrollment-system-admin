@@ -11,14 +11,14 @@ export default async function handler(req, res) {
       return handleGetRequest(req, res);
     case "PUT":
       return handlePutRequest(req, res);
-    case "DELETE":
-      if (req.query.deleteAll === "true") {
-        return handleDeleteAllRequest(req, res); // ✅ Handle delete all
-      } else if (req.query.id) {
-        return handleDeleteRequest(req, res); // ✅ Handle delete one
-      } else {
-        return res.status(400).json({ error: "Missing delete parameters" });
-      }
+    // case "DELETE":
+    //   if (req.query.deleteAll === "true") {
+    //     return handleDeleteAllRequest(req, res); // ✅ Handle delete all
+    //   } else if (req.query.id) {
+    //     return handleDeleteRequest(req, res); // ✅ Handle delete one
+    //   } else {
+    //     return res.status(400).json({ error: "Missing delete parameters" });
+    //   }
     default:
       return res.status(405).json({ error: "Method Not Allowed" });
   }
@@ -161,58 +161,58 @@ async function handleGetRequest(req, res) {
     return res.status(500).json({ error: "Failed to fetch payment data" });
   }
 }
-// ✅ DELETE ONE PAYMENT
-async function handleDeleteRequest(req, res) {
-  const { id } = req.query;
+// // ✅ DELETE ONE PAYMENT
+// async function handleDeleteRequest(req, res) {
+//   const { id } = req.query;
 
-  try {
-    if (!id) return res.status(400).json({ error: "Payment ID is required" });
+//   try {
+//     if (!id) return res.status(400).json({ error: "Payment ID is required" });
 
-    const payment = await Payment.findOne({ paymentId: id }).exec();
-    if (!payment) return res.status(404).json({ error: "Payment not found" });
+//     const payment = await Payment.findOne({ paymentId: id }).exec();
+//     if (!payment) return res.status(404).json({ error: "Payment not found" });
 
-    const student = await Student.findById(payment.studentRef);
-    if (student) {
-      student.payments = (student.payments || []).filter(
-        (paymentId) => paymentId.toString() !== payment._id.toString()
-      );
-      student.totalPaid -= payment.amount;
-      student.balance = student.tuitionFee - student.totalPaid;
-      await student.save();
-    }
+//     const student = await Student.findById(payment.studentRef);
+//     if (student) {
+//       student.payments = (student.payments || []).filter(
+//         (paymentId) => paymentId.toString() !== payment._id.toString()
+//       );
+//       student.totalPaid -= payment.amount;
+//       student.balance = student.tuitionFee - student.totalPaid;
+//       await student.save();
+//     }
 
-    await payment.deleteOne();
-    return res.status(200).json({ success: true, message: "Payment deleted successfully" });
-  } catch (error) {
-    console.error("❌ Error deleting payment:", error);
-    return res.status(500).json({ error: "Failed to delete payment" });
-  }
-}
+//     await payment.deleteOne();
+//     return res.status(200).json({ success: true, message: "Payment deleted successfully" });
+//   } catch (error) {
+//     console.error("❌ Error deleting payment:", error);
+//     return res.status(500).json({ error: "Failed to delete payment" });
+//   }
+// }
 
-// ✅ DELETE ALL PAYMENTS
-async function handleDeleteAllRequest(req, res) {
-  try {
-    const payments = await Payment.find();
-    if (payments.length === 0) {
-  return res.status(200).json({ success: true, message: "No payments to delete" });
-} 
+// // ✅ DELETE ALL PAYMENTS
+// async function handleDeleteAllRequest(req, res) {
+//   try {
+//     const payments = await Payment.find();
+//     if (payments.length === 0) {
+//   return res.status(200).json({ success: true, message: "No payments to delete" });
+// } 
 
-    for (let payment of payments) {
-      const student = await Student.findById(payment.studentRef);
-      if (student) {
-        student.payments = (student.payments || []).filter(
-          (paymentId) => paymentId.toString() !== payment._id.toString()
-        );
-        student.totalPaid -= payment.amount;
-        student.balance = student.tuitionFee - student.totalPaid;
-        await student.save();
-      }
-      await payment.deleteOne();
-    }
+//     for (let payment of payments) {
+//       const student = await Student.findById(payment.studentRef);
+//       if (student) {
+//         student.payments = (student.payments || []).filter(
+//           (paymentId) => paymentId.toString() !== payment._id.toString()
+//         );
+//         student.totalPaid -= payment.amount;
+//         student.balance = student.tuitionFee - student.totalPaid;
+//         await student.save();
+//       }
+//       await payment.deleteOne();
+//     }
 
-    return res.status(200).json({ success: true, message: "All payments deleted successfully" });
-  } catch (error) {
-    console.error("❌ Error deleting payments:", error);
-    return res.status(500).json({ error: error.message || "Failed to delete payments" });
-  }
-}
+//     return res.status(200).json({ success: true, message: "All payments deleted successfully" });
+//   } catch (error) {
+//     console.error("❌ Error deleting payments:", error);
+//     return res.status(500).json({ error: error.message || "Failed to delete payments" });
+//   }
+// }

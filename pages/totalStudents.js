@@ -12,6 +12,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "@/components/Loading";
+import { useRouter } from "next/router";
 
 const STATUS_COLORS = {
   "enrolled": "#4ade80",       // green-400
@@ -24,6 +25,7 @@ const STATUS_COLORS = {
 const STUDENT_TYPE_COLORS = {
   "new": "#34d399",         // green-400
   "old": "#60a5fa",         // blue-400
+  "transferee": "#f87171",  // red-400
   "irregular": "#fbbf24",   // yellow-400
   "unknown": "#9ca3af",     // gray-400 fallback
 };
@@ -35,7 +37,20 @@ export default function StudentStatusPieChart() {
   const [studentTypeChartData, setStudentTypeChartData] = useState([]);
   const [initialized, setInitialized] = useState(false);
 
-  const { data: session } = useSession();
+  const router = useRouter();
+
+  const { data: session , status } = useSession();
+
+    useEffect(() => {
+    // Check if the user is logged in and has the required role
+    if (status === "loading") return; // Wait for session data to load
+
+    if (!session) {
+      <Login />
+    } else if (!["superAdmin", "admin", "registrar"].includes(session.user.role)) {
+      router.push("/");
+    }
+  }, [session, status, router]);
 
   useEffect(() => {
     if (!session) return;
@@ -101,11 +116,9 @@ export default function StudentStatusPieChart() {
       .finally(() => setLoading(false));
   }, [session, initialized]);
 
-  useEffect(() => {
-    if (!session) {
-      toast.error("You don't have permission to access this page.");
-    }
-  }, [session]);
+   if (loading || status === "loading") {
+    return <LoadingSpinner />;
+  }
 
   if (!session) {
     return <Login />;
@@ -208,7 +221,7 @@ export default function StudentStatusPieChart() {
               </PieChart>
             </ResponsiveContainer>
 
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-700 dark:text-gray-300">
+            <div className="mt-6 grid grid-cols-1 items-center sm:grid-cols-4 gap-4 text-sm text-gray-700 dark:text-gray-300">
               {studentTypeChartData.map((item, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <span

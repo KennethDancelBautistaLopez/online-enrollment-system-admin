@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Login from "@/pages/Login";
+import Login from "./Login";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -14,13 +14,19 @@ export default function Payments() {
   const [chartData, setChartData] = useState([]);
   const [initialized, setInitialized] = useState(false);
 
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter(); // Initialize router
 
-  useEffect(() => {
-    // 1. If the user is not logged in
-    if (!session && session.user.role !== "superAdmin") {
-      toast.error("You don't have permission to access this page.");
+useEffect(() => {
+    if (status === "loading") return; // Wait for session to load
+
+    if (!session) {
+      // Not logged in
+      return;
+    }
+
+    if (session.user.role !== "superAdmin") {
+      router.push("/"); // Redirect to home or another safe page
       return;
     }
 
@@ -64,12 +70,21 @@ export default function Payments() {
           toast.error("Failed to load payments.");
         }
       }).finally(() => setLoading(false))
-  }, [session, initialized, router]);
+  }, [session, initialized, router, status]);
 
+ if (status === "loading") {
+    return <LoadingSpinner />;
+  }
+
+  // Show login if not logged in
   if (!session) {
     return <Login />;
   }
 
+  // Block render if user is not superAdmin (redirect already handled)
+  if (session.user.role !== "superAdmin") {
+    return null;
+  }
   return (
     <Login>
       <div className="space-y-8">

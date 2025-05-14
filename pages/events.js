@@ -5,31 +5,27 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "@/components/Loading";
+import { useRouter } from "next/router";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const [showDescription, setShowDescription] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-  
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-    return () => window.removeEventListener("resize", checkScreenSize);
-  }, []);
+  const router = useRouter();
   useEffect(() => {
     if (!session) return;
-
+    
+    if (session.user.role !== "superAdmin" && session.user.role !== "admin") {
+      router.push("/"); // Redirect to home if not admin
+      return;
+    }
+    
     axios
       .get("/api/events")
       .then((response) => {
         setEvents(response.data);
-        toast.success("Events loaded successfully! ✅");
       })
       .catch((error) => {
         console.error("❌ Error fetching events:", error);
@@ -38,11 +34,8 @@ export default function EventsPage() {
       }).finally(() => {
         setLoading(false);
       })
-  }, [session]);
+  }, [session, router]);
 
-  useEffect(() => {
-
-  }, [session]);
 
   if (!session) {
     return <Login />;
@@ -122,24 +115,10 @@ export default function EventsPage() {
                       <tr key={event._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{index + 1}</td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.title}</td>
-                        <td
-                          className="border p-2 dark:border-gray-700 dark:text-gray-200"
-                          onClick={() => {
-                            if (isMobile) setShowDescription(!showDescription);
-                          }}
-                          title={isMobile ? "Tap to toggle description" : ""}
-                        >
-                          {isMobile ? (
-                            showDescription ? (
-                              <div className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal">
-                                {event.description}
-                              </div>
-                            ) : (
-                              "Tap to show description"
-                            )
-                          ) : (
-                            event.description
-                          )}
+                        <td className="border p-2 dark:border-gray-700 dark:text-gray-200 cursor-pointer hover:text-blue-500"
+                        onClick={() => setShowDescription(!showDescription)}
+                        title= "Click to toggle description">
+                          {showDescription ? event.description : "Show Description"}
                         </td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{formattedDate}</td>
                         <td className="border p-2 dark:border-gray-700 dark:text-gray-200">{event.location}</td>

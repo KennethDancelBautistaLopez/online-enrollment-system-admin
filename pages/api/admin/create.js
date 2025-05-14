@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
 
     // Role validation (allow only specific roles)
-    const allowedRoles = ["admin", "superadmin"];
+    const allowedRoles = ["admin", "superAdmin", "registrar", "accountant"];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ message: "Invalid role specified" });
     }
@@ -47,7 +47,9 @@ export default async function handler(req, res) {
     const passwordMinLength = 8;
     const passwordMaxLength = 32;
     if (password.length < passwordMinLength || password.length > passwordMaxLength) {
-      return res.status(400).json({ message: `Password must be between ${passwordMinLength} and ${passwordMaxLength} characters` });
+      return res.status(400).json({ 
+        message: `Password must be between ${passwordMinLength} and ${passwordMaxLength} characters` 
+      });
     }
 
     // Strong password requirements (at least one letter, one number, one special character)
@@ -59,7 +61,10 @@ export default async function handler(req, res) {
     }
 
     // Prevent common weak passwords
-    const weakPasswords = ["password", "admin", "123456", "admin123", "qwerty", "letmein", "12345678",];
+    const weakPasswords = [
+      "password", "admin", "123456", "admin123", 
+      "qwerty", "letmein", "12345678"
+    ];
     if (weakPasswords.includes(password.toLowerCase())) {
       return res.status(400).json({ message: "Password is too weak" });
     }

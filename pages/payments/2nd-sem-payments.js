@@ -1,20 +1,33 @@
 import Link from "next/link";
 import Login from "@/pages/Login";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo  } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "@/components/Loading";
-
+import { useRouter } from "next/router";
+const allowedRoles = ["admin", "superAdmin", "accountant"];
 export default function SecondSemester() {
   const [groupedPayments, setGroupedPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [initialized, setInitialized] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const router = useRouter();
+
+const isAuthorized = useMemo(() => {
+  return session?.user?.role && allowedRoles.includes(session.user.role);
+}, [session]); // ✅ ESLint is happy
+
   useEffect(() => {
-    if (!session || initialized) return;
+    if (status !== "loading" && session && !isAuthorized) {
+      toast.error("Access denied.");
+      router.push("/");
+    }
+  }, [status, session, isAuthorized, router]);
+  useEffect(() => {
+  if (!session || initialized || !isAuthorized) return;
 
     const fetchPayments = async () => {
       try {
@@ -67,7 +80,7 @@ export default function SecondSemester() {
     };
 
     fetchPayments();
-  }, [session, initialized]);
+  }, [session, initialized, isAuthorized]);
 
   useEffect(() => {
     if (!session) {
@@ -75,7 +88,11 @@ export default function SecondSemester() {
     }
   }, [session]);
 
+
+  if (status === "loading") return <LoadingSpinner />;
   if (!session) return <Login />;
+  if (!isAuthorized) return null; // redirecting
+
 
   const examPeriods = [
     "Downpayment",
@@ -160,19 +177,15 @@ export default function SecondSemester() {
                               SY {student.schoolYear} • {student.semester}
                             </div>
                           </td>
-                          {examPeriods.map((period, idx) => (
-                            <td key={idx} className="border p-2 text-center dark:border-gray-700 dark:text-gray-200">
-                              {paymentsByPeriod[period] === "paid" ? (
-                                "✅"
-                              ) : paymentsByPeriod[period] === "pending" || paymentsByPeriod[period] === "unpaid" ? (
-                                "🕓"
-                              ) : paymentsByPeriod[period] === "failed" ? (
-                                "❌"
-                              ) : (
-                                "—"
-                              )}
+                          {examPeriods.map((period, idx) => {
+                            const isRemainingPaid = paymentsByPeriod["Remaining"] === "paid";
+                            const icon = isRemainingPaid|| paymentsByPeriod[period] === "paid" ? "✅" : paymentsByPeriod[period] === "pending" || paymentsByPeriod[period] === "unpaid" ? "🕓" : paymentsByPeriod[period] === "failed" ? "❌" : "—";
+                            return (
+                              <td key={idx} className="border p-2 text-center dark:border-gray-700 dark:text-gray-200">
+                              {icon}
                             </td>
-                          ))}
+                            );
+                          })}
                           <td className="border p-2 text-center dark:border-gray-700">
                             <Link
                               href={`/payments/view/2ndsem/${student.studentId}/payments`}

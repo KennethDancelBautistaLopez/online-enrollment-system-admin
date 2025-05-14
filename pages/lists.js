@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Login from "@/pages/Login";
+import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { generatePDFfile } from "@/components/generatePDFfile";
@@ -35,25 +36,35 @@ export default function Students({ initialStudents }) {
   const [uploading, setUploading] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [showEmail, setShowEmail] = useState(false);
+
+  const router = useRouter();
   const { data: session } = useSession();
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    if (!session) return;
-    axios.get("/api/students").then((response) => {
+useEffect(() => {
+ if (!session) return;
+
+  const allowedRoles = ["superAdmin", "admin", "registrar"];
+  const userRole = session?.user?.role;
+
+  if (!allowedRoles.includes(userRole)) {
+    toast.error("Access denied. Authorized personnel only.");
+    router.push("/");
+    return;
+  }
+
+  axios.get("/api/students")
+    .then((response) => {
       setStudents(response.data);
-      toast.success("Students loaded successfully! ✅");
-    }).catch((error) => {
+    })
+    .catch((error) => {
       toast.error("Failed to load students.");
       console.error(error);
-    }).finally(() => setLoading(false));
-  }, [session]);
+    })
+    .finally(() => setLoading(false));
+}, [session, router]);
 
-  useEffect(() => {
-    if (!session) toast.error("You don't have permission to access this page.");
-  }, [session]);
 
-  if (!session) return <Login />;
 
   const handleGeneratePDF = async (student) => {
     const pdfBlob = await generatePDFfile(student); // Make sure this returns a Blob
@@ -160,6 +171,12 @@ export default function Students({ initialStudents }) {
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
+if (!session) return <Login />;
+
+const allowedRoles = ["superAdmin", "admin", "registrar"];
+const isAuthorized = allowedRoles.includes(session?.user?.role);
+
+if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access denied.</p>;
 
   return (
     <Login>

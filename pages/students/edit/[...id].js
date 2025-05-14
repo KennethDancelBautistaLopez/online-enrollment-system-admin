@@ -20,18 +20,15 @@ export default function EditStudentPage() {
         : router.query.id;
   
       setStudentId(queryId);
-      console.log("✅ Student ID from query:", queryId);
     }
   }, [router.isReady, router.query]);
 
   useEffect(() => {
     if (!studentId) return; 
   
-    console.log("🔄 Fetching student data for ID:", studentId);
   
     axios.get(`/api/students`, { params: { id: studentId } })
       .then((response) => {
-        console.log("✅ Fetched student data:", response.data);
   
         if (response.data && Object.keys(response.data).length > 0) {
           setStudentInfo(response.data);

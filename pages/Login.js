@@ -32,6 +32,7 @@ export default function Login({ children }) {
       if (result.error.includes("Invalid")) {
         throw new Error("Invalid email or password.");
       } else if (result.error.includes("Network")) {
+        toast.error("Network error. Please check your connection.");
         throw new Error("Network error. Please check your connection.");
       } else {
         throw new Error(result.error);
@@ -119,12 +120,14 @@ export default function Login({ children }) {
       {/* Main Layout */}
       <div className="flex bg-bgGray dark:bg-gray-900 h-full">
         {/* Sidebar / Navigation */}
-        <Nav show={showNav} />
+        <Nav show={showNav} onClose={() => setShowNav(false)}/>
   
         {/* Content Area */}
+        {!showNav && (
         <div className="flex-grow p-4 overflow-auto text-gray-900 dark:text-gray-100">
           {children}
         </div>
+      )}
       </div>
     </div>
   );

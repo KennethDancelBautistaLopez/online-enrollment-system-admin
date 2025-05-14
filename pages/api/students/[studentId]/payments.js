@@ -1,3 +1,4 @@
+// pages/api/students/[studentId]/payments.js
 import Payment from "@/models/Payment";
 import { connectToDB } from "@/lib/mongoose";
 

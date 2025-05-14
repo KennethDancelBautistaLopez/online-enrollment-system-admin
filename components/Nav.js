@@ -19,13 +19,8 @@ export default function Nav({show}) {
   const router = useRouter();
   const {pathname} = router;
 
-  const [isClient, setIsClient] = useState(false);
 
   const { data: session } = useSession();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const logout = async () => {
     try {
@@ -52,12 +47,9 @@ export default function Nav({show}) {
   
   return (
 <aside className={(show ? 'left-0' : '-left-full') + " top-0 text-gray-500 p-4 fixed w-full bg-bgGray dark:bg-gray-900 h-full md:static md:w-auto transition-all"}>
-      {/* Only render the Logo component on the client side */}
-      {isClient && (
         <div className="mb-4 mr-4">
           <Logo />
         </div>
-      )}  
     <nav className="flex flex-col gap-2">
       <Link href={'/'} className={pathname === '/' ? activeLink : inactiveLink}>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname === '/' ? activeIcon : inactiveIcon}>
@@ -71,13 +63,16 @@ export default function Nav({show}) {
           </svg>
           Students
         </Link>
-        <Link href={'/lists'} className={pathname.includes('/lists') ? activeLink : inactiveLink}>
+        {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") && (
+          <Link href={'/lists'} className={pathname.includes('/lists') ? activeLink : inactiveLink}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/lists') ? activeIcon : inactiveIcon}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
         </svg>
         Lists
         </Link>
-        <Link href="/manage-subjects" className={pathname.includes('/manage-subjects') ? activeLink : inactiveLink}>
+        )}
+        {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") && (
+          <Link href="/manage-subjects" className={pathname.includes('/manage-subjects') ? activeLink : inactiveLink}>
           <div className="flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +87,9 @@ export default function Nav({show}) {
             Subjects
           </div>
         </Link>
-        <Link href="/sections" className={pathname.includes('/sections') ? activeLink : inactiveLink}>
+        )}
+        {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") && (
+          <Link href="/sections" className={pathname.includes('/sections') ? activeLink : inactiveLink}>
         <div className="flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -106,13 +103,17 @@ export default function Nav({show}) {
           </svg>
           Sections
         </div>
-      </Link>
-        <Link href={'/events'} className={pathname.includes('/events') ? activeLink : inactiveLink}>
+      </Link> 
+        )}
+        {(session?.user?.role === "admin" || session?.user?.role === "superAdmin") && (
+          <Link href={'/events'} className={pathname.includes('/events') ? activeLink : inactiveLink}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" strokeWidth={1.5} className={pathname.includes('/events') ? activeIcon : inactiveIcon}>
           <path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A2.75 2.75 0 0 1 18 6.75v8.5A2.75 2.75 0 0 1 15.25 18H4.75A2.75 2.75 0 0 1 2 15.25v-8.5A2.75 2.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" />
         </svg>
         Events
         </Link>
+        )}
+        
         {session?.user?.role === 'superAdmin' && (
           <>  
         <Link href={'/overall'} className={pathname.includes('/overall') ? activeLink : inactiveLink}>
@@ -123,21 +124,25 @@ export default function Nav({show}) {
         </Link>
         </>
         )}
-
-            <Link href={'/totalStudents'} className={pathname.includes('/totalStudents') ? activeLink : inactiveLink}>
+        {(session?.user?.role === 'superAdmin' || session?.user?.role === 'admin' || session?.user?.role === 'registrar') && (
+          <Link href={'/totalStudents'} className={pathname.includes('/totalStudents') ? activeLink : inactiveLink}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/totalStudents') ? activeIcon : inactiveIcon}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
           </svg>
 
-              Total Students
-            </Link>
+          Total Students
+          </Link>
+        )}
 
-            <Link href={'/all-payments'} className={pathname.includes('/all-payments') ? activeLink : inactiveLink}>
+        {(session?.user?.role === 'superAdmin' || session?.user?.role === 'admin'|| session?.user?.role === 'accountant') && (
+          <Link href={'/all-payments'} className={pathname.includes('/all-payments') ? activeLink : inactiveLink}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/all-payments') ? activeIcon : inactiveIcon}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
           </svg>
           List of Payments</Link>
-          {session?.user?.role === 'superAdmin' && (
+        )}
+            
+          {(session?.user?.role === 'superAdmin' || session?.user?.role === 'admin' || session?.user?.role === 'accountant') && (
           <>  
           <Link href={'/paymentsPage'} className={pathname.includes('/paymentsPage') ? activeLink : inactiveLink}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/paymentsPage') ? activeIcon : inactiveIcon}>

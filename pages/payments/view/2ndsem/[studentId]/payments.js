@@ -20,7 +20,6 @@ export default function SecondSEMStudentPaymentsView() {
       try {
         const response = await axios.get(`/api/students/${studentId}/payments`);
         setStudentData(response.data);
-        toast.success("Student payment data loaded! ✅");
       } catch (error) {
         const errorMessage = error.response?.data?.message || error.message || "Failed to load student data.";
         toast.error(`Error: ${errorMessage}`);

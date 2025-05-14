@@ -24,7 +24,6 @@ export default function Students() {
         setStudents(response.data);
 
         if (!initialized.current && response.data.length > 0) {
-          toast.success("Students loaded successfully! ✅");
           initialized.current = true;
         }
       } catch (error) {
@@ -60,14 +59,16 @@ export default function Students() {
         <LoadingSpinner /> 
       ) : (
         <> 
+        
         <div className="flex flex-col md:flex-row justify-between items-center mb-4">
           <h1 className="text-3xl font-bold mb-2 md:mb-0 text-gray-800 dark:text-white">Students List</h1>
-          <Link
+          {(session.user.role === "admin" || session.user.role === "superAdmin"|| session.user.role === "registrar") && (<Link
             className="btn-primary-filled px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             href="/students/new"
           >
             Add new student
-          </Link>
+          </Link>)}
+          
         </div>
 
             {/* Search Bar */}
@@ -94,7 +95,8 @@ export default function Students() {
                     <th className="border  dark:border-gray-700"><div className="flex items-center justify-center text-center">Registration Date</div></th>
                     <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center text-center">Email</div></th>
                     <th className="border p-2 dark:border-gray-700">Password</th>
-                    <th className="border p-2 dark:border-gray-700">Actions</th>
+                    {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") &&(
+                    <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center text-center">Actions</div></th>)}
                   </tr>
                 </thead>
                 <tbody>
@@ -157,6 +159,7 @@ export default function Students() {
                         >
                           {showPassword ? student.password : "••••••••"}
                         </td>
+                      {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") &&(
                         <td className="border p-2 dark:border-gray-700">
                           <div className="flex justify-center space-x-2">
                             <Link
@@ -173,7 +176,9 @@ export default function Students() {
                               </svg>
                               Edit
                             </Link>
-                            <Link
+                            
+                            {(session?.user?.role === "admin" || session?.user?.role === "superAdmin") &&(
+                              <Link
                               className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition"
                               href={`/students/delete/${student._id}`}
                             >
@@ -187,8 +192,12 @@ export default function Students() {
                               </svg>
                               Delete
                             </Link>
+                            )}
+                              
+                            
                           </div>
                         </td>
+                        )}
                       </tr>
                     ))
                   )}
