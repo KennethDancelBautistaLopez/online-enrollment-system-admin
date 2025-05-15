@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import Login from './Login';
@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import LoadingSpinner from '@/components/Loading';
+
 
 export default function ManageSubjects() {
   const [studentId, setStudentId] = useState('');
@@ -17,6 +18,7 @@ export default function ManageSubjects() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [curriculumSubjects, setCurriculumSubjects] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState({ open: false, code: '' });
   const [form, setForm] = useState({
     course: '',
@@ -28,6 +30,29 @@ export default function ManageSubjects() {
 
   const router = useRouter();
 
+  useEffect(() => {
+  async function fetchCurriculumSubjects() {
+    try {
+      const { course, yearLevel, semester } = form;
+
+      // Only fetch if all are selected
+      if (!course || !yearLevel || !semester) {
+        setCurriculumSubjects([]); // optionally clear previous data
+        return;
+      }
+
+      const res = await axios.get('/api/curriculum-subjects', {
+        params: { course, yearLevel, semester },
+      });
+      setCurriculumSubjects(res.data);
+    } catch (error) {
+      console.error('Failed to load curriculum subjects:', error);
+      toast.error('Failed to load curriculum subjects');
+    }
+  }
+  fetchCurriculumSubjects();
+}, [form]);
+
  if (status === 'loading') {
     return <LoadingSpinner />;
   }
@@ -37,6 +62,7 @@ export default function ManageSubjects() {
     return <Login />;
   }
 
+  
   // If logged in but not authorized
   const allowedRoles = ['superAdmin', 'registrar', 'admin'];
   if (!allowedRoles.includes(session.user.role)) {
@@ -45,6 +71,8 @@ export default function ManageSubjects() {
     }
     return null;
   }
+
+  
 
   const handleSubjectChange = (index, field, value) => {
     const updated = [...form.subjects];
@@ -127,23 +155,25 @@ const handleSubmit = async () => {
 };
 
   const addSubject = async () => {
-    if (!newSubject.code || !newSubject.description || !newSubject.units) {
-      toast.error('Please fill in all fields for the new subject');
-      return;
-    }
+  if (!newSubject.code || !newSubject.description || !newSubject.units) {
+    toast.error('Please fill in all fields for the new subject');
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const res = await axios.post(`/api/subjects?id=${studentId}`, newSubject);
-      setStudent(res.data);
-      toast.success('Subject added successfully');
-      setNewSubject({ code: '', description: '', units: '' });
-    } catch {
-      toast.error('Error adding subject');
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const res = await axios.post(`/api/subjects?id=${studentId}`, newSubject);
+    setStudent(res.data);
+    toast.success('Subject added successfully');
+    setNewSubject({ code: '', description: '', units: '' });
+  } catch (error) {
+    // Check if backend sent an error message
+    const message = error.response?.data?.error || 'Failed to add subject';
+    toast.error(message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const deleteSubject = async (code) => {
     setLoading(true);
@@ -158,6 +188,9 @@ const handleSubmit = async () => {
       setConfirmDelete({ open: false, code: '' });
     }
   };
+
+
+  
 
   return (
   <Login>
@@ -276,7 +309,7 @@ const handleSubmit = async () => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-xl">
           <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white text-center">Search for Student</h2>
 
-          <div className="flex gap-4 mb-6">
+          <div className="flex gap-4 mb-1">
             <input
               type="text"
               value={studentId}
@@ -313,6 +346,9 @@ const handleSubmit = async () => {
               <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white text-center">
                 Subjects for {student.fname} {student.lname} - {student.studentType}
               </h3>
+<h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white text-center">
+                Course: {student.course} - Year Level: {student.yearLevel} - Semester: {student.semester}
+              </h3>
 
               <ul className="mb-6 space-y-4">
                 {student.subjects.map((subject) => (
@@ -342,27 +378,91 @@ const handleSubmit = async () => {
               {/* Add New Subject Form */}
               <div className="border-t pt-4 mt-6 dark:border-gray-700">
                 <h3 className="font-semibold mb-4 text-gray-800 dark:text-white">Add New Subject</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input
-                    type="text"
-                    placeholder="Code"
-                    className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <div className="mb-4">
+                  <label className="block mb-2 font-medium text-gray-700 dark:text-white">
+                    Select Curriculum Subject
+                  </label>
+                  <select
+                      value={form.course}
+                      onChange={(e) => setForm({ ...form, course: e.target.value })}
+                    >
+                      <option value="">-- Choose a course --</option>
+                      <option value="BSCS">BS Computer Science</option>
+                      <option value="BSHM">BS Hospitality Management</option>
+                      <option value="BSBA">BS Business Administration</option>
+                      <option value="BSTM">BS Tourism Management</option>
+                      <option value="BEED">Bachelor of Elementary Education</option>
+                      <option value="BSED-MATH">
+                        Bachelor of Secondary Education - Math
+                      </option>
+                      <option value="BSED-ENG">
+                        Bachelor of Secondary Education - English
+                      </option>
+                      <option value="BA-POLSCI">Bachelor of Arts - Political Science</option>
+                      
+                    </select>
+
+                    <select
+                      value={form.yearLevel}
+                      onChange={(e) => setForm({ ...form, yearLevel: e.target.value })}
+                    >
+                      <option value="">-- Choose a Year Level --</option>
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                    </select>
+
+                    <select
+                      value={form.semester}
+                      onChange={(e) => setForm({ ...form, semester: e.target.value })}
+                    >
+                      <option value="">-- Choose a Semester --</option>
+                      <option value="1st Semester">1st Semester</option>
+                      <option value="2nd Semester">2nd Semester</option>
+                    </select>
+                  <select
                     value={newSubject.code}
-                    onChange={(e) => setNewSubject({ ...newSubject, code: e.target.value })}
-                  />
+                    onChange={(e) => {
+                      const selected = curriculumSubjects.find(
+                        (subj) => subj.code === e.target.value
+                      );
+                      if (selected) {
+                        setNewSubject({
+                          code: selected.code,
+                          description: selected.description,
+                          units: selected.units,
+                        });
+                      } else {
+                        setNewSubject({ code: '', description: '', units: '' });
+                      }
+                    }}
+                    className="border rounded px-4 py-2 w-full dark:bg-gray-800 dark:text-white"
+                  >
+                    <option value="">-- Choose a subject --</option>
+                    {curriculumSubjects.map((subject) => (
+                      <option key={subject.code} value={subject.code}>
+                        {subject.code} - {subject.description}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Show the description and units in readonly inputs for clarity */}
+                <div className="grid grid-cols-2 gap-4">
                   <input
                     type="text"
-                    placeholder="Description"
-                    className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={newSubject.description}
-                    onChange={(e) => setNewSubject({ ...newSubject, description: e.target.value })}
+                    readOnly
+                    placeholder="Description"
+                    className="border rounded px-4 py-2 dark:bg-gray-800 dark:text-white"
                   />
                   <input
                     type="number"
-                    placeholder="Units"
-                    className="border px-4 py-3 rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={newSubject.units}
-                    onChange={(e) => setNewSubject({ ...newSubject, units: e.target.value })}
+                    readOnly
+                    placeholder="Units"
+                    className="border rounded px-4 py-2 dark:bg-gray-800 dark:text-white"
                   />
                 </div>
                 <button

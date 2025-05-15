@@ -7,6 +7,7 @@ import { generateReceiptPDF } from "@/components/generateReceiptPDF";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import LoadingSpinner from "@/components/Loading";
+import { CSVLink } from "react-csv";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
@@ -26,7 +27,7 @@ export default function PaymentsPage() {
       return;
     }
 
-    if (session.user.role !== "superAdmin" && session.user.role !== "admin" && session.user.role !== "accountant") {
+    if (session.user.role !== "superAdmin" && session.user.role !== "accountant") {
       router.push("/");
       return;
     }
@@ -63,7 +64,7 @@ export default function PaymentsPage() {
     }
   }, [session]); // Trigger error toast only when session is null
 
-  if (!session || session.user.role !== "superAdmin" && session.user.role !== "admin" && session.user.role !== "cashier") {
+  if (!session || session.user.role !== "superAdmin" && session.user.role !== "accountant") {
     return <Login />; // Or redirect to login if not logged in or not superAdmin
   }
 
@@ -81,6 +82,41 @@ export default function PaymentsPage() {
     }));
     toast.success(`PDF generated for ${payment.fullName}!`);
   };
+
+
+  const headers = [
+  { label: "ID", key: "id" },
+  { label: "Student ID", key: "studentId" },
+  { label: "Reference No.", key: "referenceNumber" },
+  { label: "Full Name", key: "fullName" },
+  { label: "Amount", key: "amount" },
+  { label: "Payment Method", key: "method" },
+  { label: "Exam Period", key: "examPeriod" },
+  { label: "Semester", key: "semester" },
+  { label: "Year Level", key: "yearLevel" },
+  { label: "School Year", key: "schoolYear" },
+  { label: "Status", key: "status" },
+  { label: "Created At", key: "createdAt" },
+];
+
+// Format your payments data
+const csvData = filteredPayments.map((payment, index) => ({
+  id: index + 1,
+  studentId: payment.studentId || "N/A",
+  referenceNumber: payment.referenceNumber || "N/A",
+  fullName: payment.fullName || "N/A",
+  amount: payment.amount?.toFixed(2) || "0.00",
+  method: payment.paymentMethod || "N/A",
+  examPeriod: payment.examPeriod || "N/A", 
+  semester: payment.semester || "N/A",
+  yearLevel: payment.yearLevel || "N/A",
+  schoolYear: payment.schoolYear || "N/A",
+  status: payment.status,
+  createdAt: new Date(payment.createdAt).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }),
+}));
 
 
 
@@ -136,6 +172,18 @@ export default function PaymentsPage() {
           )} */}
               <div className="flex flex-col md:flex-row md:items-center justify-between items-center gap-2 mb-4">
               <h1 className="text-2xl font-bold mb-3 md:mb-0 text-gray-800 dark:text-white">Payments List</h1>
+
+            {(session?.user.role === "superAdmin" || session?.user.role === "accountant") && (
+              <CSVLink
+                data={csvData}
+                headers={headers}
+                filename="ALL_PAYMENTS_DATA.csv"
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md shadow"
+              >
+                Download CSV
+              </CSVLink>
+            )}
+              
               {/* {session?.user.role === "superAdmin" && (
                 <button
                   onClick={() => setShowDeleteAllModal(true)}

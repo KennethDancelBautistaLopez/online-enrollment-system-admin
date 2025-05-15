@@ -207,11 +207,11 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                 <th className="border p-1 dark:border-gray-700"><div className="flex items-center justify-center">Student Number </div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Name</div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Email </div></th>
-                <th className="border p-2 dark:border-gray-700"> <div className="flex items-center justify-center">Year Level </div></th>
+                  <th className="border p-2 dark:border-gray-700"> <div className="flex items-center justify-center">Year Level </div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">School Year</div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Semester</div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Files</div></th>
-                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Upload Files </div></th>
+                {(session.user.role === "superAdmin" || session.user.role === "registrar")&&(<><th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Upload Files </div></th></>)}
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Status </div></th>
                 <th className="border p-1 text-center dark:border-gray-700">Student Type</th>
                 <th className="border p-1 dark:border-gray-700"><div className="flex items-center justify-center">Download</div></th>
@@ -229,7 +229,7 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                   <tr key={student._studentId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="border p-2 text-center dark:border-gray-700">{index + 1}</td>
                     <td className="border p-2 dark:border-gray-700">{student._studentId || "N/A"}</td>
-                    <td className="border p-2 dark:border-gray-700">{student.fname} {student.mname} {student.lname}</td>
+                    <td className="border  p-2 dark:border-gray-700">{student.fname} {student.mname} {student.lname}</td>
                     <td
                       className="border p-2 dark:border-gray-700 text-center"
                       onClick={() => setShowEmail(!showEmail)}
@@ -260,38 +260,60 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                         "Click to show email"
                       )}
                     </td>
-                    <td className="border p-2 text-center dark:border-gray-700">
-                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={student.yearLevel}
-                        onChange={(e) => updateStudentInfo(student._studentId, { yearLevel: e.target.value })}
-                        >
-                        <option value="1">1st Year</option>
-                        <option value="2">2nd Year</option>
-                        <option value="3">3rd Year</option>
-                        <option value="4">4th Year</option>
-                      </select>
-                    </td>
-                    <td className="border p-2 text-center dark:border-gray-700 text-gray-100">
-                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-black dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={student.schoolYear}
-                      onChange={(e) => updateStudentInfo(student._studentId, { schoolYear: e.target.value })}>
-                        <option value="2023-2024">2023-2024</option>
-                        <option value="2024-2025">2024-2025</option>
-                        <option value="2025-2026">2025-2026</option>
-                        <option value="2026-2027">2026-2027</option>
-                        <option value="2027-2028">2027-2028</option>
-                        <option value="2028-2029">2028-2029</option>
-                        <option value="2029-2030">2029-2030</option>
-                      </select>
-                    </td>
-                    <td className="border p-2 text-center dark:border-gray-700 text-gray-100">
-                      <select className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 text-black dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={student.semester}
-                      onChange={(e) => updateStudentInfo(student._studentId, { semester: e.target.value })}>
-                        <option value="1st Semester">1st Semester</option>
-                        <option value="2nd Semester">2nd Semester</option>
-                      </select>
-                    </td>
+                    {/* Year Level */}
+                      <td className="border p-2 text-center dark:border-gray-700">
+                        {(session.user.role === "superAdmin" || session.user.role === "registrar") ? (
+                          <select
+                            className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={student.yearLevel}
+                            onChange={(e) => updateStudentInfo(student._studentId, { yearLevel: e.target.value })}
+                          >
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                          </select>
+                        ) : (
+                          <span className="dark:text-gray-400">{student.yearLevel}</span>
+                        )}
+                      </td>
+
+                      {/* School Year */}
+                      <td className="border p-2 text-center dark:border-gray-700">
+                        {(session.user.role === "superAdmin" || session.user.role === "registrar") ? (
+                          <select
+                            className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={student.schoolYear}
+                            onChange={(e) => updateStudentInfo(student._studentId, { schoolYear: e.target.value })}
+                          >
+                            <option value="2023-2024">2023-2024</option>
+                            <option value="2024-2025">2024-2025</option>
+                            <option value="2025-2026">2025-2026</option>
+                            <option value="2026-2027">2026-2027</option>
+                            <option value="2027-2028">2027-2028</option>
+                            <option value="2028-2029">2028-2029</option>
+                            <option value="2029-2030">2029-2030</option>
+                          </select>
+                        ) : (
+                          <span className="dark:text-gray-400">{student.schoolYear}</span>
+                        )}
+                      </td>
+
+                      {/* Semester */}
+                      <td className="border p-2 text-center dark:border-gray-700">
+                        {(session.user.role === "superAdmin" || session.user.role === "registrar") ? (
+                          <select
+                            className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={student.semester}
+                            onChange={(e) => updateStudentInfo(student._studentId, { semester: e.target.value })}
+                          >
+                            <option value="1st Semester">1st Semester</option>
+                            <option value="2nd Semester">2nd Semester</option>
+                          </select>
+                        ) : (
+                          <span className="dark:text-gray-400">{student.semester}</span>
+                        )}
+                      </td>
                     <td className="border p-4 text-center dark:border-gray-700 text-gray-100">
                     <Link href={`/students/student-files/${student._id}`}>
                       <button className="flex items-center gap-2 text-sm px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -303,7 +325,7 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                       </button>
                     </Link>
                     </td>
-                    <td className="border p-4 text-center dark:border-gray-700 text-gray-100">
+                    {(session.user.role === "superAdmin" || session.user.role === "registrar")&&(<td className="border p-4 text-center dark:border-gray-700 text-gray-100">
                       <button
                         onClick={() => {
                           setSelectedStudentId(student._studentId);
@@ -351,8 +373,9 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                           </div>
                         </div>
                       )}
-                    </td>
+                    </td>)}
                     <td className="border p-4 text-center dark:border-gray-700">
+                      {(session.user.role === "superAdmin" || session.user.role === "registrar") ? (
                     <select
                       value={student.status}
                       onChange={(e) => updateStudentInfo(student._studentId, { status: e.target.value })}
@@ -362,8 +385,12 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                         <option value="enrolled">Enrolled</option>
                         <option value="missing files">Missing Files</option>
                       </select>
+                      ) : (
+                          <span className="dark:text-gray-400">{student.status}</span>
+                      )}
                     </td>
                     <td className="border p-4 text-center dark:border-gray-700">
+                      {(session.user.role === "superAdmin" || session.user.role === "registrar") ? (
                     <select
                       value={student.studentType}
                       onChange={(e) => updateStudentInfo(student._studentId, { studentType: e.target.value })}
@@ -375,6 +402,9 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                         <option value="irregular">Irregular</option>
                         <option value="transferee">transferee</option>
                       </select>
+                      ) : (
+                          <span className="dark:text-gray-400">{student.studentType}</span>
+                      )}
                     </td>
                     <td className="border p-1 text-center dark:border-gray-700">
                       {pdfLinks[student._studentId] ? (

@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "@/components/Loading";
+import { CSVLink } from "react-csv";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
@@ -52,6 +53,66 @@ export default function Students() {
       .includes(searchQuery.toLowerCase())
   );
 
+const csvData = filteredStudents.map((student, index) => ({
+  No: index + 1,
+  "Full Name": `${student.lname}, ${student.fname} ${student.mname}` || "N/A",
+  LRN: student.lrn || "N/A",
+  "Student Number": student._studentId || "N/A",
+  Gender: student.sex || "N/A",
+  "Date of Birth": student.birthdate
+    ? new Date(student.birthdate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "N/A",
+  Birthplace: student.birthplace || "N/A",
+  Address: student.address || "N/A",
+  "Mobile Number": student.mobile || "N/A",
+  "Landline Number": student.landline || "N/A",
+  Facebook: student.facebook || "N/A",
+  Email: student.email || "N/A",
+  "School Year": student.schoolYear || "N/A",
+  Semester: student.semester || "N/A",
+  Course: student.course || "N/A",
+  Year: student.yearLevel || "N/A",
+  Section: student.section || "N/A",
+  "Education Level": student.education,
+  "Guardian Info": `${student.guardian} (${student.guardianOccupation})`,
+  Father: student.father || "N/A",
+  Mother: student.mother || "N/A",
+  Nationality: student.nationality || "N/A",
+  Religion: student.religion || "N/A",
+  "Registration Date": student.registrationDate
+    ? new Date(student.registrationDate).toLocaleString("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "N/A",
+  Verified: student.verified ? "Yes" : "No",
+  "Student Type": student.studentType || "N/A",
+
+  // Education Levels
+  "Nursery School": student.nursery?.schoolName || "N/A",
+  "Nursery Year": student.nursery?.yearAttended || "N/A",
+
+  "Elementary School": student.elementary?.schoolName || "N/A",
+  "Elementary Year": student.elementary?.yearAttended || "N/A",
+
+  "Junior High School": student.juniorHigh?.schoolName || "N/A",
+  "Junior High Year": student.juniorHigh?.yearAttended || "N/A",
+
+  "Senior High School": student.seniorHigh?.schoolName || "N/A",
+  "Senior High Year": student.seniorHigh?.yearAttended || "N/A",
+
+  // Subjects Flattened
+  Subjects: student.subjects?.length
+    ? student.subjects.map(
+        (sub) => `${sub.code} - ${sub.description} (${sub.units} units)`
+      ).join("; ")
+    : "N/A",
+}));
+
   return (
     <Login>
       <div className="container mx-auto p-4 text-gray-900 dark:text-gray-100">
@@ -59,28 +120,42 @@ export default function Students() {
         <LoadingSpinner /> 
       ) : (
         <> 
-        
-        <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold mb-2 md:mb-0 text-gray-800 dark:text-white">Students List</h1>
-          {(session.user.role === "admin" || session.user.role === "superAdmin"|| session.user.role === "registrar") && (<Link
+        <h1 className="text-3xl font-bold mb-4 md:mb-0 text-gray-800 dark:text-white">Students List</h1>
+
+          <div className="flex justify-end items-center pt-0 pb-2 gap-2">
+          
+          {(session.user.role === "superAdmin" || session.user.role === "registrar")&&(<CSVLink
+          data={csvData}
+          filename={"Enrolled_Students_data.csv"}
+          className="btn-primary-filled px-6 py-3 bg-green-600 text-white rounded-lg border border-green-700 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400"
+        >
+          Export to CSV
+        </CSVLink>)}
+
+          {(session.user.role === "superAdmin"|| session.user.role === "registrar") && (<Link
             className="btn-primary-filled px-6 py-3 bg-blue-500 text-white rounded-lg border border-blue-600 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             href="/students/new"
           >
             Add new student
           </Link>)}
+  </div>
           
-        </div>
+          
 
-            {/* Search Bar */}
-            <input
-              type="text"
-              placeholder="Search by Name, Student Number, Email, verified or not"
-              className="w-full p-3 mb-6 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
 
+<div className="flex items-center mb-2 gap-2">
+  <input
+    type="text"
+    placeholder="Search by Name, Student Number, Email, verified or not"
+    className="flex-1   min-w-[200px] p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+  
+</div>
+  
             <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+              
               <table className="min-w-full text-left table-auto border-collapse">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
@@ -89,13 +164,11 @@ export default function Students() {
                     <th className="border p-2 dark:border-gray-700">First Name</th>
                     <th className="border p-2 dark:border-gray-700">Middle Name</th>
                     <th className="border p-2 dark:border-gray-700">Last Name</th>
-                    <th className="border p-2 dark:border-gray-700">Mobile Number</th>
                     <th className="border p-2 dark:border-gray-700">Course</th>
                     <th className="border p-2 dark:border-gray-700">Semester</th>
-                    <th className="border  dark:border-gray-700"><div className="flex items-center justify-center text-center">Registration Date</div></th>
                     <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center text-center">Email</div></th>
                     <th className="border p-2 dark:border-gray-700">Password</th>
-                    {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") &&(
+                    {(session?.user?.role === "superAdmin" || session?.user?.role === "registrar") &&(
                     <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center text-center">Actions</div></th>)}
                   </tr>
                 </thead>
@@ -112,16 +185,8 @@ export default function Students() {
                         <td className="border p-2 dark:border-gray-700">{student.fname || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.mname || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.lname || "N/A"}</td>
-                        <td className="border p-2 dark:border-gray-700">{student.mobile || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.course || "N/A"}</td>
                         <td className="border p-2 dark:border-gray-700">{student.semester || "N/A"}</td>
-                        <td className="border p-1 dark:border-gray-700">
-                          <div className="text-center">
-                          {student.registrationDate 
-                            ? new Date(student.registrationDate).toLocaleString("en-US", {
-                                dateStyle: "medium",timeStyle: "short", }) : "N/A"}
-                          </div>
-                        </td>
                         <td
                       className="border p-2 dark:border-gray-700 text-center"
                       onClick={() => setShowEmail(!showEmail)}
@@ -159,7 +224,7 @@ export default function Students() {
                         >
                           {showPassword ? student.password : "••••••••"}
                         </td>
-                      {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") &&(
+                      {(session?.user?.role === "superAdmin" || session?.user?.role === "registrar") &&(
                         <td className="border p-2 dark:border-gray-700">
                           <div className="flex justify-center space-x-2">
                             <Link
@@ -177,7 +242,7 @@ export default function Students() {
                               Edit
                             </Link>
                             
-                            {(session?.user?.role === "admin" || session?.user?.role === "superAdmin") &&(
+                            {session?.user?.role === "superAdmin" &&(
                               <Link
                               className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition"
                               href={`/students/delete/${student._id}`}

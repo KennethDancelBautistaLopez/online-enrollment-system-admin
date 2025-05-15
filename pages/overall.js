@@ -59,7 +59,6 @@ useEffect(() => {
         );
       
         if (!initialized) {
-          toast.success("Payments loaded successfully! ✅");
           setInitialized(true);
         }
       })

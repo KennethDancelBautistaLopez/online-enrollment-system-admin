@@ -37,6 +37,13 @@ export default async function handler(req, res) {
         { $pull: { subjects: { code } } }
       );
 
+       const exists = student.subjects.some(
+        (subject) => subject.description.toLowerCase() === description.toLowerCase()
+      );
+      if (exists) {
+        return res.status(400).json({ error: 'Subject already exists' });
+      }
+
       const updatedStudent = await Student.findByIdAndUpdate(
         student._id,
         { $push: { subjects: req.body } },

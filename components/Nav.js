@@ -71,7 +71,7 @@ export default function Nav({show}) {
         Lists
         </Link>
         )}
-        {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") && (
+        {( session?.user?.role === "superAdmin" || session?.user?.role === "registrar") && (
           <Link href="/manage-subjects" className={pathname.includes('/manage-subjects') ? activeLink : inactiveLink}>
           <div className="flex items-center gap-2">
             <svg
@@ -88,7 +88,7 @@ export default function Nav({show}) {
           </div>
         </Link>
         )}
-        {(session?.user?.role === "admin" || session?.user?.role === "superAdmin" || session?.user?.role === "registrar") && (
+        {(session?.user?.role === "superAdmin" || session?.user?.role === "registrar") && (
           <Link href="/sections" className={pathname.includes('/sections') ? activeLink : inactiveLink}>
         <div className="flex items-center gap-2">
           <svg
@@ -142,7 +142,7 @@ export default function Nav({show}) {
           List of Payments</Link>
         )}
             
-          {(session?.user?.role === 'superAdmin' || session?.user?.role === 'admin' || session?.user?.role === 'accountant') && (
+          {(session?.user?.role === 'superAdmin' || session?.user?.role === 'accountant') && (
           <>  
           <Link href={'/paymentsPage'} className={pathname.includes('/paymentsPage') ? activeLink : inactiveLink}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/paymentsPage') ? activeIcon : inactiveIcon}>

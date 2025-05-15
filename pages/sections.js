@@ -15,8 +15,6 @@ export default function SectionManager() {
     subjects: [],
   });
 
-  // const [studentsToAdd, setStudentsToAdd] = useState([]);
-  const [allStudents, setAllStudents] = useState([]); // ✅ New state for all students
   const [sections, setSections] = useState([]);
   const [sectionIdToUpdate, setSectionIdToUpdate] = useState("");
   const [sectionToDelete, setSectionToDelete] = useState(null);
@@ -29,7 +27,7 @@ export default function SectionManager() {
   
 useEffect(() => {
   if (!session) return;
-  if (!["superAdmin", "admin", "registrar"].includes(session.user.role)) {
+  if (!["superAdmin", "registrar"].includes(session.user.role)) {
     router.push("/");
   } else {
     fetchSections();
