@@ -6,9 +6,13 @@ import { hash } from "bcryptjs";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/lib/mailer";
 import Curriculum from "@/models/Subject";
+import { getServerSession } from "next-auth";
+import authOptions from "@/pages/api/auth/[...nextauth]";
+
 async function handler(req, res) {
-  console.log("API /students called with method:", req.method);
   await connectToDB();
+  const session = await getServerSession(req, res, authOptions);
+  if (!session) return res.status(401).json({ message: "Unauthorized" });
   const { method } = req;
   if (method === "GET") {
     try {
@@ -189,8 +193,8 @@ async function handler(req, res) {
           studentType: "new",
         },
         {
-          id: "67f2ba16c67508450c1f09b4",
-          email: "test@gmail.com",
+          id: session.user.id,
+          email: session.user.email,
         },
         {
           ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
@@ -277,8 +281,8 @@ async function handler(req, res) {
           new: true,
           runValidators: true,
           _auditUser: {
-            id: "67f2ba16c67508450c1f09b4",
-            email: "test@gmail.com",
+            id: session.user.id,
+            email: session.user.email,
           },
           _auditMeta: {
             ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
