@@ -4,6 +4,7 @@ import { diff } from "deep-diff";
 
 export function auditLoggerPlugin(schema) {
   schema.pre("save", async function (next) {
+    this.wasNew = this.isNew;
     if (!this.isNew) {
       const original = await this.constructor.findById(this._id).lean();
       this._original = original ? JSON.parse(JSON.stringify(original)) : null;
@@ -17,7 +18,7 @@ export function auditLoggerPlugin(schema) {
 
     const before = this._original;
     const after = this.toObject({ depopulate: true });
-    const action = this.isNew ? "create" : "update";
+    const action = this.wasNew ? "create" : "update";
     const differences = before ? diff(before, after) : null;
 
     await AuditLog.create({
@@ -71,4 +72,15 @@ export function auditLoggerPlugin(schema) {
       timestamp: new Date(),
     });
   });
+
+  schema.statics.auditCreate = async function (
+    docData,
+    auditUser,
+    auditMeta = {}
+  ) {
+    const doc = new this(docData);
+    doc._auditUser = auditUser;
+    doc._auditMeta = auditMeta;
+    return await doc.save();
+  };
 }
