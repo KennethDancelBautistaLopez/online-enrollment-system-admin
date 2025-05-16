@@ -8,6 +8,7 @@ import { sendVerificationEmail } from "@/lib/mailer";
 import Curriculum from "@/models/Subject";
 import { getServerSession } from "next-auth";
 import authOptions from "@/pages/api/auth/[...nextauth]";
+import User from "@/models/User";
 
 async function handler(req, res) {
   await connectToDB();
@@ -15,6 +16,7 @@ async function handler(req, res) {
   if (!session.user) {
     return res.status(401).json({ message: "Unauthorized" });
   }
+  const user = await User.findOne({ email: session.user.email });
   const { method } = req;
   if (method === "GET") {
     try {
@@ -195,8 +197,8 @@ async function handler(req, res) {
           studentType: "new",
         },
         {
-          id: session.user.id,
-          email: session.user.email,
+          id: user.id,
+          email: user.email,
         },
         {
           ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
@@ -283,8 +285,8 @@ async function handler(req, res) {
           new: true,
           runValidators: true,
           _auditUser: {
-            id: session.user.id,
-            email: session.user.email,
+            id: user.id,
+            email: user.email,
           },
           _auditMeta: {
             ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,

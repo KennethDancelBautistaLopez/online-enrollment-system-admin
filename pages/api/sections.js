@@ -3,12 +3,14 @@ import { connectToDB } from "@/lib/mongoose";
 import Curriculum from "@/models/Subject";
 import { getServerSession } from "next-auth";
 import authOptions from "@/pages/api/auth/[...nextauth]";
+import User from "@/models/User";
 
 export default async function handler(req, res) {
   await connectToDB();
   const session = await getServerSession(req, res, authOptions);
   if (!session.user)
     return res.status(401).json({ success: false, message: "Unauthorized" });
+  const user = await User.findOne({ email: session.user.email });
   const { method } = req;
 
   switch (method) {
@@ -85,8 +87,8 @@ export default async function handler(req, res) {
             subjects: formattedSubjects,
           },
           {
-            id: session.user.id,
-            email: session.user.email,
+            id: user.id,
+            email: user.email,
           },
           {
             ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
@@ -113,8 +115,8 @@ export default async function handler(req, res) {
         const updatedSection = await Section.findByIdAndUpdate(id, updates, {
           new: true,
           _auditUser: {
-            id: session.user.id,
-            email: session.user.email,
+            id: user.id,
+            email: user.email,
           },
           _auditMeta: {
             ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
