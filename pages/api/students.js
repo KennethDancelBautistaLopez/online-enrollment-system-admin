@@ -273,7 +273,18 @@ async function handler(req, res) {
       const updatedStudent = await Student.findOneAndUpdate(
         { _studentId: id },
         updatedData,
-        { new: true, runValidators: true }
+        {
+          new: true,
+          runValidators: true,
+          _auditUser: {
+            id: "67f2ba16c67508450c1f09b4",
+            email: "test@gmail.com",
+          },
+          _auditMeta: {
+            ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+            userAgent: req.headers["user-agent"],
+          },
+        }
       );
 
       return res.status(200).json(updatedStudent);

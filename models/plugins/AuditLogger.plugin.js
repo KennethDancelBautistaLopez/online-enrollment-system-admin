@@ -27,7 +27,7 @@ export function auditLoggerPlugin(schema) {
       documentId: this._id.toString(),
       user: {
         id: user.id,
-        email: user.name,
+        email: user.email,
       },
       before,
       after,
@@ -64,7 +64,7 @@ export function auditLoggerPlugin(schema) {
       documentId: res._id.toString(),
       user: {
         id: user.id,
-        email: user.name,
+        email: user.email,
       },
       before,
       after,
