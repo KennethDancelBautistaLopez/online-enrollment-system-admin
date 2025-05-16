@@ -7,7 +7,7 @@ import authOptions from "@/pages/api/auth/[...nextauth]";
 export default async function handler(req, res) {
   await connectToDB();
   const session = await getServerSession(req, res, authOptions);
-  if (!session)
+  if (!session.user)
     return res.status(401).json({ success: false, message: "Unauthorized" });
   const { method } = req;
 

@@ -12,7 +12,9 @@ import authOptions from "@/pages/api/auth/[...nextauth]";
 async function handler(req, res) {
   await connectToDB();
   const session = await getServerSession(req, res, authOptions);
-  if (!session) return res.status(401).json({ message: "Unauthorized" });
+  if (!session.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
   const { method } = req;
   if (method === "GET") {
     try {
