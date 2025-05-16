@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { auditLoggerPlugin } from "./plugins/AuditLogger.plugin";
 
 const PaymentSettingsSchema = new mongoose.Schema(
   {
@@ -9,6 +10,8 @@ const PaymentSettingsSchema = new mongoose.Schema(
     collection: "payment-settings",
   }
 );
+
+PaymentSettingsSchema.plugin(auditLoggerPlugin);
 
 const PaymentSettings =
   mongoose.models.PaymentSettings ||
