@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
 
     // Role validation (allow only specific roles)
-    const allowedRoles = ["admin", "superAdmin", "registrar", "accountant"];
+    const allowedRoles = ["admin", "superAdmin", "registrar", "accountant","programHeads"];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ message: "Invalid role specified" });
     }

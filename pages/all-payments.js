@@ -102,9 +102,7 @@ export default function FirstSemester() {
   if (!session) return;
 
   const filteredStudents = groupedPayments.filter((student) =>
-    `${student.studentId} ${student.fullName}`
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
+    student.fullName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

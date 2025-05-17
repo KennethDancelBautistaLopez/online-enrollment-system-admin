@@ -207,6 +207,7 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                 <th className="border p-1 dark:border-gray-700"><div className="flex items-center justify-center">Student Number </div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Name</div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Email </div></th>
+                <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Course </div></th>
                   <th className="border p-2 dark:border-gray-700"> <div className="flex items-center justify-center">Year Level </div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">School Year</div></th>
                 <th className="border p-2 dark:border-gray-700"><div className="flex items-center justify-center">Semester</div></th>
@@ -260,6 +261,7 @@ if (!isAuthorized) return <p className="text-center mt-20 text-red-500">Access d
                         "Click to show email"
                       )}
                     </td>
+                    <td className="border p-2 dark:border-gray-700">{student.course}</td>
                     {/* Year Level */}
                       <td className="border p-2 text-center dark:border-gray-700">
                         {(session.user.role === "superAdmin" || session.user.role === "registrar") ? (

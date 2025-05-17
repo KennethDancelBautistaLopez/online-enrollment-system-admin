@@ -4,6 +4,7 @@ import Curriculum from "@/models/Subject";
 import { getServerSession } from "next-auth";
 import authOptions from "@/pages/api/auth/[...nextauth]";
 import User from "@/models/User";
+import Student from "@/models/Student";
 
 export default async function handler(req, res) {
   await connectToDB();
@@ -101,7 +102,6 @@ export default async function handler(req, res) {
         console.error(error);
         return res.status(500).json({ success: false, message: error.message });
       }
-
     case "PUT":
       try {
         const { id, updates } = req.body;
@@ -135,6 +135,13 @@ export default async function handler(req, res) {
 
     case "DELETE":
       try {
+        const session = await getServerSession(req, res, authOptions);
+        if (!session) {
+          return res
+            .status(401)
+            .json({ success: false, message: "Unauthorized" });
+        }
+
         const { id } = req.query;
         if (!id) {
           return res.status(400).json({
@@ -142,15 +149,40 @@ export default async function handler(req, res) {
             message: "Section ID is required in query.",
           });
         }
-        const deleted = await Section.findByIdAndDelete(id);
-        if (!deleted) {
+
+        const section = await Section.findById(id).lean();
+        if (!section) {
           return res
             .status(404)
             .json({ success: false, message: "Section not found." });
         }
+
+        const student = await Student.find({ _id: { $in: section.students } });
+
+        for (const s of student) {
+          await Student.findByIdAndUpdate(s._id, {
+            section: "", // or null, depending on your schema
+          });
+        }
+
+        // Import ArchiveSection model
+        const ArchiveSection = (await import("@/models/ArchiveSection"))
+          .default;
+
+        // Archive the section
+        const { _id, ...rest } = section;
+        await ArchiveSection.create({
+          ...rest,
+          deletedAt: new Date(),
+          deletedBy: session.user.email,
+        });
+
+        // Delete from active Section collection
+        await Section.findByIdAndDelete(id);
+
         return res
           .status(200)
-          .json({ success: true, message: "Section deleted." });
+          .json({ success: true, message: "Section archived and deleted." });
       } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
       }

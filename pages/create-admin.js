@@ -175,6 +175,7 @@ export default function CreateAdmin() {
                       <option value="superAdmin">Super Admin</option>
                       <option value="registrar">Registrar</option>
                       <option value="accountant">Accountant</option>
+                      <option value="programHeads">Program Heads</option>
                     </select> 
                   </div>
                   <button

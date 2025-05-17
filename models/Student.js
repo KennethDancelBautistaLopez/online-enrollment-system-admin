@@ -16,6 +16,16 @@ const enrolledSubjectSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const archivedSubjectSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true },
+    description: { type: String, required: true },
+    units: { type: Number, required: true },
+    deletedAt: { type: Date, default: Date.now }, // 👈 timestamp of deletion
+    deletedBy: { type: String }, // 👈 who deleted it (e.g. admin email or ID)
+  },
+  { _id: false }
+);
 const StudentSchema = new mongoose.Schema(
   {
     _studentId: { type: String, unique: true, required: true },
@@ -83,12 +93,13 @@ const StudentSchema = new mongoose.Schema(
     ],
 
     subjects: { type: [enrolledSubjectSchema], default: [] },
+    archivedSubjects: { type: [archivedSubjectSchema], default: [] },
     verified: { type: Boolean, default: false },
+    section: { type: String },
   },
   { timestamps: true }
 );
 
 StudentSchema.plugin(auditLoggerPlugin);
-
 export default mongoose.models.Student ||
   mongoose.model("Student", StudentSchema);

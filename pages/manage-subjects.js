@@ -62,7 +62,7 @@ export default function ManageSubjects() {
   }
 
   // If logged in but not authorized
-  const allowedRoles = ["superAdmin", "registrar", "admin"];
+  const allowedRoles = ["superAdmin", "programHeads", "registrar", "admin"];
   if (!allowedRoles.includes(session.user.role)) {
     if (typeof window !== "undefined") {
       router.push("/"); // Redirect to home or another page
@@ -192,7 +192,7 @@ export default function ManageSubjects() {
       <Toaster position="top-right" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Left side - Create Subject */}
-        {(session.user.role === "admin" ||
+        {(session.user.role === "programHeads" ||
           session.user.role === "superAdmin") && (
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="mb-6 flex justify-between pt-4">
@@ -324,8 +324,9 @@ export default function ManageSubjects() {
         <div
           className={`${
             !(
-              session.user.role === "admin" ||
-              session.user.role === "superAdmin"
+              session.user.role === "registrar" ||
+              session.user.role === "superAdmin" ||
+              session.user.role === "programHeads"
             )
               ? "flex justify-center"
               : ""
@@ -401,7 +402,7 @@ export default function ManageSubjects() {
                             }
                             className="text-red-600 hover:text-red-700 transition-all duration-300"
                           >
-                            Delete
+                            Archive
                           </button>
                         </div>
                       </div>
@@ -423,6 +424,8 @@ export default function ManageSubjects() {
                       onChange={(e) =>
                         setForm({ ...form, course: e.target.value })
                       }
+                      required
+                      className="border px-4 py-3 w-full rounded-lg text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">-- Choose a course --</option>
                       <option value="BSCS">BS Computer Science</option>
@@ -448,6 +451,8 @@ export default function ManageSubjects() {
                       onChange={(e) =>
                         setForm({ ...form, yearLevel: e.target.value })
                       }
+                      required
+                      className="border px-4 py-3 w-full rounded-lg text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">-- Choose a Year Level --</option>
                       <option value="1">1st Year</option>
@@ -461,6 +466,8 @@ export default function ManageSubjects() {
                       onChange={(e) =>
                         setForm({ ...form, semester: e.target.value })
                       }
+                      required
+                      className="border px-4 py-3 w-full rounded-lg text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">-- Choose a Semester --</option>
                       <option value="1st Semester">1st Semester</option>
@@ -486,7 +493,7 @@ export default function ManageSubjects() {
                           });
                         }
                       }}
-                      className="border rounded px-4 py-2 w-full dark:bg-gray-800 dark:text-white"
+                      className="border px-4 py-3 w-full rounded-lg text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">-- Choose a subject --</option>
                       {curriculumSubjects.map((subject) => (

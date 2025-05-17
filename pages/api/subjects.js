@@ -1,47 +1,47 @@
 // pages/api/subjects.js
-import { connectToDB } from '@/lib/mongoose';
-import Student from '@/models/Student';
+import { connectToDB } from "@/lib/mongoose";
+import Student from "@/models/Student";
+import { getServerSession } from "next-auth";
+import authOptions from "@/pages/api/auth/[...nextauth]";
 
 export default async function handler(req, res) {
   await connectToDB();
   const method = req.method;
   const studentId = req.query.id;
 
-  if (method === 'GET') {
+  if (method === "GET") {
     try {
       const student = await Student.findOne({ _studentId: studentId });
       if (!student) {
-        return res.status(404).json({ error: 'Student not found' });
+        return res.status(404).json({ error: "Student not found" });
       }
       return res.status(200).json(student);
     } catch (error) {
-      console.error('Error fetching student data:', error);
-      return res.status(500).json({ error: 'Failed to fetch subjects' });
+      console.error("Error fetching student data:", error);
+      return res.status(500).json({ error: "Failed to fetch subjects" });
     }
-
-  } else if (method === 'POST') {
+  } else if (method === "POST") {
     const { code, description } = req.body;
-    if (!code || !description ) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!code || !description) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
-    
 
     try {
       const student = await Student.findOne({ _studentId: studentId });
       if (!student) {
-        return res.status(404).json({ error: 'Student not found' });
+        return res.status(404).json({ error: "Student not found" });
       }
 
-      await Student.findByIdAndUpdate(
-        student._id,
-        { $pull: { subjects: { code } } }
-      );
+      await Student.findByIdAndUpdate(student._id, {
+        $pull: { subjects: { code } },
+      });
 
-       const exists = student.subjects.some(
-        (subject) => subject.description.toLowerCase() === description.toLowerCase()
+      const exists = student.subjects.some(
+        (subject) =>
+          subject.description.toLowerCase() === description.toLowerCase()
       );
       if (exists) {
-        return res.status(400).json({ error: 'Subject already exists' });
+        return res.status(400).json({ error: "Subject already exists" });
       }
 
       const updatedStudent = await Student.findByIdAndUpdate(
@@ -52,36 +52,61 @@ export default async function handler(req, res) {
 
       return res.status(200).json(updatedStudent);
     } catch (error) {
-      console.error('Error adding subject:', error);
-      return res.status(500).json({ error: 'Failed to add subject' });
+      console.error("Error adding subject:", error);
+      return res.status(500).json({ error: "Failed to add subject" });
+    }
+  } else if (method === "DELETE") {
+    const session = await getServerSession(req, res, authOptions);
+    console.log(session);
+    if (!session) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-  } else if (method === 'DELETE') {
     const { code } = req.query;
+    console.log(code);
     if (!studentId || !code) {
-      return res.status(400).json({ error: 'Missing studentId or subjectCode' });
+      return res
+        .status(400)
+        .json({ error: "Missing studentId or subjectCode" });
     }
-  
+
     try {
       const student = await Student.findOne({ _studentId: studentId });
-      if (!student) return res.status(404).json({ error: 'Student not found' });
-  
+      if (!student) return res.status(404).json({ error: "Student not found" });
+
+      const subjectToDelete = student.subjects.find((s) => s.code === code);
+      console.log(subjectToDelete);
+      if (!subjectToDelete) {
+        return res
+          .status(404)
+          .json({ error: "Subject not found in student record" });
+      }
+
+      const archivedSubject = {
+        ...subjectToDelete.toObject(),
+        deletedAt: new Date(),
+        deletedBy: session.user.email,
+      };
+
+      console.log("Archived subject:", archivedSubject);
+
       const updatedStudent = await Student.findByIdAndUpdate(
         student._id,
-        { $pull: { subjects: { code: code } } },
+        {
+          $pull: { subjects: { code: code } },
+          $push: { archivedSubjects: archivedSubject },
+        },
         { new: true }
       );
-  
-      if (!updatedStudent) {
-        return res.status(404).json({ error: 'Subject not found in student record' });
-      }
-  
+
+      console.log("Updated student:", updatedStudent);
+
       return res.status(200).json(updatedStudent);
     } catch (error) {
-      console.error('Error deleting subject:', error);
-      return res.status(500).json({ error: 'Failed to delete subject' });
+      console.error("Error deleting subject:", error);
+      return res.status(500).json({ error: "Failed to delete subject" });
     }
   } else {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 }

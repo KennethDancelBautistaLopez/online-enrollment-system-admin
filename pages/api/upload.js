@@ -73,7 +73,11 @@ handler.delete(async (req, res) => {
     }
 
     const fileIndex = parseInt(index);
-    if (isNaN(fileIndex) || fileIndex < 0 || fileIndex >= student.files.length) {
+    if (
+      isNaN(fileIndex) ||
+      fileIndex < 0 ||
+      fileIndex >= student.files.length
+    ) {
       return res.status(404).json({ error: "File not found" });
     }
 
@@ -107,7 +111,10 @@ handler.get(async (req, res) => {
 
       if (!inline || inline === "false") {
         // Force download only when inline=false or not present
-        res.setHeader("Content-Disposition", `attachment; filename="${file.filename}"`);
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${file.filename}"`
+        );
       }
 
       res.send(buffer);
@@ -121,12 +128,14 @@ handler.get(async (req, res) => {
       const student = await Student.findOne({ _studentId: studentId });
       if (!student) return res.status(404).json({ error: "Student not found" });
 
-      const files = student.files.map(({ filename, mimeType, size }, index) => ({
-        index,
-        filename,
-        mimeType,
-        size,
-      }));
+      const files = student.files.map(
+        ({ filename, mimeType, size }, index) => ({
+          index,
+          filename,
+          mimeType,
+          size,
+        })
+      );
 
       res.status(200).json({ files });
     } catch (error) {
