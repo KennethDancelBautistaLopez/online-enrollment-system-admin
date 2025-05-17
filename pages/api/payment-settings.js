@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: "Fields cannot be empty" });
       }
 
-      const user = await User.findOne({ email: email });
+      const user = await User.findOne({ email });
       if (!user) {
         return res.status(401).json({ message: "Wrong Credentials" });
       }
@@ -32,9 +32,27 @@ export default async function handler(req, res) {
         return res.status(401).json({ message: "Wrong Credentials" });
       }
 
-      const paymentSettings = await PaymentSettings.findByIdAndUpdate(id, {
-        $set: { amount: amount },
-      });
+      const paymentSettings = await PaymentSettings.findById(id);
+      if (!paymentSettings) {
+        return res.status(404).json({ message: "Payment settings not found" });
+      }
+
+      // Update fields
+      paymentSettings.amount = amount;
+
+      // 🔐 Attach audit context
+      paymentSettings._auditUser = {
+        id: user._id,
+        name: user.name || user.email,
+      };
+
+      paymentSettings._auditMeta = {
+        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+        userAgent: req.headers["user-agent"],
+      };
+
+      await paymentSettings.save();
+
       return res.status(200).json({ message: "Exam Period Updated" });
     } catch (error) {
       console.error(error);

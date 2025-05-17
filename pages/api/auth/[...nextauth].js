@@ -13,7 +13,11 @@ export default NextAuth({
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "admin@example.com" },
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "admin@example.com",
+        },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -34,15 +38,26 @@ export default NextAuth({
             DEFAULT_ADMIN_ROLE,
           } = process.env;
 
-          if (!DEFAULT_SUPERADMIN_EMAIL || !DEFAULT_SUPERADMIN_PASSWORD || !DEFAULT_SUPERADMIN_ROLE ||
-              !DEFAULT_ADMIN_EMAIL || !DEFAULT_ADMIN_PASSWORD || !DEFAULT_ADMIN_ROLE) {
-            throw new Error("Missing required environment variables for default admin creation");
+          if (
+            !DEFAULT_SUPERADMIN_EMAIL ||
+            !DEFAULT_SUPERADMIN_PASSWORD ||
+            !DEFAULT_SUPERADMIN_ROLE ||
+            !DEFAULT_ADMIN_EMAIL ||
+            !DEFAULT_ADMIN_PASSWORD ||
+            !DEFAULT_ADMIN_ROLE
+          ) {
+            throw new Error(
+              "Missing required environment variables for default admin creation"
+            );
           }
 
           // ✅ Check if Super Admin exists, create if not
           const existingSuperAdmin = await User.findOne({ role: "superAdmin" });
           if (!existingSuperAdmin) {
-            const hashedSuperAdminPassword = await bcrypt.hash(DEFAULT_SUPERADMIN_PASSWORD, 10);
+            const hashedSuperAdminPassword = await bcrypt.hash(
+              DEFAULT_SUPERADMIN_PASSWORD,
+              10
+            );
             const defaultSuperAdmin = new User({
               email: DEFAULT_SUPERADMIN_EMAIL,
               password: hashedSuperAdminPassword,
@@ -55,7 +70,10 @@ export default NextAuth({
           // ✅ Check if Admin exists, create if not
           const existingAdmin = await User.findOne({ role: "admin" });
           if (!existingAdmin) {
-            const hashedAdminPassword = await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10);
+            const hashedAdminPassword = await bcrypt.hash(
+              DEFAULT_ADMIN_PASSWORD,
+              10
+            );
             const defaultAdmin = new User({
               email: DEFAULT_ADMIN_EMAIL,
               password: hashedAdminPassword,
@@ -66,18 +84,28 @@ export default NextAuth({
           }
 
           // 🔍 Find the user trying to log in
-          const user = await User.findOne({ email: credentials.email.toLowerCase() });
+          const user = await User.findOne({
+            email: credentials.email.toLowerCase(),
+          });
           if (!user) {
             throw new Error("User not found");
           }
 
           // 🔐 Only allow admin or super admin users to log in
-          if (user.role !== "admin" && user.role !== "superAdmin" && user.role !== "registrar" && user.role !== "accountant") {
+          if (
+            user.role !== "admin" &&
+            user.role !== "superAdmin" &&
+            user.role !== "registrar" &&
+            user.role !== "accountant"
+          ) {
             throw new Error("Access Denied! Admins only.");
           }
 
           // 🔑 Check password
-          const isValid = await bcrypt.compare(credentials.password, user.password);
+          const isValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
           if (!isValid) {
             throw new Error("Invalid password");
           }
@@ -107,7 +135,7 @@ export default NextAuth({
       return session;
     },
   },
-  secret: process.env.NEXT_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login", // Customize the sign-in page URL if necessary
   },
