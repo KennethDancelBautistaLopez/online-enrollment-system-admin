@@ -13,20 +13,21 @@ export default function FirstSemester() {
   const { data: session } = useSession();
   const [initialized, setInitialized] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [examPeriods, setExamPeriods] = useState([]);
 
   const router = useRouter();
 
   useEffect(() => {
- if (!session) return;
+    if (!session) return;
 
-  const allowedRoles = ["superAdmin", "admin", "accountant"];
-  if (!allowedRoles.includes(session.user.role)) {
-    toast.error("You do not have permission to access this page.");
-    router.push("/");
-    return;
-  }
+    const allowedRoles = ["superAdmin", "admin", "accountant"];
+    if (!allowedRoles.includes(session.user.role)) {
+      toast.error("You do not have permission to access this page.");
+      router.push("/");
+      return;
+    }
 
-  if (initialized) return;
+    if (initialized) return;
     const fetchPayments = async () => {
       try {
         const response = await axios.get("/api/get-all-payments");
@@ -59,6 +60,7 @@ export default function FirstSemester() {
             examPeriod: payment.examPeriod,
             status: payment.status,
             referenceNumber: payment.referenceNumber,
+            amount: payment.amount,
           });
         });
 
@@ -66,8 +68,14 @@ export default function FirstSemester() {
         setGroupedPayments(groupedArray);
         setInitialized(true);
       } catch (error) {
-        if (error.response && error.response.data && error.response.data.message) {
-          toast.error( "Failed to load payments: " + error.response.data.message);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          toast.error(
+            "Failed to load payments: " + error.response.data.message
+          );
         } else {
           toast.error("Failed to load payments." + error);
         }
@@ -78,22 +86,25 @@ export default function FirstSemester() {
 
     fetchPayments();
   }, [session, initialized, router]);
-if (!session) return ;
 
-  const examPeriods = [
-    "Downpayment",
-    "1st Periodic",
-    "Prelim",
-    "2nd Periodic",
-    "Midterm",
-    "3rd Periodic",
-    "Pre-final",
-    "4th Periodic",
-    "Finals",
-  ];
+  useEffect(() => {
+    const fetchExamPeriods = async () => {
+      try {
+        const response = await axios.get("/api/payment-settings");
+        setExamPeriods(response.data.paymentSettings);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchExamPeriods();
+  }, [session, router]);
+  if (!session) return;
 
   const filteredStudents = groupedPayments.filter((student) =>
-    `${student.studentId} ${student.fullName}`.toLowerCase().includes(searchQuery.toLowerCase())
+    `${student.studentId} ${student.fullName}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -129,14 +140,23 @@ if (!session) return ;
               <table className="min-w-full text-left table-auto border-collapse">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border p-2 dark:border-gray-700 dark:text-gray-300">#</th>
-                    <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Student Info</th>
+                    <th className="border p-2 dark:border-gray-700 dark:text-gray-300">
+                      #
+                    </th>
+                    <th className="border p-2 dark:border-gray-700 dark:text-gray-300">
+                      Student Info
+                    </th>
                     {examPeriods.map((period, index) => (
-                      <th key={index} className="border p-2 text-center dark:border-gray-700 dark:text-gray-300">
-                        {period}
+                      <th
+                        key={index}
+                        className="border p-2 text-center dark:border-gray-700 dark:text-gray-300"
+                      >
+                        {period.examPeriod}
                       </th>
                     ))}
-                    <th className="border p-2 text-center dark:border-gray-700 dark:text-gray-300">Actions</th>
+                    <th className="border p-2 text-center dark:border-gray-700 dark:text-gray-300">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -147,43 +167,58 @@ if (!session) return ;
                         paymentsByPeriod[payment.examPeriod] = payment.status;
                       });
                       return (
-                        <tr key={student.studentId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <tr
+                          key={student.studentId}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
                           <td className="border p-2 text-center dark:border-gray-700 dark:text-gray-200">
                             {index + 1}
                           </td>
                           <td className="border p-2 dark:border-gray-700 dark:text-gray-200">
-                            <div className="font-semibold">{student.fullName}</div>
+                            <div className="font-semibold">
+                              {student.fullName}
+                            </div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">
                               ID: {student.studentId}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {student.course} • {student.education} • Year Level: {student.yearLevel}
+                              {student.course} • {student.education} • Year
+                              Level: {student.yearLevel}
                             </div>
                             <div className="text-sm text-gray-400 dark:text-gray-500">
                               SY {student.schoolYear} • {student.semester}
                             </div>
                           </td>
                           {examPeriods.map((period, idx) => {
-                          const isRemainingPaid = paymentsByPeriod["Remaining"] === "paid";
-                          const icon = isRemainingPaid || paymentsByPeriod[period] === "paid" ? 
-                            "✅" : 
-                            paymentsByPeriod[period] === "pending" || paymentsByPeriod[period] === "unpaid" ? 
-                            "🕓" : 
-                            paymentsByPeriod[period] === "failed" ? 
-                            "❌" : 
-                            "—";
+                            const isRemainingPaid =
+                              paymentsByPeriod["Remaining"] === "paid";
+                            const totalPaid = student.payments
+                              .filter(
+                                (data) => data.examPeriod === period.examPeriod
+                              )
+                              .reduce(
+                                (sum, payment) => sum + (payment.amount || 0),
+                                0
+                              );
+                            const icon =
+                              isRemainingPaid || totalPaid >= period.amount
+                                ? "✅"
+                                : "—";
 
-                          return (
-                            <td key={idx} className="border p-2 text-center dark:border-gray-700 dark:text-gray-200">
-                              {icon}
-                            </td>
-                          );
-                        })}
+                            return (
+                              <td
+                                key={idx}
+                                className="border p-2 text-center dark:border-gray-700 dark:text-gray-200"
+                              >
+                                {icon}
+                              </td>
+                            );
+                          })}
 
                           <td className="border p-2 text-center dark:border-gray-700">
                             <Link
                               href={`/payments/view/1stsem/${student.studentId}/payments`}
-                              className="text-blue-600 hover:underline dark:text-blue-400 font-semibold dark:text-blue-400"
+                              className="text-blue-600 hover:underline dark:text-blue-400 font-semibold"
                             >
                               View
                             </Link>
@@ -193,7 +228,10 @@ if (!session) return ;
                     })
                   ) : (
                     <tr>
-                      <td colSpan={examPeriods.length + 3} className="text-center p-4 dark:text-gray-300">
+                      <td
+                        colSpan={examPeriods.length + 3}
+                        className="text-center p-4 dark:text-gray-300"
+                      >
                         No First Semester payments found
                       </td>
                     </tr>
