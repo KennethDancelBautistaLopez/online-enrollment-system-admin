@@ -335,12 +335,22 @@ async function handler(req, res) {
       const studentObj = student.toObject();
       const { _id, ...rest } = studentObj;
 
-      const archived = await ArchiveStudent.create({
-        ...rest,
-        originalId: _id,
-        DeletedBy: userId,
-        deletedAt: new Date(),
-      });
+      const archived = await ArchiveStudent.auditCreate(
+        {
+          ...rest,
+          originalId: _id,
+          DeletedBy: userId,
+          deletedAt: new Date(),
+        },
+        {
+          id: user.id,
+          email: user.email,
+        },
+        {
+          ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+          userAgent: req.headers["user-agent"],
+        }
+      );
 
       console.log("Archived student:", archived);
 

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Email from "next-auth/providers/email";
+import { auditLoggerPlugin } from "./plugins/AuditLogger.plugin";
 
 const educationHistorySchema = new mongoose.Schema({
   schoolName: { type: String, default: "" },
@@ -75,6 +76,8 @@ const ArchiveStudentSchema = new mongoose.Schema(
     collection: "archive-students",
   }
 );
+
+ArchiveStudentSchema.plugin(auditLoggerPlugin);
 
 export default mongoose.models.ArchiveStudent ||
   mongoose.model("ArchiveStudent", ArchiveStudentSchema);
