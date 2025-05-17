@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { auditLoggerPlugin } from "./plugins/AuditLogger.plugin";
 
 const SubjectScheduleSchema = new mongoose.Schema(
   {
@@ -40,6 +41,8 @@ const ArchiveSectionSchema = new mongoose.Schema(
     collection: "archive-sections",
   }
 );
+
+ArchiveSectionSchema.plugin(auditLoggerPlugin);
 
 export default mongoose.models.ArchiveSection ||
   mongoose.model("ArchiveSection", ArchiveSectionSchema);

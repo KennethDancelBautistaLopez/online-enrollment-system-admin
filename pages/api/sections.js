@@ -171,11 +171,21 @@ export default async function handler(req, res) {
 
         // Archive the section
         const { _id, ...rest } = section;
-        await ArchiveSection.create({
-          ...rest,
-          deletedAt: new Date(),
-          deletedBy: session.user.email,
-        });
+        await ArchiveSection.auditCreate(
+          {
+            ...rest,
+            deletedAt: new Date(),
+            deletedBy: session.user.email,
+          },
+          {
+            id: user.id,
+            email: user.email,
+          },
+          {
+            ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+            userAgent: req.headers["user-agent"],
+          }
+        );
 
         // Delete from active Section collection
         await Section.findByIdAndDelete(id);
