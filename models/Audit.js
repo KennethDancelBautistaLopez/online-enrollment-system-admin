@@ -13,16 +13,16 @@ const AuditLogSchema = new mongoose.Schema(
     timestamp: { type: Date, default: Date.now },
 
     user: {
-      id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      name: String,
+      id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      email: { type: String, required: true },
     },
 
     before: { type: mongoose.Schema.Types.Mixed },
     after: { type: mongoose.Schema.Types.Mixed },
     diff: { type: mongoose.Schema.Types.Mixed },
 
-    ip: String,
-    userAgent: String,
+    ip: { type: String },
+    userAgent: { type: String },
   },
   {
     strict: true, // keep this if your `before/after/diff` structure varies
