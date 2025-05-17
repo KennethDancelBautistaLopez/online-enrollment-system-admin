@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       // 🔐 Attach audit context
       paymentSettings._auditUser = {
         id: user._id,
-        name: user.name || user.email,
+        email: user.email,
       };
 
       paymentSettings._auditMeta = {
