@@ -21,8 +21,8 @@ const AuditLogSchema = new mongoose.Schema(
     after: { type: mongoose.Schema.Types.Mixed },
     diff: { type: mongoose.Schema.Types.Mixed },
 
-    ip: String,
-    userAgent: String,
+    ip: { type: String },
+    userAgent: { type: String },
   },
   {
     strict: true, // keep this if your `before/after/diff` structure varies
