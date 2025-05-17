@@ -3,6 +3,7 @@ import Login from "./Login";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import Link from "next/link";
 
 function DiffTable({ differences, action, before, after }) {
   if (action === "create" || action === "archive") {
@@ -137,7 +138,16 @@ export default function Page() {
   return (
     <Login>
       <div className="p-6 max-w-6xl mx-auto dark:bg-gray-800">
-        <h1 className="text-2xl font-bold mb-4 dark:text-white">Audit Logs</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold mb-4 dark:text-white">
+            Audit Logs
+          </h1>
+          <Link href="/students/archive" className="mb-6">
+            <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+              Archive Logs
+            </button>
+          </Link>
+        </div>
 
         <div className="flex items-center gap-2 mb-6">
           <select

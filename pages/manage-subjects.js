@@ -178,9 +178,9 @@ export default function ManageSubjects() {
         `/api/subjects?id=${studentId}&code=${code}`
       );
       setStudent(res.data);
-      toast.success("Subject deleted successfully");
+      toast.success("Subject Archived successfully");
     } catch {
-      toast.error("Error deleting subject");
+      toast.error("Error Archiving subject");
     } finally {
       setLoading(false);
       setConfirmDelete({ open: false, code: "" });
@@ -534,7 +534,7 @@ export default function ManageSubjects() {
                   <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
                       <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-                        Are you sure you want to delete subject{" "}
+                        Are you sure you want to Archive subject{" "}
                         <b>{confirmDelete.code}</b>?
                       </h2>
                       <div className="flex justify-center gap-6">
@@ -542,7 +542,7 @@ export default function ManageSubjects() {
                           onClick={() => deleteSubject(confirmDelete.code)}
                           className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-transform hover:scale-105"
                         >
-                          Yes, Delete
+                          Yes, Archive
                         </button>
                         <button
                           onClick={() =>

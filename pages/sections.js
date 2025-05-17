@@ -47,10 +47,10 @@ export default function SectionManager() {
       });
       if (res.ok) {
         fetchSections();
-        toast.success("Section deleted successfully");
+        toast.success("Section Archived successfully");
       } else {
         const errorMessage =
-          (await res.json()).message || "Failed to delete section.";
+          (await res.json()).message || "Failed to Archive section.";
         toast.error(errorMessage);
       }
     } catch {
@@ -129,7 +129,7 @@ export default function SectionManager() {
               Confirm Deletion
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete this section? This action cannot
+              Are you sure you want to Archive this section? This action cannot
               be undone.
             </p>
             <div className="flex justify-center gap-4">
@@ -137,7 +137,7 @@ export default function SectionManager() {
                 onClick={confirmDelete}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
               >
-                Yes, Delete
+                Yes, Archive
               </button>
               <button
                 onClick={() => setSectionToDelete(null)}

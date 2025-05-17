@@ -45,6 +45,7 @@ const ArchiveStudentSchema = new mongoose.Schema(
     semester: String,
     schoolYear: String,
     email: String,
+    password: String,
     nursery: educationHistorySchema,
     elementary: educationHistorySchema,
     juniorHigh: educationHistorySchema,
