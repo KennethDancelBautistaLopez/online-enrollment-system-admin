@@ -152,6 +152,8 @@ export default function Page() {
             <option value={"Section"}>Section</option>
             <option value={"Curriculum"}>Curriculum</option>
             <option value={"PaymentSettings"}>Payment Settings</option>
+            <option value={"ArchiveStudent"}>Archive Students</option>
+            <option value={"ArchiveSection"}>Archive Section</option>
           </select>
           <button
             className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
