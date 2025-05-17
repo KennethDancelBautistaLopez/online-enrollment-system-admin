@@ -25,7 +25,7 @@ const AuditLogSchema = new mongoose.Schema(
     userAgent: String,
   },
   {
-    strict: false, // keep this if your `before/after/diff` structure varies
+    strict: true, // keep this if your `before/after/diff` structure varies
   }
 );
 
