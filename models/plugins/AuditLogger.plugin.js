@@ -18,8 +18,11 @@ export function auditLoggerPlugin(schema) {
 
     const before = this._original;
     const after = this.toObject({ depopulate: true });
-    const action = this.wasNew ? "create" : "update";
+    let action = this.wasNew ? "create" : "update";
     const differences = before ? diff(before, after) : null;
+    if (this.constructor.modelName.startsWith("Archive")) {
+      action = "archive";
+    }
 
     await AuditLog.create({
       action,
