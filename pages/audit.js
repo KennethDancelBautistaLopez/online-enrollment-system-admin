@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 
 function DiffTable({ differences, action, before, after }) {
-  if (action === "create") {
+  if (action === "create" || action === "archive") {
     return (
       <div>
         <p>
