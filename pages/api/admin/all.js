@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const admins = await User.find({ role: { $in: ["admin", "superAdmin", "registrar","accountant"] } }).select("email role _id");
+      const admins = await User.find({ role: { $in: ["admin", "superAdmin", "registrar","accountant", "programHeads"] } }).select("email role _id");
       res.status(200).json({ admins });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch admin users" });

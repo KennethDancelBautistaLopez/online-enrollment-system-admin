@@ -3,32 +3,49 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 
-export default function EventForm({ _id, title, description, date, location, eventType, organizer }) {
+export default function EventForm({
+  _id,
+  title,
+  description,
+  date,
+  location,
+  eventType,
+  organizer,
+}) {
   const [titleState, setTitle] = useState(title || "");
   const [descriptionState, setDescription] = useState(description || "");
-  const [dateState, setDate] = useState(date ? new Date(date).toISOString().split("T")[0] : "");
+  const [dateState, setDate] = useState(
+    date ? new Date(date).toISOString().split("T")[0] : ""
+  );
   const [locationState, setLocation] = useState(location || "");
   const [eventTypeState, setEventType] = useState(eventType || "");
   const [organizerState, setOrganizer] = useState(organizer || "");
   const router = useRouter();
 
-  useEffect(() => {
-  }, [ _id, title, description, date, location, eventType, organizer ]);
+  useEffect(() => {}, [
+    _id,
+    title,
+    description,
+    date,
+    location,
+    eventType,
+    organizer,
+  ]);
 
   async function saveEvent(ev) {
     ev.preventDefault();
-    
+
     const eventDate = new Date(dateState).toISOString().split("T")[0];
-  
+
     const data = {
       title: titleState,
       description: descriptionState,
       date: eventDate,
       location: locationState,
       eventType: eventTypeState,
-      organizer: organizerState
+      organizer: organizerState,
     };
-  
+
     try {
       if (_id) {
         await axios.put("/api/events", { ...data, _id });
@@ -39,13 +56,15 @@ export default function EventForm({ _id, title, description, date, location, eve
       }
       router.push("/events");
     } catch (error) {
-      console.error("Error saving event:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error saving event:",
+        error.response ? error.response.data : error.message
+      );
       toast.error("Failed to save event. Please try again.");
     }
   }
   return (
     <form onSubmit={saveEvent} className="space-y-4">
-  
       {/* Event Title */}
       <div className="space-y-2">
         <label
@@ -65,7 +84,7 @@ export default function EventForm({ _id, title, description, date, location, eve
                      dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
         />
       </div>
-  
+
       {/* Description */}
       <div className="space-y-2">
         <label
@@ -83,13 +102,10 @@ export default function EventForm({ _id, title, description, date, location, eve
           className="w-full p-3 border rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
         />
       </div>
-  
+
       {/* Date */}
       <div className="space-y-2">
-        <label
-          htmlFor="eventDate"
-          className="text-gray-700 dark:text-gray-200"
-        >
+        <label htmlFor="eventDate" className="text-gray-700 dark:text-gray-200">
           Date
         </label>
         <input
@@ -102,13 +118,10 @@ export default function EventForm({ _id, title, description, date, location, eve
                      dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
         />
       </div>
-  
+
       {/* Location */}
       <div className="space-y-2">
-        <label
-          htmlFor="location"
-          className="text-gray-700 dark:text-gray-200"
-        >
+        <label htmlFor="location" className="text-gray-700 dark:text-gray-200">
           Location
         </label>
         <input
@@ -122,13 +135,10 @@ export default function EventForm({ _id, title, description, date, location, eve
                      dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
         />
       </div>
-  
+
       {/* Event Type */}
       <div className="space-y-2">
-        <label
-          htmlFor="eventType"
-          className="text-gray-700 dark:text-gray-200"
-        >
+        <label htmlFor="eventType" className="text-gray-700 dark:text-gray-200">
           Event Type
         </label>
         <select
@@ -146,13 +156,10 @@ export default function EventForm({ _id, title, description, date, location, eve
           <option value="Cememony">Cememony</option>
         </select>
       </div>
-  
+
       {/* Organizer */}
       <div className="space-y-2">
-        <label
-          htmlFor="organizer"
-          className="text-gray-700 dark:text-gray-200"
-        >
+        <label htmlFor="organizer" className="text-gray-700 dark:text-gray-200">
           Organizer
         </label>
         <input
@@ -166,7 +173,7 @@ export default function EventForm({ _id, title, description, date, location, eve
                      dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
         />
       </div>
-  
+
       {/* Submit */}
       <div>
         <button

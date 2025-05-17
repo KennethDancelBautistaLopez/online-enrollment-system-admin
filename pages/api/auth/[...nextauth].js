@@ -18,6 +18,11 @@ export default NextAuth({
           type: "email",
           placeholder: "admin@example.com",
         },
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "admin@example.com",
+        },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -49,6 +54,17 @@ export default NextAuth({
             throw new Error(
               "Missing required environment variables for default admin creation"
             );
+            // if (
+            //   !DEFAULT_SUPERADMIN_EMAIL ||
+            //   !DEFAULT_SUPERADMIN_PASSWORD ||
+            //   !DEFAULT_SUPERADMIN_ROLE ||
+            //   !DEFAULT_ADMIN_EMAIL ||
+            //   !DEFAULT_ADMIN_PASSWORD ||
+            //   !DEFAULT_ADMIN_ROLE
+            // ) {
+            //   throw new Error(
+            //     "Missing required environment variables for default admin creation"
+            //   );
           }
 
           // ✅ Check if Super Admin exists, create if not
@@ -58,6 +74,10 @@ export default NextAuth({
               DEFAULT_SUPERADMIN_PASSWORD,
               10
             );
+            // const hashedSuperAdminPassword = await bcrypt.hash(
+            //   DEFAULT_SUPERADMIN_PASSWORD,
+            //   10
+            // );
             const defaultSuperAdmin = new User({
               email: DEFAULT_SUPERADMIN_EMAIL,
               password: hashedSuperAdminPassword,
@@ -74,6 +94,10 @@ export default NextAuth({
               DEFAULT_ADMIN_PASSWORD,
               10
             );
+            // const hashedAdminPassword = await bcrypt.hash(
+            //   DEFAULT_ADMIN_PASSWORD,
+            //   10
+            // );
             const defaultAdmin = new User({
               email: DEFAULT_ADMIN_EMAIL,
               password: hashedAdminPassword,
@@ -87,6 +111,9 @@ export default NextAuth({
           const user = await User.findOne({
             email: credentials.email.toLowerCase(),
           });
+          // const user = await User.findOne({
+          //   email: credentials.email.toLowerCase(),
+          // });
           if (!user) {
             throw new Error("User not found");
           }
@@ -96,7 +123,8 @@ export default NextAuth({
             user.role !== "admin" &&
             user.role !== "superAdmin" &&
             user.role !== "registrar" &&
-            user.role !== "accountant"
+            user.role !== "accountant" &&
+            user.role !== "programHeads"
           ) {
             throw new Error("Access Denied! Admins only.");
           }
@@ -106,6 +134,10 @@ export default NextAuth({
             credentials.password,
             user.password
           );
+          // const isValid = await bcrypt.compare(
+          //   credentials.password,
+          //   user.password
+          // );
           if (!isValid) {
             throw new Error("Invalid password");
           }
@@ -122,7 +154,7 @@ export default NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
+        token.id = user.id || token.id;
         token.email = user.email;
         token.role = user.role;
       }
@@ -135,6 +167,7 @@ export default NextAuth({
       return session;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login", // Customize the sign-in page URL if necessary

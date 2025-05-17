@@ -1,3 +1,4 @@
+// pages/students/edit/[...id].js
 import Login from "@/pages/Login";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

@@ -43,7 +43,7 @@ export async function generatePDFfile(student) {
       doc.setFontSize(11);
       doc.text(`${label}:`, x1, y);
       doc.setFont("helvetica", "normal");
-      doc.text(String(value || "N/A"), x2, y); 
+      doc.text(String(value || "N/A"), x2, y);
     };
 
     sectionTitle("Student Information");
@@ -75,7 +75,7 @@ export async function generatePDFfile(student) {
     addField("Mother", student.mother, 110, 127);
     y += 7;
 
-    addField("Guardian", student.guardian ,15 , 35);
+    addField("Guardian", student.guardian, 15, 35);
     addField("Guardian's Occupation", student.guardianOccupation, 110, 155);
     y += 10;
 
@@ -84,19 +84,18 @@ export async function generatePDFfile(student) {
     addField("Nursery", student.nursery?.schoolName || "");
     addField("Year", student.nursery?.yearAttended || "", 110, 123);
     y += 7;
-    
+
     addField("Elementary", student.elementary?.schoolName || "");
     addField("Year", student.elementary?.yearAttended || "", 110, 123);
     y += 7;
-    
+
     addField("Junior High", student.juniorHigh?.schoolName || "");
     addField("Year", student.juniorHigh?.yearAttended || "", 110, 123);
     y += 7;
-    
+
     addField("Senior High", student.seniorHigh?.schoolName || "");
     addField("Year", student.seniorHigh?.yearAttended || "", 110, 123);
     y += 10;
-    
 
     sectionTitle("Enrollment Details");
     addField("Education Level", student.education, 15, 47);
@@ -132,7 +131,11 @@ export async function generatePDFfile(student) {
     y += 5;
     doc.text("Registrar's Signature", 80, y);
 
-    doc.save(`${student.fname || "Student"}_${student.lname || "Name"}_Enrollment_Form.pdf`);
+    doc.save(
+      `${student.fname || "Student"}_${
+        student.lname || "Name"
+      }_Enrollment_Form.pdf`
+    );
 
     return doc.output("blob");
   };

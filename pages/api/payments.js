@@ -24,7 +24,6 @@ export default async function handler(req, res) {
   }
 }
 
-
 async function handlePutRequest(req, res) {
   const { paymentId, status } = req.body;
 
@@ -48,14 +47,16 @@ async function handlePutRequest(req, res) {
 async function handleGetRequest(req, res) {
   try {
     const { id, type, studentId } = req.query;
-    
+
     if (studentId) {
       const payments = await Payment.find({ studentRef: studentId })
         .populate("studentRef")
         .exec();
 
       const formatted = payments.map((payment) => {
-        const fullName = `${payment.fname || ""} ${payment.mname || ""} ${payment.lname || ""}`.trim();
+        const fullName = `${payment.fname || ""} ${payment.mname || ""} ${
+          payment.lname || ""
+        }`.trim();
 
         return {
           paymentId: payment.paymentId,
@@ -90,7 +91,9 @@ async function handleGetRequest(req, res) {
         return res.status(404).json({ error: "Payment not found" });
       }
 
-      const fullName = `${payment.fname || ""} ${payment.mname || ""} ${payment.lname || ""}`.trim();
+      const fullName = `${payment.fname || ""} ${payment.mname || ""} ${
+        payment.lname || ""
+      }`.trim();
 
       if (type === "minimal") {
         return res.status(200).json({
@@ -132,7 +135,9 @@ async function handleGetRequest(req, res) {
     const allPayments = await Payment.find().populate("studentRef").exec();
 
     const formattedPayments = allPayments.map((payment) => {
-      const fullName = `${payment.fname || ""} ${payment.mname || ""} ${payment.lname || ""}`.trim();
+      const fullName = `${payment.fname || ""} ${payment.mname || ""} ${
+        payment.lname || ""
+      }`.trim();
 
       return {
         paymentId: payment.paymentId,
@@ -195,7 +200,7 @@ async function handleGetRequest(req, res) {
 //     const payments = await Payment.find();
 //     if (payments.length === 0) {
 //   return res.status(200).json({ success: true, message: "No payments to delete" });
-// } 
+// }
 
 //     for (let payment of payments) {
 //       const student = await Student.findById(payment.studentRef);

@@ -19,7 +19,9 @@ export default async function handler(req, res) {
         }
         return res.status(200).json(event); // Return the event data
       } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch event", details: error.message });
+        return res
+          .status(500)
+          .json({ error: "Failed to fetch event", details: error.message });
       }
     } else {
       // If no ID is passed, return all events
@@ -27,16 +29,26 @@ export default async function handler(req, res) {
         const events = await Event.find();
         return res.status(200).json(events);
       } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch events", details: error.message });
+        return res
+          .status(500)
+          .json({ error: "Failed to fetch events", details: error.message });
       }
     }
   }
 
   if (req.method === "POST") {
     try {
-      const { title, description, date, location, eventType, organizer } = req.body;
+      const { title, description, date, location, eventType, organizer } =
+        req.body;
 
-      if (!title || !date || !location || !eventType || !organizer || !description) {
+      if (
+        !title ||
+        !date ||
+        !location ||
+        !eventType ||
+        !organizer ||
+        !description
+      ) {
         return res.status(400).json({ error: "All fields are required" });
       }
       const eventDate = new Date(date);
@@ -44,16 +56,31 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Invalid date format" });
       }
 
-      const existingEvent = await Event.findOne({ title, date, location, eventType, organizer });
+      const existingEvent = await Event.findOne({
+        title,
+        date,
+        location,
+        eventType,
+        organizer,
+      });
       if (existingEvent) {
         return res.status(409).json({ error: "Event already exists" });
       }
 
-      const newEvent = new Event({ title, description, date, location, eventType, organizer });
+      const newEvent = new Event({
+        title,
+        description,
+        date,
+        location,
+        eventType,
+        organizer,
+      });
       await newEvent.save();
       return res.status(201).json(newEvent);
     } catch (error) {
-      return res.status(500).json({ error: "Failed to create event", details: error.message });
+      return res
+        .status(500)
+        .json({ error: "Failed to create event", details: error.message });
     }
   }
 
@@ -71,13 +98,16 @@ export default async function handler(req, res) {
       }
       return res.status(200).json({ message: "Event deleted successfully" });
     } catch (error) {
-      return res.status(500).json({ error: "Failed to delete event", details: error.message });
+      return res
+        .status(500)
+        .json({ error: "Failed to delete event", details: error.message });
     }
   }
 
   if (req.method === "PUT") {
     try {
-      const { _id, title, description, date, location, eventType, organizer } = req.body;
+      const { _id, title, description, date, location, eventType, organizer } =
+        req.body;
 
       if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
         return res.status(400).json({ error: "Invalid or missing event ID" });
@@ -101,7 +131,9 @@ export default async function handler(req, res) {
 
       return res.status(200).json(updatedEvent);
     } catch (error) {
-      return res.status(500).json({ error: "Failed to update event", details: error.message });
+      return res
+        .status(500)
+        .json({ error: "Failed to update event", details: error.message });
     }
   }
 

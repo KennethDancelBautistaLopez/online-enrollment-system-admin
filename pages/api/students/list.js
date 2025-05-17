@@ -1,4 +1,5 @@
 import Student from '@/models/Student';
+import Section from '@/models/Section';
 import { connectToDB } from '@/lib/mongoose';
 
 export default async function handler(req, res) {
@@ -20,6 +21,28 @@ export default async function handler(req, res) {
     }
   }
 
-  res.setHeader('Allow', ['GET']);
+  
+ if (method !== 'PATCH') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
+  }
+
+  const { studentId, fromSectionId, toSectionId } = req.body;
+
+  try {
+    // Remove student from current section
+    await Section.findByIdAndUpdate(fromSectionId, {
+      $pull: { students: studentId },
+    });
+
+    // Add student to new section
+    await Section.findByIdAndUpdate(toSectionId, {
+      $addToSet: { students: studentId },
+    });
+
+    return res.status(200).json({ success: true, message: 'Student moved.' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+  res.setHeader('Allow', ['GET', 'PATCH']);
   return res.status(405).end(`Method ${method} Not Allowed`);
 }

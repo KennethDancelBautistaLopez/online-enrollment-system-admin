@@ -6,6 +6,7 @@ import { hash } from "bcryptjs";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/lib/mailer";
 import Curriculum from "@/models/Subject";
+import ArchiveStudent from "@/models/ArchiveStudent";
 import { getServerSession } from "next-auth";
 import authOptions from "@/pages/api/auth/[...nextauth]";
 import User from "@/models/User";
@@ -215,6 +216,7 @@ async function handler(req, res) {
       );
 
       await sendVerificationEmail(newStudent.email, token);
+      await sendVerificationEmail(newStudent.email, token);
 
       return res.status(201).json({
         message: "Student added successfully",
@@ -304,15 +306,60 @@ async function handler(req, res) {
     }
   }
   if (method === "DELETE") {
-    if (req.query?.id) {
-      const deletedStudent = await Student.findOneAndDelete({
-        $or: [{ _studentId: req.query.id }, { _id: req.query.id }],
+    try {
+      const session = await getServerSession(req, res, authOptions);
+      if (!session.user) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized: User not authenticated" });
+      }
+
+      const userId = session.user.email;
+      console.log("User ID:", userId);
+      const { id } = req.query;
+      if (!id) {
+        return res
+          .status(400)
+          .json({ error: "Student ID is required for deletion" });
+      }
+
+      const student = await Student.findOne({
+        $or: [{ _studentId: id }, { _id: id }],
       });
-      if (!deletedStudent)
+
+      if (!student) {
         return res.status(404).json({ error: "Student not found" });
-      return res.status(200).json(deletedStudent);
+      }
+
+      // Archive the student before deletion
+      const studentObj = student.toObject();
+      const { _id, ...rest } = studentObj;
+
+      const archived = await ArchiveStudent.create({
+        ...rest,
+        originalId: _id,
+        DeletedBy: userId,
+        deletedAt: new Date(),
+      });
+
+      console.log("Archived student:", archived);
+
+      // Delete the student
+      await Student.deleteOne({ _id });
+
+      return res.status(200).json({
+        message: "Student archived and deleted successfully",
+        archivedStudent: archived,
+      });
+    } catch (error) {
+      console.error("Error archiving/deleting student:", error);
+      return res.status(500).json({
+        error: "Internal Server Error",
+        details: error.message,
+      });
     }
   }
+
   return res.status(405).json({ error: "Method Not Allowed" });
 }
 export default handler;

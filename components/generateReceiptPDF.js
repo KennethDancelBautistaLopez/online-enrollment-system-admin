@@ -67,7 +67,11 @@ export function generateReceiptPDF(payment) {
 
     y += 15;
     doc.setFont("helvetica", "italic");
-    doc.text("This is a system-generated receipt. Please keep this for your records.", 15, y);
+    doc.text(
+      "This is a system-generated receipt. Please keep this for your records.",
+      15,
+      y
+    );
     y += 8;
     doc.text("Signature: _______________________________", 15, y);
 
