@@ -17,8 +17,7 @@ export default function CreateAdmin() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-
-      if (!session) {
+    if (!session) {
       return;
     }
 
@@ -116,8 +115,12 @@ export default function CreateAdmin() {
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
                   <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center w-96">
                     <h1 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-                      Are you sure you want to delete admin <b>{adminToDelete?.email || "N/A"}</b>?
-                      This action is <span className="text-red-600 font-bold">irreversible</span>.
+                      Are you sure you want to delete admin{" "}
+                      <b>{adminToDelete?.email || "N/A"}</b>? This action is{" "}
+                      <span className="text-red-600 font-bold">
+                        irreversible
+                      </span>
+                      .
                     </h1>
                     <div className="flex justify-center gap-4">
                       <button
@@ -144,7 +147,9 @@ export default function CreateAdmin() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Email
+                    </label>
                     <input
                       type="email"
                       value={email}
@@ -154,7 +159,9 @@ export default function CreateAdmin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Password
+                    </label>
                     <input
                       type="password"
                       value={password}
@@ -164,7 +171,9 @@ export default function CreateAdmin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Role
+                    </label>
                     <select
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
@@ -176,7 +185,7 @@ export default function CreateAdmin() {
                       <option value="registrar">Registrar</option>
                       <option value="accountant">Accountant</option>
                       <option value="programHeads">Program Heads</option>
-                    </select> 
+                    </select>
                   </div>
                   <button
                     type="submit"
@@ -205,9 +214,13 @@ export default function CreateAdmin() {
 
               {/* Right: Admin List */}
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Admin Users</h2>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                  Admin Users
+                </h2>
                 {adminUsers.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400">No admin users found.</p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No admin users found.
+                  </p>
                 ) : (
                   <ul className="divide-y divide-gray-200 dark:divide-gray-700 rounded-lg border dark:border-gray-600">
                     {adminUsers.map((admin) => (
@@ -216,9 +229,69 @@ export default function CreateAdmin() {
                         className="p-4 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                       >
                         <div>
-                          <p className="text-gray-900 dark:text-white">{admin.email}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{admin.role}</p>
+                          <p className="text-gray-900 dark:text-white">
+                            {admin.email}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {admin.role} •{" "}
+                            <span
+                              className={
+                                admin.isActive
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }
+                            >
+                              {admin.isActive ? "ACTIVE" : "DEACTIVATED"}
+                            </span>
+                          </p>
                         </div>
+                        <button
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              const res = await fetch(
+                                `/api/admin/all?id=${admin._id}`,
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({
+                                    isActive: !admin.isActive,
+                                  }),
+                                }
+                              );
+
+                              const data = await res.json();
+
+                              if (!res.ok) {
+                                toast.error(
+                                  data.message || "Failed to update status"
+                                );
+                              } else {
+                                toast.success(
+                                  `Admin ${
+                                    admin.isActive ? "deactivated" : "activated"
+                                  } successfully`
+                                );
+                                fetchAdmins(); // refresh list
+                              }
+                            } catch (err) {
+                              toast.error("Failed to update status");
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          className={`px-3 py-2 rounded-md text-sm font-medium
+                            ${
+                              admin.isActive
+                                ? "bg-yellow-200 hover:bg-yellow-300 text-yellow-800"
+                                : "bg-green-200 hover:bg-green-300 text-green-800"
+                            }`}
+                        >
+                          {admin.isActive ? "Deactivate" : "Activate"}
+                        </button>
+
                         <button
                           onClick={() => {
                             setAdminToDelete(admin._id);

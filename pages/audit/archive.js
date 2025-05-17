@@ -48,11 +48,13 @@ export default function ArchivePage() {
   /* --------------- view --------------- */
   return (
     <Login>
-      <div className="p-6 max-w-7xl mx-auto dark:bg-gray-800">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold dark:text-white">Archive Logs</h1>
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto dark:bg-gray-800">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold dark:text-white">
+            Archive Logs
+          </h1>
           <Link href="/audit">
-            <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+            <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">
               &larr; Back to Audit
             </button>
           </Link>
@@ -65,22 +67,22 @@ export default function ArchivePage() {
         ) : (
           <>
             {/* ---------- Archived Students ---------- */}
-            <h2 className="text-xl font-semibold mt-8 mb-3 dark:text-white">
+            <h2 className="text-lg sm:text-xl font-semibold mt-8 mb-3 dark:text-white">
               Archived Students ({students.length})
             </h2>
             {students.length ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse text-sm">
-                  <thead className="bg-gray-100 dark:bg-gray-700">
+                  <thead className="bg-gray-100 dark:bg-gray-700 text-xs sm:text-sm">
                     <tr>
                       <th className="p-2 text-left">Name</th>
                       <th className="p-2 text-left">Course</th>
-                      <th className="p-2">Year</th>
-                      <th className="p-2">Semester</th>
-                      <th className="p-2">SY</th>
-                      <th className="p-2">Deleted&nbsp;At</th>
-                      <th className="p-2">Deleted&nbsp;By</th>
-                      <th className="p-2">Actions</th>
+                      <th className="p-2 text-center">Year</th>
+                      <th className="p-2 text-center">Semester</th>
+                      <th className="p-2 text-center">SY</th>
+                      <th className="p-2 text-center">Deleted At</th>
+                      <th className="p-2 text-center">Deleted By</th>
+                      <th className="p-2 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -97,19 +99,21 @@ export default function ArchivePage() {
                           {fmtDate(s.deletedAt)}
                         </td>
                         <td className="p-2 text-center">{s.DeletedBy}</td>
-                        <button
-                          onClick={async () => {
-                            await axios.patch(
-                              `/api/archive-students?id=${s._id}`
-                            );
-                            setStudents((prev) =>
-                              prev.filter((item) => item._id !== s._id)
-                            ); // remove from UI
-                          }}
-                          className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
-                        >
-                          Restore
-                        </button>
+                        <td className="p-2 text-center">
+                          <button
+                            onClick={async () => {
+                              await axios.patch(
+                                `/api/archive-students?id=${s._id}`
+                              );
+                              setStudents((prev) =>
+                                prev.filter((item) => item._id !== s._id)
+                              );
+                            }}
+                            className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
+                          >
+                            Restore
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -120,22 +124,22 @@ export default function ArchivePage() {
             )}
 
             {/* ---------- Archived Sections ---------- */}
-            <h2 className="text-xl font-semibold mt-10 mb-3 dark:text-white">
+            <h2 className="text-lg sm:text-xl font-semibold mt-10 mb-3 dark:text-white">
               Archived Sections ({sections.length})
             </h2>
             {sections.length ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse text-sm">
-                  <thead className="bg-gray-100 dark:bg-gray-700">
+                  <thead className="bg-gray-100 dark:bg-gray-700 text-xs sm:text-sm">
                     <tr>
-                      <th className="p-2 text-left">Section ID</th>
+                      <th className="p-2 text-left">Section ID</th>
                       <th className="p-2 text-left">Course</th>
-                      <th className="p-2">Year</th>
-                      <th className="p-2">Semester</th>
-                      <th className="p-2">SY</th>
-                      <th className="p-2">Deleted&nbsp;At</th>
-                      <th className="p-2">Deleted&nbsp;By</th>
-                      <th className="p-2">Actions</th>
+                      <th className="p-2 text-center">Year</th>
+                      <th className="p-2 text-center">Semester</th>
+                      <th className="p-2 text-center">SY</th>
+                      <th className="p-2 text-center">Deleted At</th>
+                      <th className="p-2 text-center">Deleted By</th>
+                      <th className="p-2 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -153,19 +157,21 @@ export default function ArchivePage() {
                           {fmtDate(sec.deletedAt)}
                         </td>
                         <td className="p-2 text-center">{sec.deletedBy}</td>
-                        <button
-                          onClick={async () => {
-                            await axios.patch(
-                              `/api/archive-sections?id=${sec._id}`
-                            );
-                            setSections((prev) =>
-                              prev.filter((item) => item._id !== sec._id)
-                            );
-                          }}
-                          className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
-                        >
-                          Restore
-                        </button>
+                        <td className="p-2 text-center">
+                          <button
+                            onClick={async () => {
+                              await axios.patch(
+                                `/api/archive-sections?id=${sec._id}`
+                              );
+                              setSections((prev) =>
+                                prev.filter((item) => item._id !== sec._id)
+                              );
+                            }}
+                            className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
+                          >
+                            Restore
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

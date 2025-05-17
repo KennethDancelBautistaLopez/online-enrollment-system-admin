@@ -8,7 +8,7 @@ import Link from "next/link";
 function DiffTable({ differences, action, before, after }) {
   if (action === "create" || action === "archive") {
     return (
-      <div>
+      <div className="overflow-x-auto">
         <p>
           <strong>Document created.</strong>
         </p>
@@ -27,7 +27,6 @@ function DiffTable({ differences, action, before, after }) {
     );
   }
 
-  // Helper to stringify values (handle objects gracefully)
   const stringify = (val) => {
     if (val === undefined) return "<undefined>";
     if (val === null) return "<null>";
@@ -36,69 +35,71 @@ function DiffTable({ differences, action, before, after }) {
   };
 
   return (
-    <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded-md">
-      <thead className="bg-gray-100 dark:bg-gray-700">
-        <tr>
-          <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
-            Path
-          </th>
-          <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
-            Change Type
-          </th>
-          <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
-            Before
-          </th>
-          <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
-            After
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {differences.map((diff, i) => {
-          const path = diff.path ? diff.path.join(".") : "";
-          let beforeValue = "";
-          let afterValue = "";
+    <div className="overflow-x-auto">
+      <table className="min-w-[700px] w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded-md">
+        <thead className="bg-gray-100 dark:bg-gray-700">
+          <tr>
+            <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
+              Path
+            </th>
+            <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
+              Change Type
+            </th>
+            <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
+              Before
+            </th>
+            <th className="px-3 py-2 border-b border-gray-300 dark:border-gray-600">
+              After
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {differences.map((diff, i) => {
+            const path = diff.path ? diff.path.join(".") : "";
+            let beforeValue = "";
+            let afterValue = "";
 
-          switch (diff.kind) {
-            case "N": // new
-              beforeValue = "-";
-              afterValue = stringify(diff.rhs);
-              break;
-            case "D": // deleted
-              beforeValue = stringify(diff.lhs);
-              afterValue = "-";
-              break;
-            case "E": // edited
-              beforeValue = stringify(diff.lhs);
-              afterValue = stringify(diff.rhs);
-              break;
-            case "A": // array
-              beforeValue = stringify(diff.item.lhs);
-              afterValue = stringify(diff.item.rhs);
-              break;
-            default:
-              beforeValue = "-";
-              afterValue = "-";
-          }
+            switch (diff.kind) {
+              case "N":
+                beforeValue = "-";
+                afterValue = stringify(diff.rhs);
+                break;
+              case "D":
+                beforeValue = stringify(diff.lhs);
+                afterValue = "-";
+                break;
+              case "E":
+                beforeValue = stringify(diff.lhs);
+                afterValue = stringify(diff.rhs);
+                break;
+              case "A":
+                beforeValue = stringify(diff.item?.lhs);
+                afterValue = stringify(diff.item?.rhs);
+                break;
+              default:
+                beforeValue = "-";
+                afterValue = "-";
+            }
 
-          return (
-            <tr
-              key={i}
-              className="border-t border-gray-200 dark:border-gray-600"
-            >
-              <td className="px-3 py-2 align-top">{path}</td>
-              <td className="px-3 py-2 align-top capitalize">{diff.kind}</td>
-              <td className="px-3 py-2 font-mono whitespace-pre-wrap">
-                {beforeValue}
-              </td>
-              <td className="px-3 py-2 font-mono whitespace-pre-wrap">
-                {afterValue}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+            return (
+              <tr
+                key={i}
+                className="border-t border-gray-200 dark:border-gray-600"
+              >
+                <td className="px-3 py-2 align-top">{path}</td>
+                <td className="px-3 py-2 align-top capitalize">{diff.kind}</td>
+                <td className="px-3 py-2 font-mono whitespace-pre-wrap">
+                  {beforeValue}
+                </td>
+                <td className="px-3 py-2 font-mono whitespace-pre-wrap">
+                  {afterValue}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -137,23 +138,19 @@ export default function Page() {
 
   return (
     <Login>
-      <div className="p-6 max-w-6xl mx-auto dark:bg-gray-800">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold mb-4 dark:text-white">
-            Audit Logs
-          </h1>
-          <Link href="/students/archive" className="mb-6">
-            <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto dark:bg-gray-800">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <h1 className="text-2xl font-bold dark:text-white">Audit Logs</h1>
+          <Link href="/audit/archive" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
               Archive Logs
             </button>
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-6">
           <select
-            type="text"
-            placeholder="Filter by collection name..."
-            className="border border-gray-300 rounded px-3 mb-0 py-2 w-64 dark:text-white dark:bg-gray-800 dark:border-gray-700"
+            className="border border-gray-300 rounded px-3 py-2 w-full sm:w-64 dark:text-white dark:bg-gray-800 dark:border-gray-700"
             value={collectionName}
             onChange={(e) => setCollectionName(e.target.value)}
           >
@@ -184,8 +181,8 @@ export default function Page() {
                 key={log._id}
                 className="border border-gray-300 rounded p-4 bg-white shadow-sm dark:text-white dark:bg-gray-800 dark:border-gray-700"
               >
-                <div className="flex justify-between">
-                  <div>
+                <div className="flex flex-col sm:flex-row justify-between gap-3">
+                  <div className="text-sm space-y-1">
                     <p>
                       <strong>Action:</strong> {log.action}
                     </p>
@@ -201,7 +198,7 @@ export default function Page() {
                     </p>
                   </div>
                   <button
-                    className="text-sm self-start p-1 md:p-3 rounded-3xl bg-white text-black dark:bg-gray-700 dark:text-white border"
+                    className="text-sm self-start px-3 py-1 rounded-3xl bg-white text-black dark:bg-gray-700 dark:text-white border"
                     onClick={() =>
                       setExpandedLogId((prev) =>
                         prev === log._id ? null : log._id
@@ -213,14 +210,14 @@ export default function Page() {
                 </div>
 
                 {expandedLogId === log._id && (
-                  <pre className="mt-4 bg-gray-100 p-3 rounded text-sm overflow-x-auto dark:text-white dark:bg-gray-800 dark:border-gray-700">
+                  <div className="mt-4 overflow-x-auto">
                     <DiffTable
                       differences={log.diff}
                       action={log.action}
                       before={log.before}
                       after={log.after}
                     />
-                  </pre>
+                  </div>
                 )}
               </div>
             ))}
