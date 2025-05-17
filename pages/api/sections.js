@@ -31,10 +31,18 @@ export default async function handler(req, res) {
           semester,
           schoolYear,
           students = [],
+          maxLimit,
           subjectOverrides = [], // Optional overrides for professor/schedule
         } = req.body;
 
-        if (!sectionID || !course || !yearLevel || !semester || !schoolYear) {
+        if (
+          !sectionID ||
+          !course ||
+          !yearLevel ||
+          !semester ||
+          !schoolYear ||
+          !maxLimit
+        ) {
           return res
             .status(400)
             .json({ success: false, message: "Missing required fields." });
@@ -86,6 +94,7 @@ export default async function handler(req, res) {
             schoolYear,
             students,
             subjects: formattedSubjects,
+            maxLimit,
           },
           {
             id: user.id,

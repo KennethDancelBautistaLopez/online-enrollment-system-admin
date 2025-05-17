@@ -17,7 +17,6 @@ export default async function handler(req, res) {
   console.log(studentId, fromSectionId, toSectionId);
 
   try {
-    // Remove student from old section
     const section = await Section.findByIdAndUpdate(fromSectionId, {
       $pull: { students: studentId },
     });

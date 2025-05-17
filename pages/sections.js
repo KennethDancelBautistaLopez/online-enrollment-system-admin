@@ -188,6 +188,9 @@ export default function SectionManager() {
                     <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
                       Section ID: {sec.sectionID}
                     </h3>
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      Max Students Limit: {sec.maxLimit}
+                    </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {sec.course} • {year[sec.yearLevel]} • {sec.semester}{" "}
                       <br />

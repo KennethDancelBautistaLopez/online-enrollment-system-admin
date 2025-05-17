@@ -33,6 +33,7 @@ const SectionSchema = new mongoose.Schema(
     schoolYear: { type: String, required: true },
     subjects: [SubjectSchema],
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
+    maxLimit: { type: Number, required: true },
   },
   {
     timestamps: true,

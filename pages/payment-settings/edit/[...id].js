@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import axios from "axios";
+import Link from "next/link";
 
 export default function EditPaymentSetting() {
   const [setting, setSetting] = useState();
@@ -29,6 +30,7 @@ export default function EditPaymentSetting() {
 
     fetchPaymentSetting();
   }, [id, session, router]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -57,57 +59,104 @@ export default function EditPaymentSetting() {
       }
     } catch (error) {
       console.error(error);
-      return toast.error(error.response.data.message);
+      return toast.error(error.response?.data?.message || "Error updating.");
     }
   };
+
   return (
     <Login>
-      <div className="container mx-auto p-4">
-        <div className="w-full lg:w-1/2 space-y-6 border p-4 md:p-6 rounded-xl shadow-xl overflow-y-auto max-h-[80vh] dark:bg-gray-800 dark:border-gray-700">
-          <form onSubmit={handleSubmit}>
-            <h1 className="md:text-xl font-semibold dark:text-white">
-              Edit Payment
+      <div className="container mx-auto p-4 flex justify-center">
+        <div className="w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl shadow-lg p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+              Edit Payment Setting
             </h1>
-            <label className="dark:text-white">
-              Exam Period
+            <div className="flex items-center space-x-2 text-gray-900 dark:text-white ">
+              <Link
+                className="hover:underline text-lg font-semibold border border-gray-300 dark:border-gray-600 rounded-md px-4 py-2 transition duration-300 ease-in-out"
+                href="/payment-settings"
+              >
+                Back
+              </Link>
+            </div>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label
+                htmlFor="examPeriod"
+                className="block mb-1 font-medium text-gray-700 dark:text-gray-300"
+              >
+                Exam Period
+              </label>
               <input
+                id="examPeriod"
                 type="text"
-                className="dark:text-black"
                 defaultValue={setting?.examPeriod}
                 readOnly
+                className="w-full rounded-md border border-gray-300 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-4 py-2 cursor-not-allowed"
               />
-            </label>
-            <label className="dark:text-white">
-              Amount
+            </div>
+
+            <div>
+              <label
+                htmlFor="amount"
+                className="block mb-1 font-medium text-gray-700 dark:text-gray-300"
+              >
+                Amount (₱)
+              </label>
               <input
-                type="number"
-                className="dark:text-black"
+                id="amount"
                 name="amount"
-                required
+                type="number"
                 min={1}
+                required
                 defaultValue={setting?.amount}
+                className="w-full rounded-md border border-gray-300 px-4 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
-            </label>
-            <h1 className="dark:text-white font-bold">Enter Credentials</h1>
-            <label className="dark:text-white">
-              Email
+            </div>
+
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              Enter Credentials
+            </h2>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block mb-1 font-medium text-gray-700 dark:text-gray-300"
+              >
+                Email
+              </label>
               <input
-                type="email"
-                className="dark:text-black"
+                id="email"
                 name="email"
+                type="email"
                 required
+                className="w-full rounded-md border border-gray-300 px-4 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
-            </label>
-            <label className="dark:text-white">
-              Password
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block mb-1 font-medium text-gray-700 dark:text-gray-300"
+              >
+                Password
+              </label>
               <input
-                type="password"
-                className="dark:text-black"
+                id="password"
                 name="password"
+                type="password"
                 required
+                className="w-full rounded-md border border-gray-300 px-4 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
-            </label>
-            <button type="submit">Confirm</button>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-[1.02]"
+            >
+              Confirm
+            </button>
           </form>
         </div>
       </div>
