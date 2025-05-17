@@ -3,11 +3,15 @@ import { connectToDB } from "@/lib/mongoose";
 import Student from "@/models/Student";
 import { getServerSession } from "next-auth";
 import authOptions from "@/pages/api/auth/[...nextauth]";
+import User from "@/models/User";
 
 export default async function handler(req, res) {
   await connectToDB();
   const method = req.method;
   const studentId = req.query.id;
+  const session = await getServerSession(req, res, authOptions);
+  if (!session.user) return res.status(401).json({ message: "Unauthorized" });
+  const user = await User.findOne({ email: session.user.email });
 
   if (method === "GET") {
     try {
@@ -56,12 +60,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Failed to add subject" });
     }
   } else if (method === "DELETE") {
-    const session = await getServerSession(req, res, authOptions);
-    console.log(session);
-    if (!session) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
     const { code } = req.query;
     console.log(code);
     if (!studentId || !code) {
@@ -85,7 +83,7 @@ export default async function handler(req, res) {
       const archivedSubject = {
         ...subjectToDelete.toObject(),
         deletedAt: new Date(),
-        deletedBy: session.user.email,
+        deletedBy: user.email,
       };
 
       console.log("Archived subject:", archivedSubject);
@@ -96,7 +94,17 @@ export default async function handler(req, res) {
           $pull: { subjects: { code: code } },
           $push: { archivedSubjects: archivedSubject },
         },
-        { new: true }
+        {
+          new: true,
+          _auditUser: {
+            id: user.id,
+            email: user.email,
+          },
+          _auditMeta: {
+            ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+            userAgent: req.headers["user-agent"],
+          },
+        }
       );
 
       console.log("Updated student:", updatedStudent);

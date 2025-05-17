@@ -176,15 +176,25 @@ export default async function handler(req, res) {
             .json({ success: false, error: "Subject not found in curriculum" });
         }
 
-        await ArchiveCurriculum.create({
-          course: curriculum.course,
-          yearLevel: curriculum.yearLevel,
-          semester: curriculum.semester,
-          subjects: [subjectToRemove], // Wrap in array to match schema
-          originalId: curriculum._id,
-          deletedBy: userId,
-          deletedAt: new Date(),
-        });
+        await ArchiveCurriculum.auditCreate(
+          {
+            course: curriculum.course,
+            yearLevel: curriculum.yearLevel,
+            semester: curriculum.semester,
+            subjects: [subjectToRemove], // Wrap in array to match schema
+            originalId: curriculum._id,
+            deletedBy: userId,
+            deletedAt: new Date(),
+          },
+          {
+            id: user.id,
+            email: user.email,
+          },
+          {
+            ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+            userAgent: req.headers["user-agent"],
+          }
+        );
 
         // Filter out the subject to be deleted
         curriculum.subjects = curriculum.subjects.filter(

@@ -1,5 +1,6 @@
 // models/Subject.js
 import mongoose from "mongoose";
+import { auditLoggerPlugin } from "./plugins/AuditLogger.plugin";
 
 const subjectSchema = new mongoose.Schema({
   code: { type: String, required: true },
@@ -21,6 +22,8 @@ const ArchiveCurriculumSchema = new mongoose.Schema(
     collection: "archive-curriculum",
   }
 );
+
+ArchiveCurriculumSchema.plugin(auditLoggerPlugin);
 
 export default mongoose.models.ArchiveCurriculum ||
   mongoose.model("ArchiveCurriculum", ArchiveCurriculumSchema);
